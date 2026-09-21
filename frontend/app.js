@@ -27,9 +27,30 @@ document.addEventListener("DOMContentLoaded", () => {
   const navBadgeMissing = document.getElementById("nav-badge-missing");
 
   // Metadata Strip
+  const contractStrip = document.getElementById("contract-strip");
   const docFilename = document.getElementById("doc-filename");
   const docPartiesPill = document.getElementById("doc-parties-pill");
   const docPagesPill = document.getElementById("doc-pages-pill");
+  const stripRightStatus = document.getElementById("strip-right-status");
+
+  // Welcome & Upload Screen Elements
+  const dropZone = document.getElementById("drop-zone");
+  const btnBrowseTrigger = document.getElementById("btn-browse-trigger");
+  const filePreviewCard = document.getElementById("file-preview-card");
+  const previewFilename = document.getElementById("preview-filename");
+  const previewFilesize = document.getElementById("preview-filesize");
+  const btnCancelFile = document.getElementById("btn-cancel-file");
+  const btnStartAudit = document.getElementById("btn-start-audit");
+  const uploadProgressCard = document.getElementById("upload-progress-card");
+  const auditProgressStageTitle = document.getElementById("audit-progress-stage-title");
+  const auditProgressBadge = document.getElementById("audit-progress-badge");
+  const btnTryDemo = document.getElementById("btn-try-demo");
+
+  // Quick Action Buttons (Overview Screen)
+  const btnQaUpload = document.getElementById("btn-qa-upload");
+  const btnQaMemo = document.getElementById("btn-qa-memo");
+  const btnQaJson = document.getElementById("btn-qa-json");
+  const btnQaAsk = document.getElementById("btn-qa-ask");
 
   // Transparency Card Elements
   const btnToggleTransparency = document.getElementById("btn-toggle-transparency");
@@ -49,6 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnNavToScanner = document.getElementById("btn-nav-to-scanner");
 
   // Global Action Buttons
+  const btnHeaderNewAudit = document.getElementById("btn-header-new-audit");
   const btnDownloadMemo = document.getElementById("btn-download-memo");
   const fileUploadInput = document.getElementById("file-upload-input");
   const btnChooseFile = document.getElementById("btn-choose-file");
@@ -232,17 +254,72 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // =========================================================================
+  // CLIPBOARD COPY HELPER WITH VISUAL FEEDBACK
+  // =========================================================================
+  async function copyToClipboard(text, btnElement, successMsg = "Copied to clipboard!") {
+    if (!text) return;
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        throw new Error("Clipboard API unavailable");
+      }
+    } catch (e) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try {
+        document.execCommand("copy");
+      } catch (copyErr) {
+        console.warn("Fallback copy failed", copyErr);
+      }
+      ta.remove();
+    }
+    showToast(successMsg, "📋");
+    if (btnElement) {
+      const originalHtml = btnElement.innerHTML;
+      btnElement.classList.add("copied");
+      btnElement.innerHTML = `<span>Copied! ✓</span>`;
+      setTimeout(() => {
+        btnElement.classList.remove("copied");
+        btnElement.innerHTML = originalHtml;
+      }, 2000);
+    }
+  }
+
+  function resetToWelcomeScreen() {
+    if (dropZone) dropZone.style.display = "flex";
+    if (filePreviewCard) filePreviewCard.style.display = "none";
+    if (uploadProgressCard) uploadProgressCard.style.display = "none";
+    if (fileUploadInput) fileUploadInput.value = "";
+    selectedFile = null;
+    switchScreen("screen-welcome", "tab-welcome");
+  }
+
+  // =========================================================================
   // DATA LOADING & INITIALIZATION
   // =========================================================================
   async function loadLatestReport() {
     try {
       const res = await fetch("/api/report/latest");
-      if (!res.ok) throw new Error("Could not fetch latest report");
-      auditData = await res.json();
-      renderAll(auditData);
+      if (!res.ok) {
+        // Clean start: No previous user upload found, stay on welcome screen
+        return;
+      }
+      const data = await res.json();
+      if (data && data.health && data.findings) {
+        auditData = data;
+        renderAll(auditData);
+        switchScreen("screen-overview", "tab-overview");
+        showToast(`Restored previous audit: ${data.document_name || "Contract"}`, "📄");
+      }
     } catch (err) {
-      console.warn("Using sample report fallback:", err);
-      showToast("Loaded offline audit report", "ℹ️");
+      // Clean start without annoying error prompts
+      console.log("Welcome screen active, ready for file upload.");
     }
   }
 
@@ -260,11 +337,32 @@ document.addEventListener("DOMContentLoaded", () => {
   // 1. RENDER METADATA & HEALTH SCORE
   // =========================================================================
   function renderMetadata(data) {
-    if (docFilename) docFilename.textContent = data.document_name || "sample_contract.pdf";
-    if (docPartiesPill && data.parties) {
-      docPartiesPill.textContent = `${data.parties.customer || "Customer"} ↔ ${data.parties.provider || "Provider"}`;
+    if (contractStrip) {
+      contractStrip.classList.remove("empty-state");
     }
-    if (docPagesPill) docPagesPill.textContent = "6 Pages";
+    if (docFilename) {
+      docFilename.textContent = data.document_name || "contract.pdf";
+    }
+    if (docPartiesPill) {
+      docPartiesPill.style.display = "inline-flex";
+      if (data.parties && (data.parties.customer || data.parties.provider)) {
+        docPartiesPill.textContent = `${data.parties.customer || "Customer"} ↔ ${data.parties.provider || "Provider"}`;
+      } else {
+        docPartiesPill.textContent = "Parties Analyzed";
+      }
+    }
+    if (docPagesPill) {
+      docPagesPill.style.display = "inline-flex";
+      const pages = data.num_pages || (data.evidence_index ? Object.keys(data.evidence_index).length : 6);
+      docPagesPill.textContent = `${pages} Page${pages === 1 ? "" : "s"}`;
+    }
+    if (stripRightStatus) {
+      stripRightStatus.innerHTML = `
+        <span class="system-status" style="color: var(--emerald);">
+          <span class="status-dot" style="background: var(--emerald);"></span> Audit Verified • Dual-Agent Review
+        </span>
+      `;
+    }
   }
 
   function renderHealthScore(health) {
@@ -410,10 +508,10 @@ document.addEventListener("DOMContentLoaded", () => {
         openEvidenceModal(finding);
       });
 
-      card.querySelector(".btn-copy-proposal").addEventListener("click", () => {
+      const btnCopyProposal = card.querySelector(".btn-copy-proposal");
+      btnCopyProposal?.addEventListener("click", () => {
         const text = finding.suggested_negotiation || finding.recommendation || "";
-        navigator.clipboard.writeText(text);
-        showToast("Suggested fix copied to clipboard!");
+        copyToClipboard(text, btnCopyProposal, "Suggested fix copied to clipboard!");
       });
 
       findingsCleanList.appendChild(card);
@@ -755,8 +853,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (modalRemedy) modalRemedy.textContent = remedyText;
 
     btnCopyModalRemedy.onclick = () => {
-      navigator.clipboard.writeText(remedyText);
-      showToast("Counter-proposal copied to clipboard!");
+      copyToClipboard(remedyText, btnCopyModalRemedy, "Counter-proposal copied to clipboard!");
     };
 
     evidenceModal.showModal();
@@ -820,8 +917,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (missingModalCode) missingModalCode.innerHTML = `<code>${escapeHtml(item.recommended_clause || "")}</code>`;
 
     btnCopyMissingClause.onclick = () => {
-      navigator.clipboard.writeText(item.recommended_clause || "");
-      showToast("Draft clause copied to clipboard!");
+      copyToClipboard(item.recommended_clause || "", btnCopyMissingClause, "Draft clause copied to clipboard!");
     };
 
     missingClauseModal.showModal();
@@ -931,49 +1027,134 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // =========================================================================
-  // 9. FILE UPLOAD & MEMO DOWNLOAD
+  // 9. DRAG & DROP, FILE UPLOAD & AUDIT WORKFLOW
   // =========================================================================
+  let selectedFile = null;
+
+  function stageFileForAudit(file) {
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith(".pdf")) {
+      showToast("Only PDF files (.pdf) are supported.", "⚠️");
+      return;
+    }
+    selectedFile = file;
+    if (previewFilename) previewFilename.textContent = file.name;
+    if (previewFilesize) {
+      const kb = (file.size / 1024).toFixed(1);
+      previewFilesize.textContent = `${kb} KB`;
+    }
+    if (dropZone) dropZone.style.display = "none";
+    if (filePreviewCard) filePreviewCard.style.display = "flex";
+    if (uploadProgressCard) uploadProgressCard.style.display = "none";
+  }
+
+  // Drag and Drop Events on #drop-zone
+  if (dropZone) {
+    ["dragenter", "dragover"].forEach((eventName) => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.add("dragover");
+      });
+    });
+
+    ["dragleave", "drop"].forEach((eventName) => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.remove("dragover");
+      });
+    });
+
+    dropZone.addEventListener("drop", (e) => {
+      const dt = e.dataTransfer;
+      const file = dt?.files?.[0];
+      if (file) {
+        stageFileForAudit(file);
+      }
+    });
+
+    dropZone.addEventListener("click", (e) => {
+      if (e.target.closest("#btn-browse-trigger")) return;
+      fileUploadInput?.click();
+    });
+  }
+
+  btnBrowseTrigger?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    fileUploadInput?.click();
+  });
+
+  fileUploadInput?.addEventListener("change", (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      stageFileForAudit(file);
+    }
+  });
+
+  btnCancelFile?.addEventListener("click", () => {
+    selectedFile = null;
+    if (fileUploadInput) fileUploadInput.value = "";
+    if (filePreviewCard) filePreviewCard.style.display = "none";
+    if (dropZone) dropZone.style.display = "flex";
+  });
+
+  btnStartAudit?.addEventListener("click", () => {
+    if (selectedFile) {
+      executeAudit(selectedFile);
+    } else {
+      showToast("Please select a contract PDF first.", "⚠️");
+    }
+  });
+
+  // Header quick upload button
   btnChooseFile?.addEventListener("click", () => {
     fileUploadInput?.click();
   });
 
-  fileUploadInput?.addEventListener("change", async (e) => {
-    const file = e.target.files?.[0];
+  // Core Audit Execution
+  async function executeAudit(file) {
     if (!file) return;
 
-    if (!file.name.toLowerCase().endsWith(".pdf")) {
-      showToast("Only PDF files (.pdf) are supported.", "⚠️");
-      fileUploadInput.value = "";
-      return;
-    }
+    if (filePreviewCard) filePreviewCard.style.display = "none";
+    if (dropZone) dropZone.style.display = "none";
+    if (uploadProgressCard) uploadProgressCard.style.display = "block";
 
-    // Set UI Loading State with dynamic progress updates
-    const originalBtnHtml = btnChooseFile.innerHTML;
-    btnChooseFile.disabled = true;
-
-    const stages = [
-      "Ingesting & Scanning Pages...",
-      "Extracting Clauses & Tables...",
-      "Running AI Debate & Verification...",
-      "Scoring Risks & Safety...",
-      "Finalizing Audit Memo..."
+    const steps = [
+      { id: "prog-step-1", title: "Ingesting PDF & Extracting Text & Tables..." },
+      { id: "prog-step-2", title: "Building Hybrid BM25 & Semantic Chunks..." },
+      { id: "prog-step-3", title: "Running Dual-Agent Courtroom Debate..." },
+      { id: "prog-step-4", title: "Computing 100-Point Safety Score & Memo..." }
     ];
-    let stageIdx = 0;
 
-    btnChooseFile.innerHTML = `
-      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;">
-        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
-      </svg>
-      <span id="upload-status-text">${stages[0]}</span>
-    `;
+    let currentStepIdx = 0;
+    const updateProgressUI = (idx) => {
+      steps.forEach((step, i) => {
+        const el = document.getElementById(step.id);
+        if (el) {
+          if (i < idx) {
+            el.className = "progress-step-item completed";
+          } else if (i === idx) {
+            el.className = "progress-step-item active";
+          } else {
+            el.className = "progress-step-item";
+          }
+        }
+      });
+      if (auditProgressStageTitle && steps[idx]) {
+        auditProgressStageTitle.textContent = steps[idx].title;
+      }
+    };
 
-    const stageTimer = setInterval(() => {
-      stageIdx = (stageIdx + 1) % stages.length;
-      const statusText = document.getElementById("upload-status-text");
-      if (statusText) statusText.textContent = stages[stageIdx];
-    }, 4000);
+    updateProgressUI(0);
+    const progressTimer = setInterval(() => {
+      if (currentStepIdx < steps.length - 1) {
+        currentStepIdx++;
+        updateProgressUI(currentStepIdx);
+      }
+    }, 3500);
 
-    showToast(`Auditing "${file.name}"... Dual AI agents are reviewing all clauses.`, "⏳");
+    showToast(`Auditing "${file.name}"... Autonomous review in progress.`, "⏳");
 
     const formData = new FormData();
     formData.append("file", file);
@@ -1001,16 +1182,103 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) {
       console.error("Upload error:", err);
       showToast("Audit error: " + err.message, "❌");
+      if (filePreviewCard) filePreviewCard.style.display = "flex";
     } finally {
-      clearInterval(stageTimer);
-      fileUploadInput.value = "";
-      btnChooseFile.disabled = false;
-      btnChooseFile.innerHTML = originalBtnHtml;
+      clearInterval(progressTimer);
+      if (uploadProgressCard) uploadProgressCard.style.display = "none";
+      if (dropZone) dropZone.style.display = "flex";
+      if (fileUploadInput) fileUploadInput.value = "";
+      selectedFile = null;
+    }
+  }
+
+  // "Try Demo Contract" Handler
+  btnTryDemo?.addEventListener("click", async () => {
+    if (dropZone) dropZone.style.display = "none";
+    if (filePreviewCard) filePreviewCard.style.display = "none";
+    if (uploadProgressCard) uploadProgressCard.style.display = "block";
+
+    const steps = [
+      { id: "prog-step-1", title: "Loading Sample Contract Pages..." },
+      { id: "prog-step-2", title: "Verifying Hybrid Index..." },
+      { id: "prog-step-3", title: "Running AI Courtroom Analysis..." },
+      { id: "prog-step-4", title: "Finalizing Safety Score..." }
+    ];
+    let idx = 0;
+    const updateProgressUI = (i) => {
+      steps.forEach((s, stepIndex) => {
+        const el = document.getElementById(s.id);
+        if (el) {
+          el.className = stepIndex < i ? "progress-step-item completed" : stepIndex === i ? "progress-step-item active" : "progress-step-item";
+        }
+      });
+      if (auditProgressStageTitle && steps[i]) {
+        auditProgressStageTitle.textContent = steps[i].title;
+      }
+    };
+    updateProgressUI(0);
+    const timer = setInterval(() => {
+      if (idx < steps.length - 1) {
+        idx++;
+        updateProgressUI(idx);
+      }
+    }, 1200);
+
+    showToast("Loading Sample Demo Contract...", "💡");
+
+    try {
+      const res = await fetch("/api/sample/demo");
+      if (!res.ok) {
+        throw new Error("Could not load sample demo contract.");
+      }
+      const data = await res.json();
+      auditData = data.report || data;
+      renderAll(auditData);
+      showToast("Demo contract loaded! Explore findings or upload your own.", "🎉");
+      switchScreen("screen-overview", "tab-overview");
+    } catch (err) {
+      console.error("Demo error:", err);
+      showToast("Could not load demo contract: " + err.message, "❌");
+      if (dropZone) dropZone.style.display = "flex";
+    } finally {
+      clearInterval(timer);
+      if (uploadProgressCard) uploadProgressCard.style.display = "none";
     }
   });
 
-  btnDownloadMemo?.addEventListener("click", () => {
-    window.open("/api/download/memo", "_blank");
+  // =========================================================================
+  // 10. QUICK ACTIONS & HEADER BUTTONS
+  // =========================================================================
+  btnHeaderNewAudit?.addEventListener("click", resetToWelcomeScreen);
+  btnQaUpload?.addEventListener("click", resetToWelcomeScreen);
+
+  [btnDownloadMemo, btnQaMemo].forEach((btn) => {
+    btn?.addEventListener("click", () => {
+      window.open("/api/download/memo", "_blank");
+    });
+  });
+
+  btnQaJson?.addEventListener("click", () => {
+    if (!auditData) {
+      showToast("No contract data loaded yet.", "⚠️");
+      return;
+    }
+    const filename = (auditData.document_name || "contract_audit").replace(/\.pdf$/i, "") + "_audit_report.json";
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(auditData, null, 2));
+    const dlAnchor = document.createElement("a");
+    dlAnchor.setAttribute("href", dataStr);
+    dlAnchor.setAttribute("download", filename);
+    document.body.appendChild(dlAnchor);
+    dlAnchor.click();
+    dlAnchor.remove();
+    showToast("Audit JSON exported successfully!", "📥");
+  });
+
+  btnQaAsk?.addEventListener("click", () => {
+    switchScreen("screen-courtroom", "tab-courtroom");
+    setTimeout(() => {
+      courtroomQueryInput?.focus();
+    }, 150);
   });
 
   // Utility: HTML Escaper
@@ -1024,6 +1292,6 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/'/g, "&#039;");
   }
 
-  // Load Initial Data
+  // Load Initial Data (will stay on clean welcome screen if no previous upload)
   loadLatestReport();
 });

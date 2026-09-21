@@ -32,19 +32,23 @@
 
       <!-- Navigation Tabs (Simple Words, Fluid & Scrollable) -->
       <nav class="nav-tabs" role="tablist">
-        <button class="nav-tab active" id="tab-overview" data-screen="screen-overview" role="tab" aria-selected="true">
+        <button class="nav-tab active" id="tab-welcome" data-screen="screen-welcome" role="tab" aria-selected="true">
+          <span class="tab-icon">📤</span>
+          <span class="tab-label">Upload</span>
+        </button>
+        <button class="nav-tab" id="tab-overview" data-screen="screen-overview" role="tab" aria-selected="false">
           <span class="tab-icon">📊</span>
           <span class="tab-label">Summary</span>
         </button>
         <button class="nav-tab" id="tab-findings" data-screen="screen-findings" role="tab" aria-selected="false">
           <span class="tab-icon">🛡️</span>
           <span class="tab-label">Risks & Fixes</span>
-          <span class="tab-badge badge-red" id="nav-badge-risks">6</span>
+          <span class="tab-badge badge-red" id="nav-badge-risks">0</span>
         </button>
         <button class="nav-tab" id="tab-missing" data-screen="screen-missing" role="tab" aria-selected="false">
           <span class="tab-icon">⚠️</span>
           <span class="tab-label">Missing Protections</span>
-          <span class="tab-badge badge-amber" id="nav-badge-missing">7</span>
+          <span class="tab-badge badge-amber" id="nav-badge-missing">0</span>
         </button>
         <button class="nav-tab" id="tab-courtroom" data-screen="screen-courtroom" role="tab" aria-selected="false">
           <span class="tab-icon">⚖️</span>
@@ -54,7 +58,7 @@
         <button class="nav-tab" id="tab-timeline" data-screen="screen-timeline" role="tab" aria-selected="false">
           <span class="tab-icon">📅</span>
           <span class="tab-label">Key Dates</span>
-          <span class="tab-badge badge-neutral" id="nav-badge-timeline">12</span>
+          <span class="tab-badge badge-neutral" id="nav-badge-timeline">0</span>
         </button>
         <button class="nav-tab" id="tab-scanner" data-screen="screen-scanner" role="tab" aria-selected="false">
           <span class="tab-icon">✍️</span>
@@ -68,6 +72,13 @@
 
       <!-- Quick Actions -->
       <div class="header-actions">
+        <button class="btn btn-outline" id="btn-header-new-audit" title="Upload a new contract">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>New Audit</span>
+        </button>
         <button class="btn btn-outline" id="btn-download-memo" title="Download Printable Audit Report">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -91,16 +102,16 @@
   </header>
 
   <!-- Contract Sub-Header Strip -->
-  <div class="contract-strip">
+  <div class="contract-strip empty-state" id="contract-strip">
     <div class="strip-inner">
       <div class="strip-left">
-        <span class="strip-label">DOCUMENT:</span>
-        <span class="strip-filename" id="doc-filename">sample_contract.pdf</span>
-        <span class="strip-pill" id="doc-pages-pill">6 Pages</span>
-        <span class="strip-pill pill-parties" id="doc-parties-pill">Northstar Analytics (Customer) ↔ Meridian Cloud Systems (Provider)</span>
+        <span class="strip-label">STATUS:</span>
+        <span class="strip-filename" id="doc-filename">No contract loaded</span>
+        <span class="strip-pill" id="doc-pages-pill" style="display:none;">0 Pages</span>
+        <span class="strip-pill pill-parties" id="doc-parties-pill" style="display:none;">Waiting for document</span>
       </div>
-      <div class="strip-right">
-        <span class="system-status"><span class="status-dot"></span> Double-Checked by 2 AI Agents</span>
+      <div class="strip-right" id="strip-right-status">
+        <span class="system-status"><span class="status-dot"></span> Ready for Document Upload</span>
       </div>
     </div>
   </div>
@@ -109,10 +120,147 @@
   <main class="app-main">
 
     <!-- ============================================================== -->
+    <!-- 0. 📤 WELCOME & UPLOAD SCREEN (DEFAULT CLEAN SCREEN)           -->
+    <!-- ============================================================== -->
+    <section class="screen active" id="screen-welcome">
+      <div class="welcome-container">
+        
+        <div class="welcome-hero">
+          <div class="welcome-badge">
+            <span>⚡</span> AI Autonomous Contract Review
+          </div>
+          <h1 class="welcome-title">Audit Your Enterprise Contract in Seconds</h1>
+          <p class="welcome-subtitle">
+            Upload your agreement PDF to spot fatal liabilities, unilateral cancellation terms, and missing enterprise protections with dual-agent courtroom debate.
+          </p>
+        </div>
+
+        <!-- Interactive Drag & Drop Zone -->
+        <div class="drop-zone" id="drop-zone" role="button" tabindex="0" aria-label="Drop contract PDF here or click to browse">
+          <div class="drop-icon-wrap">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <div class="drop-headline">Drag & drop your contract PDF here</div>
+          <div class="drop-subtext">or click anywhere in this area to browse files from your computer</div>
+          <div class="drop-actions">
+            <button type="button" class="btn btn-primary" id="btn-browse-trigger">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+              <span>Browse PDF File</span>
+            </button>
+          </div>
+          <div class="drop-format-pill">PDF format (.pdf) • Secure local processing • Up to 50MB</div>
+        </div>
+
+        <!-- Selected File Preview Card (Hidden until file selected) -->
+        <div class="file-preview-card" id="file-preview-card" style="display: none;">
+          <div class="file-preview-left">
+            <div class="file-preview-icon">📄</div>
+            <div class="file-preview-details">
+              <span class="file-preview-name" id="preview-filename">contract.pdf</span>
+              <span class="file-preview-size" id="preview-filesize">0 KB</span>
+            </div>
+          </div>
+          <div class="file-preview-actions">
+            <button type="button" class="btn btn-ghost btn-sm" id="btn-cancel-file" title="Choose another file">Cancel</button>
+            <button type="button" class="btn btn-primary" id="btn-start-audit">
+              <span>🚀 Start AI Contract Audit</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Audit Progress Card (Hidden until audit starts) -->
+        <div class="upload-progress-card" id="upload-progress-card" style="display: none;">
+          <div class="progress-header">
+            <div class="progress-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+              </svg>
+              <span id="audit-progress-stage-title">Ingesting PDF & Extracting Text...</span>
+            </div>
+            <span class="progress-status-badge" id="audit-progress-badge">Dual AI Agents Active</span>
+          </div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill"></div>
+          </div>
+          <div class="progress-steps-list">
+            <div class="progress-step-item active" id="prog-step-1">1. PDF & Tables</div>
+            <div class="progress-step-item" id="prog-step-2">2. Hybrid Index</div>
+            <div class="progress-step-item" id="prog-step-3">3. AI Debate</div>
+            <div class="progress-step-item" id="prog-step-4">4. 100-Pt Score</div>
+          </div>
+        </div>
+
+        <!-- Demo Contract Option -->
+        <div class="demo-bar">
+          <span>💡 Don't have a contract PDF right now?</span>
+          <button type="button" class="btn-link" id="btn-try-demo">Load Sample Demo Contract</button>
+        </div>
+
+        <!-- 3 Simple How-It-Works Cards -->
+        <div class="welcome-features-grid">
+          <div class="welcome-feature-card">
+            <div class="feature-card-icon" style="background: var(--crimson-bg); color: var(--crimson);">🚨</div>
+            <div class="feature-card-title">1. Deal-Breakers & Risk Buckets</div>
+            <div class="feature-card-desc">Automatically sorts findings into Deal-Breakers, Watch Out terms, and Protections with plain-English impact explanations.</div>
+          </div>
+          <div class="welcome-feature-card">
+            <div class="feature-card-icon" style="background: var(--indigo-bg); color: var(--indigo);">⚖️</div>
+            <div class="feature-card-title">2. Adversarial Courtroom Debate</div>
+            <div class="feature-card-desc">Auditor flags commercial exposure while an independent Skeptic verifier validates against exact cited quotes and pages.</div>
+          </div>
+          <div class="welcome-feature-card">
+            <div class="feature-card-icon" style="background: var(--emerald-bg); color: var(--emerald);">📋</div>
+            <div class="feature-card-title">3. Copy-Paste Counter Proposals</div>
+            <div class="feature-card-desc">Get pre-drafted protective redlines and negotiation suggestions that you can copy to your clipboard with one click.</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
     <!-- 1. 📊 SUMMARY SCREEN (CALM, CLEAN & TRANSPARENT)               -->
     <!-- ============================================================== -->
-    <section class="screen active" id="screen-overview">
+    <section class="screen" id="screen-overview">
       <div class="view-container">
+
+        <!-- Quick Actions Toolbar -->
+        <div class="summary-quick-actions">
+          <span class="quick-actions-label">Actions:</span>
+          <button type="button" class="btn btn-primary btn-sm" id="btn-qa-upload">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <span>Upload Another Contract</span>
+          </button>
+          <button type="button" class="btn btn-outline btn-sm" id="btn-qa-memo">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            <span>Download Audit Memo</span>
+          </button>
+          <button type="button" class="btn btn-outline btn-sm" id="btn-qa-json">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="16 18 22 12 16 6"/>
+              <polyline points="8 6 2 12 8 18"/>
+            </svg>
+            <span>Export Full JSON</span>
+          </button>
+          <button type="button" class="btn btn-outline btn-sm" id="btn-qa-ask">
+            <span>⚖️ Ask Courtroom a Question</span>
+          </button>
+        </div>
 
         <!-- Score Hero Card -->
         <div class="overview-hero-card">

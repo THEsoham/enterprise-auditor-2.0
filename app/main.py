@@ -56,22 +56,39 @@ async def health_check():
 
 @app.get("/api/report/latest")
 async def get_latest_report():
-    """Retrieve the most recently generated audit report JSON."""
+    """Retrieve the most recently generated user audit report JSON."""
     report_dir = PROJECT_ROOT / "data" / "reports"
-    json_files = list(report_dir.glob("*_audit.json"))
-    if json_files:
-        # Pick the most recently modified report file
-        json_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
-        with open(json_files[0], "r", encoding="utf-8") as f:
+    # Find user-uploaded audit reports (excluding sample_contract files)
+    user_reports = [
+        p for p in report_dir.glob("*_audit.json")
+        if not p.name.startswith("sample_contract")
+    ]
+    if user_reports:
+        user_reports.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+        with open(user_reports[0], "r", encoding="utf-8") as f:
             return json.load(f)
-    
-    # If no report exists yet, run initial audit on sample_contract.pdf
+
+    raise HTTPException(status_code=404, detail="No user contract uploaded yet.")
+
+
+@app.get("/api/sample/demo")
+async def get_sample_demo_report():
+    """Load the pre-computed sample contract audit on demand for demonstration."""
+    report_dir = PROJECT_ROOT / "data" / "reports"
+    sample_files = list(report_dir.glob("sample_contract*_audit.json"))
+    if sample_files:
+        sample_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+        with open(sample_files[0], "r", encoding="utf-8") as f:
+            data = json.load(f)
+            return {"report": data}
+
     pdf_path = PROJECT_ROOT / "data" / "documents" / "sample_contract.pdf"
     if pdf_path.exists():
         pipeline = AuditPipeline(max_debate_rounds=2)
-        res = await asyncio.to_thread(pipeline.audit, pdf_path=pdf_path, max_probes=7)
-        return res["report"]
-    raise HTTPException(status_code=404, detail="No audit report found. Please upload a contract.")
+        res = await asyncio.to_thread(pipeline.audit, pdf_path=pdf_path, max_probes=5)
+        return {"report": res["report"]}
+
+    raise HTTPException(status_code=404, detail="Sample contract not found.")
 
 
 @app.post("/api/upload")
