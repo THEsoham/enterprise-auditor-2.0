@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: enterprise-auditor
+    runtime: python
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: python run.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: HOST
+        value: 0.0.0.0
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: GEMINI_MODEL
+        value: gemini-3.6-flash
+      - key: USE_GEMINI
+        value: "false"
+      - key: CHROMA_PERSIST_DIRECTORY
+        value: data/indexes/chroma
+      - key: DATA_DIRECTORY
+        value: data
+      - key: MAX_DEBATE_ROUNDS
+        value: "2"
