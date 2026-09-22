@@ -17,12 +17,22 @@ document.addEventListener("DOMContentLoaded", () => {
   // DOM Elements - Summary Screen
   const scoreRingFill = document.getElementById("score-ring-fill");
   const scoreNumber = document.getElementById("score-number");
-  const scoreRating = document.getElementById("score-rating");
-  const pillRating = document.getElementById("pill-rating");
-  const healthHeadline = document.getElementById("health-headline");
+  const gaugeVerdictLabel = document.getElementById("gauge-verdict-label");
+  const verdictBadge = document.getElementById("verdict-badge");
+  const verdictActionHint = document.getElementById("verdict-action-hint");
+  const verdictHeadline = document.getElementById("verdict-headline");
+  const verdictSummaryText = document.getElementById("verdict-summary-text");
+  const riskDonutCanvas = document.getElementById("risk-donut-canvas");
+  const donutLegend = document.getElementById("donut-legend");
+  const waterfallBar = document.getElementById("waterfall-bar");
+  const waterfallLabels = document.getElementById("waterfall-labels");
+  const impactBarsList = document.getElementById("impact-bars-list");
   const countDealbreakers = document.getElementById("count-dealbreakers");
   const countWatchout = document.getElementById("count-watchout");
   const countProtections = document.getElementById("count-protections");
+  const metricDescDealbreakers = document.getElementById("metric-desc-dealbreakers");
+  const metricDescWatchout = document.getElementById("metric-desc-watchout");
+  const metricDescProtections = document.getElementById("metric-desc-protections");
   const navBadgeRisks = document.getElementById("nav-badge-risks");
   const navBadgeMissing = document.getElementById("nav-badge-missing");
 
@@ -52,9 +62,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnQaJson = document.getElementById("btn-qa-json");
   const btnQaAsk = document.getElementById("btn-qa-ask");
 
-  // Transparency Card Elements
-  const btnToggleTransparency = document.getElementById("btn-toggle-transparency");
-  const transparencyBody = document.getElementById("transparency-body");
 
   // Summary Action Triggers
   const metricCardDealbreakers = document.getElementById("metric-card-dealbreakers");
@@ -173,12 +180,6 @@ document.addEventListener("DOMContentLoaded", () => {
     switchScreen("screen-overview", "tab-overview");
   });
 
-  // Toggle Transparency Card
-  btnToggleTransparency?.addEventListener("click", () => {
-    if (!transparencyBody) return;
-    const isHidden = transparencyBody.style.display === "none";
-    transparencyBody.style.display = isHidden ? "block" : "none";
-  });
 
   // Overview Quick Actions
   metricCardDealbreakers?.addEventListener("click", () => {
@@ -367,39 +368,353 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderHealthScore(health) {
     if (!health) return;
-    const score = health.health_score || 62.5;
-    const rating = score >= 80 ? "Safe" : score >= 60 ? "Risky Contract" : "Very High Risk";
+    const score = typeof health.health_score === "number" ? health.health_score : 80;
+    const dbCount = health.deal_breakers_count || 0;
+    const woCount = health.watch_out_count || 0;
+    const prCount = health.protections_count || 0;
+    const msCount = health.missing_protections_count || 0;
 
+    // 1. Score display & Ring Animation
     if (scoreNumber) scoreNumber.textContent = score.toFixed(1);
-    if (scoreRating) scoreRating.textContent = rating;
-    if (pillRating) pillRating.textContent = rating.toUpperCase();
 
-    if (healthHeadline) {
-      healthHeadline.textContent = `Overall Safety Score: ${score.toFixed(1)} / 100`;
+    let ringColor = "var(--emerald)";
+    let verdictClass = "badge-safe";
+    let verdictTitle = "LOW RISK CONTRACT";
+    let gaugeText = "Safe to Proceed";
+    let actionHintText = "Ready for standard business approval";
+    let headlineText = "Overall Assessment: Strong & Balanced Agreement";
+    let summaryText = `This agreement has a healthy safety score of ${score.toFixed(1)}/100 with ${prCount} protection clauses active and ${dbCount} deal-breakers.`;
+
+    if (score < 50 || dbCount >= 2) {
+      ringColor = "var(--crimson)";
+      verdictClass = "badge-danger";
+      verdictTitle = "CRITICAL RISK";
+      gaugeText = "Do Not Sign As-Is";
+      actionHintText = "Immediate renegotiation required before signing";
+      headlineText = "Overall Assessment: Critical Risks Detected";
+      summaryText = `This contract contains ${dbCount} deal-breaker terms and significant liabilities that heavily favor the other party. We strongly advise pausing execution until key clauses are revised.`;
+    } else if (score < 75 || dbCount === 1 || woCount >= 3) {
+      ringColor = "var(--amber)";
+      verdictClass = "badge-warning";
+      verdictTitle = "MODERATE RISK";
+      gaugeText = "Proceed With Caution";
+      actionHintText = "Key terms require review and negotiation";
+      headlineText = "Overall Assessment: Actionable Red Flags Present";
+      summaryText = `While mostly operational, this agreement includes ${woCount} watch-out warning items${dbCount ? ` and ${dbCount} deal-breaker` : ""} that shift unfair exposure to your company.`;
+    } else {
+      ringColor = "var(--emerald)";
+      verdictClass = "badge-safe";
+      verdictTitle = "SAFE & BALANCED";
+      gaugeText = "Standard Risk Profile";
+      actionHintText = "Normal contractual obligations apply";
+      headlineText = "Overall Assessment: Well-Structured Contract";
+      summaryText = `Contract terms are generally fair and conform to industry standards. Minimal exposure identified (${woCount} minor watch-outs, ${prCount} solid protections).`;
     }
 
-    if (countDealbreakers) countDealbreakers.textContent = health.deal_breakers_count || 0;
-    if (countWatchout) countWatchout.textContent = health.watch_out_count || 0;
-    if (countProtections) countProtections.textContent = health.protections_count || 0;
-
-    if (navBadgeRisks) {
-      navBadgeRisks.textContent = (health.deal_breakers_count || 0) + (health.watch_out_count || 0);
+    if (gaugeVerdictLabel) {
+      gaugeVerdictLabel.textContent = gaugeText;
+      gaugeVerdictLabel.style.color = ringColor;
     }
-    if (navBadgeMissing) {
-      navBadgeMissing.textContent = health.missing_protections_count || 7;
+
+    if (verdictBadge) {
+      verdictBadge.className = `verdict-badge ${verdictClass}`;
+      verdictBadge.textContent = verdictTitle;
+    }
+
+    if (verdictActionHint) {
+      verdictActionHint.textContent = `• ${actionHintText}`;
+    }
+
+    if (verdictHeadline) {
+      verdictHeadline.textContent = headlineText;
+    }
+
+    if (verdictSummaryText) {
+      verdictSummaryText.textContent = summaryText;
     }
 
     // SVG Score Ring (Radius = 54, Perimeter = 2 * PI * 54 ≈ 339.29)
     if (scoreRingFill) {
       const perimeter = 339.29;
-      const offset = perimeter - (score / 100) * perimeter;
+      const offset = perimeter - (Math.min(100, Math.max(0, score)) / 100) * perimeter;
       scoreRingFill.style.strokeDasharray = perimeter;
       scoreRingFill.style.strokeDashoffset = offset;
-
-      if (score >= 80) scoreRingFill.style.stroke = "var(--emerald)";
-      else if (score >= 60) scoreRingFill.style.stroke = "var(--amber)";
-      else scoreRingFill.style.stroke = "var(--crimson)";
+      scoreRingFill.style.stroke = ringColor;
     }
+
+    // 2. Metric Counts & Descriptions
+    if (countDealbreakers) countDealbreakers.textContent = dbCount;
+    if (countWatchout) countWatchout.textContent = woCount;
+    if (countProtections) countProtections.textContent = prCount;
+
+    if (metricDescDealbreakers) {
+      if (dbCount > 0 && health.deal_breakers && health.deal_breakers.length > 0) {
+        const firstDb = health.deal_breakers[0].title || "Critical liability terms";
+        metricDescDealbreakers.textContent = dbCount === 1 ? `Includes: ${firstDb}` : `${dbCount} severe risks, including: ${firstDb}`;
+      } else {
+        metricDescDealbreakers.textContent = "No critical deal-breakers found in this agreement.";
+      }
+    }
+
+    if (metricDescWatchout) {
+      if (woCount > 0 && health.watch_out && health.watch_out.length > 0) {
+        const firstWo = health.watch_out[0].title || "Unfavorable terms";
+        metricDescWatchout.textContent = woCount === 1 ? `Notice: ${firstWo}` : `${woCount} warning flags, including: ${firstWo}`;
+      } else {
+        metricDescWatchout.textContent = "No warning flags detected.";
+      }
+    }
+
+    if (metricDescProtections) {
+      if (prCount > 0 && health.protections && health.protections.length > 0) {
+        const firstPr = health.protections[0].title || "Standard protective terms";
+        metricDescProtections.textContent = `Favorable protection: ${firstPr}`;
+      } else {
+        metricDescProtections.textContent = "Few or no protective clauses explicitly securing your rights.";
+      }
+    }
+
+    if (navBadgeRisks) {
+      navBadgeRisks.textContent = dbCount + woCount;
+    }
+    if (navBadgeMissing) {
+      navBadgeMissing.textContent = msCount;
+    }
+
+    // 3. Render Canvas Donut Chart
+    renderDonutChart(dbCount, woCount, prCount, msCount);
+
+    // 4. Render Waterfall Bar
+    renderWaterfallBar(score, health.score_breakdown, dbCount, woCount, msCount, prCount);
+
+    // 5. Render Category Impact Bars
+    renderImpactBars(health);
+  }
+
+  // Visual Breakdown 1: Canvas Donut Chart
+  function renderDonutChart(db, wo, pr, ms) {
+    if (!riskDonutCanvas) return;
+    const ctx = riskDonutCanvas.getContext("2d");
+    if (!ctx) return;
+
+    const total = db + wo + pr + ms;
+    const dpr = window.devicePixelRatio || 1;
+    const displayWidth = 160;
+    const displayHeight = 160;
+
+    riskDonutCanvas.width = displayWidth * dpr;
+    riskDonutCanvas.height = displayHeight * dpr;
+    riskDonutCanvas.style.width = `${displayWidth}px`;
+    riskDonutCanvas.style.height = `${displayHeight}px`;
+    ctx.scale(dpr, dpr);
+
+    ctx.clearRect(0, 0, displayWidth, displayHeight);
+
+    const centerX = displayWidth / 2;
+    const centerY = displayHeight / 2;
+    const radius = 56;
+    const lineWidth = 18;
+
+    if (total === 0) {
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+      ctx.strokeStyle = "#e2e8f0";
+      ctx.lineWidth = lineWidth;
+      ctx.stroke();
+
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "bold 13px Inter, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("No items", centerX, centerY);
+    } else {
+      const slices = [
+        { count: db, color: "#dc2626" },
+        { count: wo, color: "#f59e0b" },
+        { count: pr, color: "#10b981" },
+        { count: ms, color: "#94a3b8" }
+      ].filter((s) => s.count > 0);
+
+      let startAngle = -Math.PI / 2;
+      const gap = slices.length > 1 ? 0.05 : 0;
+
+      slices.forEach((slice) => {
+        const sliceAngle = (slice.count / total) * (2 * Math.PI);
+        const endAngle = startAngle + sliceAngle;
+
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, startAngle + gap / 2, endAngle - gap / 2);
+        ctx.strokeStyle = slice.color;
+        ctx.lineWidth = lineWidth;
+        ctx.lineCap = "round";
+        ctx.stroke();
+
+        startAngle = endAngle;
+      });
+
+      // Center text
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "800 22px 'JetBrains Mono', monospace";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(`${total}`, centerX, centerY - 7);
+
+      ctx.fillStyle = "#64748b";
+      ctx.font = "600 10px Inter, sans-serif";
+      ctx.fillText("Findings", centerX, centerY + 13);
+    }
+
+    if (donutLegend) {
+      donutLegend.innerHTML = `
+        <div class="donut-legend-item">
+          <span class="donut-legend-dot" style="background:#dc2626"></span>
+          <span class="donut-legend-label">Deal-Breakers</span>
+          <span class="donut-legend-count">${db}</span>
+        </div>
+        <div class="donut-legend-item">
+          <span class="donut-legend-dot" style="background:#f59e0b"></span>
+          <span class="donut-legend-label">Watch-Outs</span>
+          <span class="donut-legend-count">${wo}</span>
+        </div>
+        <div class="donut-legend-item">
+          <span class="donut-legend-dot" style="background:#10b981"></span>
+          <span class="donut-legend-label">Protections</span>
+          <span class="donut-legend-count">${pr}</span>
+        </div>
+        <div class="donut-legend-item">
+          <span class="donut-legend-dot" style="background:#94a3b8"></span>
+          <span class="donut-legend-label">Missing Terms</span>
+          <span class="donut-legend-count">${ms}</span>
+        </div>
+      `;
+    }
+  }
+
+  // Visual Breakdown 2: Waterfall / Stacked Composition Bar
+  function renderWaterfallBar(score, breakdown, db, wo, ms, pr) {
+    if (!waterfallBar || !waterfallLabels) return;
+
+    const sb = breakdown || {};
+    const dbDed = sb.deal_breaker_deductions ?? (db * 8);
+    const woDed = sb.watch_out_deductions ?? (wo * 3);
+    const msDed = sb.missing_deductions ?? Math.min(12, ms * 2);
+    const prRew = sb.protection_rewards ?? Math.min(15, pr * 2.5);
+
+    const sumTotal = score + dbDed + woDed + msDed;
+    const safeSum = sumTotal > 0 ? sumTotal : 100;
+
+    const scorePct = (score / safeSum) * 100;
+    const dbPct = (dbDed / safeSum) * 100;
+    const woPct = (woDed / safeSum) * 100;
+    const msPct = (msDed / safeSum) * 100;
+
+    let segHtml = "";
+    if (scorePct > 0) {
+      segHtml += `<div class="wf-seg seg-score" style="width: ${scorePct}%" title="Final Score: ${score.toFixed(1)}">${scorePct > 12 ? `${score.toFixed(1)} pts` : ""}</div>`;
+    }
+    if (dbPct > 0) {
+      segHtml += `<div class="wf-seg seg-dealbreakers" style="width: ${dbPct}%" title="Deal-Breaker Deductions: -${dbDed.toFixed(1)} pts">${dbPct > 10 ? `-${dbDed.toFixed(1)}` : ""}</div>`;
+    }
+    if (woPct > 0) {
+      segHtml += `<div class="wf-seg seg-warnings" style="width: ${woPct}%" title="Warning Deductions: -${woDed.toFixed(1)} pts">${woPct > 10 ? `-${woDed.toFixed(1)}` : ""}</div>`;
+    }
+    if (msPct > 0) {
+      segHtml += `<div class="wf-seg seg-missing" style="width: ${msPct}%" title="Missing Protections: -${msDed.toFixed(1)} pts">${msPct > 10 ? `-${msDed.toFixed(1)}` : ""}</div>`;
+    }
+
+    waterfallBar.innerHTML = segHtml;
+
+    waterfallLabels.innerHTML = `
+      <div class="wf-label">
+        <span class="wf-label-dot" style="background: var(--emerald);"></span>
+        <span>Final Score:</span>
+        <span class="wf-label-val" style="color: var(--emerald);">${score.toFixed(1)}</span>
+      </div>
+      ${dbDed > 0 ? `
+      <div class="wf-label">
+        <span class="wf-label-dot" style="background: #dc2626;"></span>
+        <span>Deal-Breakers:</span>
+        <span class="wf-label-val" style="color: #dc2626;">-${dbDed.toFixed(1)}</span>
+      </div>` : ""}
+      ${woDed > 0 ? `
+      <div class="wf-label">
+        <span class="wf-label-dot" style="background: #f59e0b;"></span>
+        <span>Watch-Outs:</span>
+        <span class="wf-label-val" style="color: #f59e0b;">-${woDed.toFixed(1)}</span>
+      </div>` : ""}
+      ${msDed > 0 ? `
+      <div class="wf-label">
+        <span class="wf-label-dot" style="background: #94a3b8;"></span>
+        <span>Missing Terms:</span>
+        <span class="wf-label-val" style="color: #64748b;">-${msDed.toFixed(1)}</span>
+      </div>` : ""}
+      ${prRew > 0 ? `
+      <div class="wf-label">
+        <span class="wf-label-dot" style="background: #10b981;"></span>
+        <span>Protections Credit:</span>
+        <span class="wf-label-val" style="color: #10b981;">+${prRew.toFixed(1)}</span>
+      </div>` : ""}
+    `;
+  }
+
+  // Visual Breakdown 3: Proportional Category Impact Bars
+  function renderImpactBars(health) {
+    if (!impactBarsList) return;
+
+    const sb = health.score_breakdown || {};
+    const dbDed = sb.deal_breaker_deductions ?? (health.deal_breakers_count ? health.deal_breakers_count * 8 : 0);
+    const woDed = sb.watch_out_deductions ?? (health.watch_out_count ? health.watch_out_count * 3 : 0);
+    const msDed = sb.missing_deductions ?? (health.missing_protections_count ? Math.min(12, health.missing_protections_count * 2) : 0);
+    const prRew = sb.protection_rewards ?? (health.protections_count ? Math.min(15, health.protections_count * 2.5) : 0);
+
+    const maxVal = Math.max(dbDed, woDed, msDed, prRew, 16);
+
+    const dbWidth = Math.min(100, Math.round((dbDed / maxVal) * 100));
+    const woWidth = Math.min(100, Math.round((woDed / maxVal) * 100));
+    const msWidth = Math.min(100, Math.round((msDed / maxVal) * 100));
+    const prWidth = Math.min(100, Math.round((prRew / maxVal) * 100));
+
+    impactBarsList.innerHTML = `
+      <div class="impact-bar-row">
+        <div class="impact-bar-header">
+          <span class="impact-bar-label">🔴 Deal-Breaker Penalties</span>
+          <span class="impact-bar-value negative">-${dbDed.toFixed(1)} pts</span>
+        </div>
+        <div class="impact-bar-track">
+          <div class="impact-bar-fill fill-red" style="width: ${dbWidth}%;"></div>
+        </div>
+      </div>
+
+      <div class="impact-bar-row">
+        <div class="impact-bar-header">
+          <span class="impact-bar-label">🟡 Watch-Out Warning Terms</span>
+          <span class="impact-bar-value negative">-${woDed.toFixed(1)} pts</span>
+        </div>
+        <div class="impact-bar-track">
+          <div class="impact-bar-fill fill-amber" style="width: ${woWidth}%;"></div>
+        </div>
+      </div>
+
+      <div class="impact-bar-row">
+        <div class="impact-bar-header">
+          <span class="impact-bar-label">⚪ Missing Standard Protections</span>
+          <span class="impact-bar-value negative">-${msDed.toFixed(1)} pts</span>
+        </div>
+        <div class="impact-bar-track">
+          <div class="impact-bar-fill fill-gray" style="width: ${msWidth}%;"></div>
+        </div>
+      </div>
+
+      <div class="impact-bar-row">
+        <div class="impact-bar-header">
+          <span class="impact-bar-label">🟢 Active Protection Credits</span>
+          <span class="impact-bar-value positive">+${prRew.toFixed(1)} pts</span>
+        </div>
+        <div class="impact-bar-track">
+          <div class="impact-bar-fill fill-green" style="width: ${prWidth}%;"></div>
+        </div>
+      </div>
+    `;
   }
 
   // Helper: Friendly Title Mapper

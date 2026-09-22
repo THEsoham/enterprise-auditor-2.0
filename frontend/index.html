@@ -262,114 +262,72 @@
           </button>
         </div>
 
-        <!-- Score Hero Card -->
-        <div class="overview-hero-card">
-          <div class="hero-left">
-            
-            <!-- Circular Health Score Gauge -->
+        <!-- ============ VERDICT + SCORE GAUGE ROW ============ -->
+        <div class="overview-verdict-row">
+
+          <!-- Left: Score Gauge -->
+          <div class="verdict-gauge-card">
             <div class="score-gauge-wrap">
               <svg class="score-svg" viewBox="0 0 140 140">
                 <circle class="score-bg" cx="70" cy="70" r="54"></circle>
                 <circle class="score-fill" id="score-ring-fill" cx="70" cy="70" r="54"></circle>
               </svg>
               <div class="score-center">
-                <span class="score-val" id="score-number">62.5</span>
+                <span class="score-val" id="score-number">—</span>
                 <span class="score-max">out of 100</span>
-                <span class="score-status" id="score-rating">High Risk</span>
               </div>
             </div>
+            <div class="gauge-verdict-label" id="gauge-verdict-label">Waiting for analysis</div>
+          </div>
 
-            <!-- Score Summary & Breakdown Details -->
-            <div class="hero-summary">
-              <div class="summary-top">
-                <span class="pill-rating" id="pill-rating">RISKY CONTRACT</span>
-                <span class="summary-time">Requires negotiation before signing</span>
-              </div>
-              <h1 class="summary-headline" id="health-headline">
-                Overall Safety Score: 62.5 / 100
-              </h1>
-              <p class="summary-text">
-                This contract heavily favors the provider. It limits your ability to recover money if things break, 
-                and lets the provider cancel with only 15 days notice while locking you in for a full year.
-              </p>
-
-              <!-- Transparent Deduction Formula Bar -->
-              <div class="score-math-row" title="How your score was calculated">
-                <span class="math-chip chip-start">Start: 100 pts</span>
-                <span class="math-chip chip-sub">-16 pts (2 Deal-Breakers)</span>
-                <span class="math-chip chip-sub">-12 pts (4 Warnings)</span>
-                <span class="math-chip chip-sub">-12 pts (7 Missing Protections)</span>
-                <span class="math-chip chip-add">+2.5 pts (1 Good Clause)</span>
-                <span class="math-chip chip-total">= 62.5</span>
-              </div>
+          <!-- Center: Verdict + Headline -->
+          <div class="verdict-main-card">
+            <div class="verdict-badge-row">
+              <span class="verdict-badge" id="verdict-badge">PENDING</span>
+              <span class="verdict-action-hint" id="verdict-action-hint"></span>
+            </div>
+            <h1 class="verdict-headline" id="verdict-headline">Upload a contract to see your audit results</h1>
+            <p class="verdict-summary-text" id="verdict-summary-text">
+              Your contract will be scored based on deal-breaker clauses, warning-level terms, missing standard protections, and good clauses found.
+            </p>
+            <div class="verdict-cta-row">
+              <button class="btn btn-primary btn-lg" id="btn-hero-deep-dive">
+                <span>View All Risks & Fixes →</span>
+              </button>
+              <button class="btn btn-outline btn-sm" id="btn-open-asymmetry-modal-top">
+                <span>⚖️ Check Who Has More Rights</span>
+              </button>
             </div>
           </div>
 
-          <div class="hero-right">
-            <button class="btn btn-primary btn-lg" id="btn-hero-deep-dive">
-              <span>View All 6 Risks & Fixes →</span>
-            </button>
-            <button class="btn btn-outline btn-sm" id="btn-open-asymmetry-modal-top">
-              <span>⚖️ Check Who Has More Rights</span>
-            </button>
+          <!-- Right: Findings Donut Chart -->
+          <div class="donut-chart-card">
+            <div class="donut-chart-title">Findings Breakdown</div>
+            <canvas id="risk-donut-canvas" width="180" height="180"></canvas>
+            <div class="donut-legend" id="donut-legend"></div>
           </div>
         </div>
 
-        <!-- Transparency Card: Exactly Why We Reached This Conclusion -->
-        <div class="transparency-card">
-          <div class="transparency-header" id="btn-toggle-transparency">
-            <div class="transparency-title">
-              <span class="t-icon">💡</span>
-              <strong>Why did we give this contract a 62.5 score? (Full Step-by-Step Transparency)</strong>
+        <!-- ============ VISUAL SCORE BREAKDOWN ROW ============ -->
+        <div class="score-breakdown-row">
+
+          <!-- Waterfall Bar -->
+          <div class="waterfall-card">
+            <div class="waterfall-card-title">How Your Score Was Built</div>
+            <div class="waterfall-bar-wrap">
+              <div class="waterfall-bar" id="waterfall-bar"></div>
             </div>
-            <span class="t-toggle-hint">Click to see full formula</span>
+            <div class="waterfall-labels" id="waterfall-labels"></div>
           </div>
-          <div class="transparency-body" id="transparency-body">
-            <div class="transparency-grid">
-              <div class="t-step">
-                <div class="t-step-num">1</div>
-                <div class="t-step-text">
-                  <strong>We start with 100 Points</strong>
-                  <p>A fair, balanced enterprise agreement starts at a perfect 100.</p>
-                </div>
-              </div>
 
-              <div class="t-step">
-                <div class="t-step-num minus">-16</div>
-                <div class="t-step-text">
-                  <strong>Deducted for 2 Deal-Breakers</strong>
-                  <p>Liability is capped at just 3 months of fees (-8 pts) and provider has a 15-day unilateral exit right (-8 pts).</p>
-                </div>
-              </div>
-
-              <div class="t-step">
-                <div class="t-step-num minus">-12</div>
-                <div class="t-step-text">
-                  <strong>Deducted for 4 Warnings</strong>
-                  <p>180-day backup data retention (-3 pts), 90-day auto-renewal trap (-3 pts), tight audit limits (-3 pts), and unapproved logo use (-3 pts).</p>
-                </div>
-              </div>
-
-              <div class="t-step">
-                <div class="t-step-num minus">-12</div>
-                <div class="t-step-text">
-                  <strong>Deducted for Missing Protections</strong>
-                  <p>7 basic safety clauses are missing (like disaster recovery commitments and a 48-hr security breach notice). Capped at -12 pts.</p>
-                </div>
-              </div>
-
-              <div class="t-step">
-                <div class="t-step-num plus">+2.5</div>
-                <div class="t-step-text">
-                  <strong>Bonus for 1 Good Protection</strong>
-                  <p>Section 4.2 clearly states the provider takes full legal responsibility if their sub-vendors make a mistake (+2.5 pts).</p>
-                </div>
-              </div>
-            </div>
+          <!-- Category Impact Bars -->
+          <div class="impact-card">
+            <div class="impact-card-title">What's Affecting the Score</div>
+            <div class="impact-bars-list" id="impact-bars-list"></div>
           </div>
         </div>
 
-        <!-- 3 Interactive Metric Cards (Click to Filter & View) -->
+        <!-- ============ 3 INTERACTIVE METRIC CARDS ============ -->
         <div class="metrics-row">
           
           <div class="metric-card card-dealbreaker" id="metric-card-dealbreakers" role="button" tabindex="0" title="Click to view deal-breakers">
@@ -377,9 +335,9 @@
               <span class="metric-icon">🔴</span>
               <span class="metric-badge">MUST FIX</span>
             </div>
-            <div class="metric-count" id="count-dealbreakers">2</div>
+            <div class="metric-count" id="count-dealbreakers">0</div>
             <div class="metric-title">Deal-Breakers</div>
-            <p class="metric-desc">Dangerous clauses that could cost you money or lock you into an unfair deal.</p>
+            <p class="metric-desc" id="metric-desc-dealbreakers">Dangerous clauses that could cost you money or lock you into an unfair deal.</p>
             <div class="metric-action">See Deal-Breakers & Fixes →</div>
           </div>
 
@@ -388,9 +346,9 @@
               <span class="metric-icon">🟡</span>
               <span class="metric-badge">WARNING</span>
             </div>
-            <div class="metric-count" id="count-watchout">4</div>
+            <div class="metric-count" id="count-watchout">0</div>
             <div class="metric-title">Watch Out</div>
-            <p class="metric-desc">Unfavorable rules like 180-day data backups and a 90-day auto-renewal notice.</p>
+            <p class="metric-desc" id="metric-desc-watchout">Unfavorable terms that may limit your flexibility or increase your exposure.</p>
             <div class="metric-action">See Warnings & Fixes →</div>
           </div>
 
@@ -399,9 +357,9 @@
               <span class="metric-icon">🟢</span>
               <span class="metric-badge">GOOD CLAUSE</span>
             </div>
-            <div class="metric-count" id="count-protections">1</div>
+            <div class="metric-count" id="count-protections">0</div>
             <div class="metric-title">Protections</div>
-            <p class="metric-desc">Provider agrees to take full legal blame if their third-party subcontractors fail.</p>
+            <p class="metric-desc" id="metric-desc-protections">Clauses that are fair and protect your company's interests.</p>
             <div class="metric-action">See Good Clauses →</div>
           </div>
 
