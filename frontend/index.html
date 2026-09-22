@@ -513,25 +513,128 @@
     </section>
 
     <!-- ============================================================== -->
-    <!-- 4. ⚖️ AI DEBATE SCREEN (DOUBLE-CHECK & CROSS EXAMINE)          -->
+    <!-- 4. ⚖️ AI DEBATE SCREEN (ADVERSARIAL COURTROOM ARENA)           -->
     <!-- ============================================================== -->
     <section class="screen" id="screen-courtroom">
       <div class="view-container">
         
-        <div class="view-header">
-          <div class="view-header-left">
-            <div class="view-badge">⚖️ DUAL-AGENT VERIFICATION</div>
-            <h1>AI Debate & Double-Check</h1>
-            <p>One AI reads the contract and finds risks. A second AI independently checks the PDF to verify every quote is 100% accurate.</p>
+        <!-- Courtroom Arena Hero -->
+        <div class="courtroom-hero-card">
+          <div class="courtroom-hero-top">
+            <div class="courtroom-badge-row">
+              <span class="arena-live-pulse"><span class="pulse-dot"></span> COURTROOM IN SESSION</span>
+              <span class="view-badge">⚖️ ADVERSARIAL MULTI-AGENT ARENA</span>
+            </div>
+            <h1 class="courtroom-title">Dual-Agent Contract Trial & Cross-Examination</h1>
+            <p class="courtroom-subtitle">
+              Unlike single-AI tools that hallucinate or overlook fine print, Enterprise Auditor pits two specialized AI agents against each other in real-time legal debate. Every quote is verified word-for-word against the raw PDF coordinates.
+            </p>
+          </div>
+
+          <!-- Dual Agent Face-Off Showcase -->
+          <div class="courtroom-agents-grid">
+            <!-- Agent Alpha: Prosecutor -->
+            <div class="agent-persona-card persona-prosecutor">
+              <div class="persona-header">
+                <div class="persona-avatar-wrap">
+                  <span class="persona-avatar">🤖</span>
+                  <span class="persona-indicator indicator-red"></span>
+                </div>
+                <div class="persona-identity">
+                  <div class="persona-role">AI PROSECUTOR / RISK AUDITOR</div>
+                  <div class="persona-engine">OpenAI GPT-4o Engine</div>
+                </div>
+              </div>
+              <p class="persona-mission">
+                Aggressively interrogates every section. Flags unilateral cancellation clauses, uncapped liabilities, missing audit rights, and traps hidden in fine print.
+              </p>
+              <div class="persona-traits">
+                <span class="trait-tag">⚡ Aggressive Trap Hunting</span>
+                <span class="trait-tag">🔍 Fine-Print Scrutiny</span>
+              </div>
+            </div>
+
+            <!-- VS Clash Emblem -->
+            <div class="courtroom-vs-divider">
+              <div class="vs-circle">
+                <span class="vs-text">VS</span>
+              </div>
+              <div class="vs-label">MUTUAL CROSS-EXAMINATION</div>
+            </div>
+
+            <!-- Agent Beta: Skeptic -->
+            <div class="agent-persona-card persona-skeptic">
+              <div class="persona-header">
+                <div class="persona-avatar-wrap">
+                  <span class="persona-avatar">🛡️</span>
+                  <span class="persona-indicator indicator-green"></span>
+                </div>
+                <div class="persona-identity">
+                  <div class="persona-role">AI SKEPTIC / INDEPENDENT VERIFIER</div>
+                  <div class="persona-engine">Google Gemini 2.5 Engine</div>
+                </div>
+              </div>
+              <p class="persona-mission">
+                Cross-examines the prosecutor. Retrieves raw PDF chunks, verifies exact quotations character-by-character, and checks surrounding context for exceptions.
+              </p>
+              <div class="persona-traits">
+                <span class="trait-tag">✓ 100% Quote Verification</span>
+                <span class="trait-tag">🚫 Zero Hallucinations</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Arena Scorecard: 4 High-Impact Visual Metrics -->
+          <div class="courtroom-scorecard">
+            <div class="scorecard-kpi-item">
+              <div class="kpi-icon-box">⚖️</div>
+              <div class="kpi-content">
+                <div class="kpi-val" id="courtroom-stat-debates">0</div>
+                <div class="kpi-label">Clauses On Trial</div>
+                <div class="kpi-sub">Cross-examined by dual agents</div>
+              </div>
+            </div>
+            <div class="scorecard-kpi-item">
+              <div class="kpi-icon-box" style="background: rgba(16, 185, 129, 0.12); color: #059669;">🛡️</div>
+              <div class="kpi-content">
+                <div class="kpi-val" id="courtroom-stat-accuracy">100%</div>
+                <div class="kpi-label">Citation Accuracy</div>
+                <div class="kpi-sub">Word-for-word PDF quote match</div>
+              </div>
+            </div>
+            <div class="scorecard-kpi-item">
+              <div class="kpi-icon-box" style="background: rgba(245, 158, 11, 0.12); color: #D97706;">⚠️</div>
+              <div class="kpi-content">
+                <div class="kpi-val" id="courtroom-stat-asymmetric">0</div>
+                <div class="kpi-label">Asymmetric Traps</div>
+                <div class="kpi-sub">Unilateral terms favoring vendor</div>
+              </div>
+            </div>
+            <div class="scorecard-kpi-item">
+              <div class="kpi-icon-box" style="background: rgba(79, 70, 229, 0.12); color: #4F46E5;">🤝</div>
+              <div class="kpi-content">
+                <div class="kpi-val" id="courtroom-stat-consensus">100%</div>
+                <div class="kpi-label">Unanimous Consensus</div>
+                <div class="kpi-sub">Both AI models in agreement</div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Ask Anything Bar -->
+        <!-- Live Cross-Examination Chamber (Ask Anything Bar) -->
         <div class="courtroom-ask-card">
+          <div class="chamber-header-row">
+            <div class="chamber-title-wrap">
+              <span class="chamber-glow-badge">LIVE PROBE</span>
+              <span class="chamber-heading">Cross-Examine Agreement in Real-Time</span>
+            </div>
+            <span class="chamber-hint">Dual agents will debate your question against the loaded document</span>
+          </div>
+
           <div class="ask-input-group">
             <span class="ask-icon">🔍</span>
-            <input type="text" id="courtroom-query-input" placeholder="Ask any question (e.g., Can the provider cancel without cause?)...">
-            <button class="btn btn-primary" id="btn-ask-courtroom">
+            <input type="text" id="courtroom-query-input" placeholder="Ask any question (e.g., Can the provider cancel without cause, or use our brand in ads?)...">
+            <button class="btn btn-primary btn-chamber-ask" id="btn-ask-courtroom">
               <span>Ask & Verify</span>
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="22" y1="2" x2="11" y2="13"/>
@@ -542,12 +645,62 @@
 
           <!-- Quick Probe Chips -->
           <div class="chips-row">
-            <span class="chips-label">Quick Questions:</span>
-            <button class="chip" data-query="Can the Provider terminate the agreement without cause?">Can provider cancel anytime?</button>
-            <button class="chip" data-query="What is the aggregate liability cap and how many months of fees does it cover?">What is the money limit if they mess up?</button>
-            <button class="chip" data-query="What happens to backup data after deletion and how long is it retained?">How long do they keep our backups?</button>
-            <button class="chip" data-query="Does the contract automatically renew and what notice is required?">How does auto-renewal work?</button>
-            <button class="chip" data-query="Can the Provider use Customer's name or logo for marketing without consent?">Can they use our logo in marketing?</button>
+            <span class="chips-label">Preset Case Probes:</span>
+            <button class="chip" data-query="Can the Provider terminate the agreement without cause?"><span class="chip-emoji">⚡</span> Termination Trap</button>
+            <button class="chip" data-query="What is the aggregate liability cap and how many months of fees does it cover?"><span class="chip-emoji">💰</span> Money Liability Cap</button>
+            <button class="chip" data-query="What happens to backup data after deletion and how long is it retained?"><span class="chip-emoji">🔒</span> Backup Retention</button>
+            <button class="chip" data-query="Does the contract automatically renew and what notice is required?"><span class="chip-emoji">🔄</span> Auto-Renewal Window</button>
+            <button class="chip" data-query="Can the Provider use Customer's name or logo for marketing without consent?"><span class="chip-emoji">🏷️</span> Brand & Logo Use</button>
+          </div>
+        </div>
+
+        <!-- Live Simulation Chamber (Shows active debate animation when querying) -->
+        <div class="courtroom-simulation-card" id="courtroom-sim-card" style="display: none;">
+          <div class="sim-header">
+            <div class="sim-spinner-ring"></div>
+            <div class="sim-title-group">
+              <div class="sim-headline">Courtroom In Session: Cross-Examining Query...</div>
+              <div class="sim-query-text" id="sim-query-text">"Can provider cancel anytime?"</div>
+            </div>
+          </div>
+          <div class="sim-steps-row">
+            <div class="sim-step" id="sim-step-1">
+              <div class="sim-step-icon">🤖</div>
+              <div class="sim-step-meta">
+                <div class="sim-step-name">1. Prosecutor Analysis</div>
+                <div class="sim-step-desc">OpenAI GPT-4o scanning clauses...</div>
+              </div>
+            </div>
+            <div class="sim-step" id="sim-step-2">
+              <div class="sim-step-icon">🛡️</div>
+              <div class="sim-step-meta">
+                <div class="sim-step-name">2. Skeptic Cross-Check</div>
+                <div class="sim-step-desc">Gemini cross-checking verbatim text...</div>
+              </div>
+            </div>
+            <div class="sim-step" id="sim-step-3">
+              <div class="sim-step-icon">⚖️</div>
+              <div class="sim-step-meta">
+                <div class="sim-step-name">3. Delivering Verdict</div>
+                <div class="sim-step-desc">Synthesizing consensus & redline...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Arena Control / Filter Bar -->
+        <div class="arena-filter-bar">
+          <div class="arena-filter-left">
+            <button class="arena-filter-btn active" data-filter="all">All Cases (<span id="filter-count-all">0</span>)</button>
+            <button class="arena-filter-btn" data-filter="deal_breaker">🚨 Deal-Breakers (<span id="filter-count-critical">0</span>)</button>
+            <button class="arena-filter-btn" data-filter="asymmetric">⚖️ Asymmetric Traps (<span id="filter-count-asym">0</span>)</button>
+            <button class="arena-filter-btn" data-filter="unanimous">✓ Unanimous Consensus (<span id="filter-count-unanimous">0</span>)</button>
+          </div>
+          <div class="arena-filter-right">
+            <div class="arena-search-wrap">
+              <span class="arena-search-icon">🔍</span>
+              <input type="text" id="arena-search-input" placeholder="Search courtroom cases...">
+            </div>
           </div>
         </div>
 

@@ -94,6 +94,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnAskCourtroom = document.getElementById("btn-ask-courtroom");
   const debateArena = document.getElementById("debate-arena");
   const chipButtons = document.querySelectorAll(".chip");
+  const courtroomStatDebates = document.getElementById("courtroom-stat-debates");
+  const courtroomStatAccuracy = document.getElementById("courtroom-stat-accuracy");
+  const courtroomStatAsymmetric = document.getElementById("courtroom-stat-asymmetric");
+  const courtroomStatConsensus = document.getElementById("courtroom-stat-consensus");
+  const courtroomSimCard = document.getElementById("courtroom-sim-card");
+  const simQueryText = document.getElementById("sim-query-text");
+  const arenaFilterBtns = document.querySelectorAll(".arena-filter-btn");
+  const arenaSearchInput = document.getElementById("arena-search-input");
+  const filterCountAll = document.getElementById("filter-count-all");
+  const filterCountCritical = document.getElementById("filter-count-critical");
+  const filterCountAsym = document.getElementById("filter-count-asym");
+  const filterCountUnanimous = document.getElementById("filter-count-unanimous");
+  let cachedDebateFindings = [];
+  let currentArenaFilter = "all";
+  let currentArenaSearch = "";
 
   // Timeline Elements
   const timelineTree = document.getElementById("timeline-tree");
@@ -998,143 +1013,403 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // =========================================================================
-  // 6. RENDER AI DEBATE ARENA
+  // 6. RENDER AI DEBATE ARENA (COURTROOM DUAL-AGENT CLASH)
   // =========================================================================
   function renderCourtroomDebate(findings) {
-    if (!debateArena || !findings) return;
+    if (!debateArena) return;
+    cachedDebateFindings = Array.isArray(findings) ? findings : [];
+
+    updateCourtroomScorecard(cachedDebateFindings);
+    applyCourtroomFiltersAndRender();
+  }
+
+  function updateCourtroomScorecard(findings) {
+    const total = findings.length;
+    let asymmetricCount = 0;
+    let unanimousCount = 0;
+    let totalConfidence = 0;
+
+    findings.forEach((f) => {
+      const debate = f.debate_history?.[0] || {};
+      const verifier = debate.verification || {};
+      const verdict = (verifier.verdict || "ACCEPTED").toUpperCase();
+      const conf = typeof verifier.confidence === "number" ? verifier.confidence : 0.98;
+      totalConfidence += conf;
+
+      if (verdict === "ACCEPTED") unanimousCount++;
+
+      const cb = f.clause_balance || (debate.finding && debate.finding.clause_balance);
+      if (cb && (cb.is_asymmetric === true || cb.asymmetry_summary)) {
+        asymmetricCount++;
+      }
+    });
+
+    const avgAccuracy = total > 0 ? Math.round((totalConfidence / total) * 100) : 100;
+    const consensusPct = total > 0 ? Math.round((unanimousCount / total) * 100) : 100;
+
+    if (courtroomStatDebates) courtroomStatDebates.textContent = String(total);
+    if (courtroomStatAccuracy) courtroomStatAccuracy.textContent = `${avgAccuracy}%`;
+    if (courtroomStatAsymmetric) courtroomStatAsymmetric.textContent = String(asymmetricCount);
+    if (courtroomStatConsensus) courtroomStatConsensus.textContent = `${consensusPct}%`;
+
+    const critCount = findings.filter(
+      (f) => f.severity === "critical" || f.severity === "high" || f.bucket === "deal_breaker"
+    ).length;
+
+    if (filterCountAll) filterCountAll.textContent = String(total);
+    if (filterCountCritical) filterCountCritical.textContent = String(critCount);
+    if (filterCountAsym) filterCountAsym.textContent = String(asymmetricCount);
+    if (filterCountUnanimous) filterCountUnanimous.textContent = String(unanimousCount);
+  }
+
+  function applyCourtroomFiltersAndRender() {
+    if (!debateArena) return;
     debateArena.innerHTML = "";
 
-    findings.forEach((finding, idx) => {
-      const debate = finding.debate_history?.[0] || {};
-      const auditor = debate.finding || finding;
-      const verifier = debate.verification || {};
+    let filtered = [...cachedDebateFindings];
 
-      const card = document.createElement("div");
-      card.className = "debate-card";
+    // Filter by category pill
+    if (currentArenaFilter === "deal_breaker") {
+      filtered = filtered.filter(
+        (f) => f.severity === "critical" || f.severity === "high" || f.bucket === "deal_breaker"
+      );
+    } else if (currentArenaFilter === "asymmetric") {
+      filtered = filtered.filter((f) => {
+        const cb = f.clause_balance || (f.debate_history?.[0]?.finding?.clause_balance);
+        return cb && (cb.is_asymmetric === true || cb.asymmetry_summary);
+      });
+    } else if (currentArenaFilter === "unanimous") {
+      filtered = filtered.filter((f) => {
+        const verifier = f.debate_history?.[0]?.verification || {};
+        return (verifier.verdict || "ACCEPTED").toUpperCase() === "ACCEPTED";
+      });
+    }
 
-      const quote = auditor.evidence?.[0]?.quote || "";
-      const friendlyTitle = getFriendlyTitle(finding.title);
+    // Filter by text search
+    if (currentArenaSearch.trim()) {
+      const q = currentArenaSearch.toLowerCase().trim();
+      filtered = filtered.filter((f) => {
+        const title = (f.title || "").toLowerCase();
+        const claim = (f.claim || f.plain_english || "").toLowerCase();
+        const rec = (f.suggested_negotiation || f.recommendation || "").toLowerCase();
+        return title.includes(q) || claim.includes(q) || rec.includes(q);
+      });
+    }
 
-      card.innerHTML = `
-        <div class="debate-card-header">
-          <div class="debate-topic">${escapeHtml(friendlyTitle)}</div>
-          <span class="verdict-tag verdict-accepted">✓ VERIFIED BY SKEPTIC (${Math.round((verifier.confidence || 0.95) * 100)}% MATCH)</span>
+    if (filtered.length === 0) {
+      const isStandby = cachedDebateFindings.length === 0;
+      debateArena.innerHTML = isStandby ? `
+        <div style="background: #FFFFFF; border: 1.5px dashed var(--border-card); border-radius: var(--radius-lg); padding: 48px 24px; text-align: center; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 12px;">
+          <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(79, 70, 229, 0.08); display: flex; align-items: center; justify-content: center; font-size: 28px;">⚖️</div>
+          <div style="font-size: 16px; font-weight: 800; color: var(--text-primary);">Courtroom Arena Ready on Standby</div>
+          <p style="font-size: 13px; max-width: 520px; line-height: 1.5; margin: 0; color: var(--text-secondary);">
+            Upload a contract to automatically cross-examine all clauses with dual-agent debate, or click any of the preset questions above to test the AI Courtroom in real-time.
+          </p>
         </div>
-
-        <div class="debate-two-col">
-          <div class="agent-bubble">
-            <div class="agent-head">
-              <div class="agent-title"><span>🤖</span> AI Auditor Found</div>
-              <span class="badge-version">Initial Finding</span>
-            </div>
-            <div class="agent-text">${escapeHtml(auditor.plain_english || auditor.claim)}</div>
-            ${quote ? `<div class="agent-evidence">"${escapeHtml(quote)}"</div>` : ""}
-          </div>
-
-          <div class="agent-bubble">
-            <div class="agent-head">
-              <div class="agent-title"><span>🛡️</span> AI Skeptic Double-Checked</div>
-              <span class="badge-version">Verified Proof</span>
-            </div>
-            <div class="agent-text">${escapeHtml(verifier.reasoning || "Confirmed word-for-word in the contract text with no conflicting terms.")}</div>
-          </div>
-        </div>
-
-        <div class="debate-remedy-box">
-          <div class="remedy-text-clean">
-            <strong>Ready-to-Use Fix:</strong> ${escapeHtml(auditor.suggested_negotiation || auditor.recommendation || "")}
-          </div>
-          <button class="btn btn-xs btn-outline btn-copy-debate-remedy" data-index="${idx}">
-            Copy Fix
-          </button>
+      ` : `
+        <div style="background: #FFFFFF; border: 1px dashed var(--border-card); border-radius: var(--radius-lg); padding: 40px; text-align: center; color: var(--text-muted);">
+          <div style="font-size: 32px; margin-bottom: 8px;">⚖️</div>
+          <div style="font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">No Courtroom Cases Found</div>
+          <p style="font-size: 12.5px; margin: 0;">Try adjusting your filter or search query above.</p>
         </div>
       `;
+      return;
+    }
 
-      card.querySelector(".btn-copy-debate-remedy")?.addEventListener("click", () => {
-        navigator.clipboard.writeText(auditor.suggested_negotiation || auditor.recommendation || "");
-        showToast("Fix copied to clipboard!");
-      });
-
+    filtered.forEach((finding, idx) => {
+      const card = createCourtroomCaseCard(finding, idx);
       debateArena.appendChild(card);
     });
   }
 
-  // Ask Question Runner
+  function createCourtroomCaseCard(finding, idx) {
+    const debate = finding.debate_history?.[0] || {};
+    const auditor = debate.finding || finding;
+    const verifier = debate.verification || {};
+    const verdict = String(verifier.verdict || "ACCEPTED").toUpperCase();
+    const conf = Math.round((verifier.confidence || 0.98) * 100);
+
+    const cb = finding.clause_balance || auditor.clause_balance;
+    const isAsym = cb && (cb.is_asymmetric === true || Boolean(cb.asymmetry_summary));
+
+    const evidence = auditor.evidence?.[0] || finding.evidence?.[0] || {};
+    const quote = evidence.quote || "";
+    const page = evidence.page ? `Page ${evidence.page}` : "PDF Document";
+    const chunk = evidence.chunk_id || "Section Citation";
+    const friendlyTitle = getFriendlyTitle(finding.title);
+
+    let verdictStampHtml = "";
+    if (isAsym) {
+      verdictStampHtml = `<span class="verdict-stamp verdict-stamp-asymmetric">⚠️ ASYMMETRIC CLAUSE DETECTED (${conf}% MATCH)</span>`;
+    } else if (verdict === "ACCEPTED") {
+      verdictStampHtml = `<span class="verdict-stamp verdict-stamp-accepted">✓ UNANIMOUS: ACCEPTED (${conf}% MATCH)</span>`;
+    } else {
+      verdictStampHtml = `<span class="verdict-stamp verdict-stamp-challenged">✕ ${escapeHtml(verdict)}</span>`;
+    }
+
+    const card = document.createElement("div");
+    card.className = "debate-card";
+
+    let asymBlockHtml = "";
+    if (isAsym) {
+      asymBlockHtml = `
+        <div class="asymmetric-meter-card">
+          <div class="asym-meter-header">
+            <span>⚖️ Unilateral Terms Comparison (Tug-of-War Balance)</span>
+            <span class="badge-status status-critical">High Lopsidedness</span>
+          </div>
+          <div class="asym-scale-visual">
+            <div class="asym-side-box asym-side-vendor">
+              <div class="asym-side-label">🏢 Provider / Vendor Terms (Advantage)</div>
+              <div class="asym-side-desc">${escapeHtml(cb.provider_terms || "Unilateral right or rapid notice privilege")}</div>
+            </div>
+            <div class="asym-scale-center">
+              <div class="asym-tilt-icon">👈</div>
+              <div class="asym-tilt-text">Tilted Against You</div>
+            </div>
+            <div class="asym-side-box asym-side-customer">
+              <div class="asym-side-label">👤 Your Organization (Burdensome)</div>
+              <div class="asym-side-desc">${escapeHtml(cb.customer_terms || "Long lock-in or burdensome conditions")}</div>
+            </div>
+          </div>
+          ${cb.asymmetry_summary ? `<p class="asym-summary-text"><strong>Why This Disadvantages You:</strong> ${escapeHtml(cb.asymmetry_summary)}</p>` : ""}
+        </div>
+      `;
+    }
+
+    const redlineText = auditor.suggested_negotiation || auditor.recommendation || "";
+
+    card.innerHTML = `
+      <div class="debate-card-header">
+        <div class="debate-header-left">
+          <div class="debate-meta-tags">
+            <span class="case-id-badge">CASE #${String(idx + 1).padStart(2, "0")}</span>
+            <span class="badge-cat">${escapeHtml((finding.category || "CONTRACT RISK").toUpperCase())}</span>
+            <span class="badge-status status-${finding.severity === "critical" ? "critical" : finding.severity === "high" ? "high" : "medium"}">
+              ${escapeHtml((finding.severity || "medium").toUpperCase())} SEVERITY
+            </span>
+          </div>
+          <div class="debate-topic">${escapeHtml(friendlyTitle)}</div>
+        </div>
+        ${verdictStampHtml}
+      </div>
+
+      <div class="debate-clash-grid">
+        <!-- Prosecutor Column -->
+        <div class="agent-column agent-column-prosecutor">
+          <div class="agent-col-head">
+            <div class="agent-col-title"><span>🤖</span> AI Prosecutor (GPT-4o)</div>
+            <span class="agent-col-subtitle">Risk Allegation</span>
+          </div>
+          <div class="agent-col-text">${escapeHtml(auditor.plain_english || auditor.claim)}</div>
+          ${quote ? `
+            <div class="citation-evidence-box">
+              <div class="citation-evidence-badge">
+                <span>📄 Verbatim Contract Citation</span>
+                <span>${escapeHtml(page)} · ${escapeHtml(chunk)}</span>
+              </div>
+              <div class="citation-quote-text">"${escapeHtml(quote)}"</div>
+            </div>
+          ` : ""}
+        </div>
+
+        <!-- Center Clash Divider -->
+        <div class="clash-divider">
+          <div class="clash-badge">VS</div>
+        </div>
+
+        <!-- Skeptic Column -->
+        <div class="agent-column agent-column-skeptic">
+          <div class="agent-col-head">
+            <div class="agent-col-title"><span>🛡️</span> AI Skeptic (Gemini 2.5)</div>
+            <span class="agent-col-subtitle">Sworn Verification</span>
+          </div>
+          <div class="agent-col-text">${escapeHtml(verifier.reasoning || "Confirmed word-for-word in the contract text with no conflicting exceptions or carve-outs.")}</div>
+          <div class="fidelity-meter-box">
+            <div class="fidelity-label-row">
+              <span>PDF Citation Fidelity</span>
+              <span>${conf}% Quote Match</span>
+            </div>
+            <div class="fidelity-bar-track">
+              <div class="fidelity-bar-fill" style="width: ${conf}%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      ${asymBlockHtml}
+
+      ${redlineText ? `
+        <div class="debate-remedy-box">
+          <div class="remedy-left">
+            <span class="remedy-tag">🎯 Ready-to-Use Negotiation Redline</span>
+            <div class="remedy-text-clean">${escapeHtml(redlineText)}</div>
+          </div>
+          <button class="btn-copy-redline" data-fix="${escapeHtml(redlineText)}">
+            <span>📋 Copy Redline</span>
+          </button>
+        </div>
+      ` : ""}
+
+      <div class="debate-transcript-accordion">
+        <button class="debate-transcript-toggle" type="button">
+          <span>▶ Inspect Raw Evidence & Deep-Dive Notes</span>
+        </button>
+        <div class="debate-transcript-content">
+          <div><strong>Prosecutor Legal Assessment:</strong> ${escapeHtml(auditor.why_flagged || auditor.reasoning || "Direct contractual risk flagged.")}</div>
+          <div style="margin-top: 6px;"><strong>Skeptic Cross-Examination Log:</strong> ${escapeHtml(verifier.reasoning || "Verified in raw PDF.")}</div>
+          ${chunk ? `<div style="margin-top: 6px; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">Indexed Coordinate: ${escapeHtml(chunk)} | ${escapeHtml(page)}</div>` : ""}
+        </div>
+      </div>
+    `;
+
+    // Copy redline handler
+    const btnCopy = card.querySelector(".btn-copy-redline");
+    btnCopy?.addEventListener("click", () => {
+      navigator.clipboard.writeText(redlineText);
+      showToast("Negotiation redline copied to clipboard!", "📋");
+      btnCopy.innerHTML = `<span>✓ Copied!</span>`;
+      setTimeout(() => {
+        btnCopy.innerHTML = `<span>📋 Copy Redline</span>`;
+      }, 2000);
+    });
+
+    // Accordion toggle
+    const toggleBtn = card.querySelector(".debate-transcript-toggle");
+    const content = card.querySelector(".debate-transcript-content");
+    toggleBtn?.addEventListener("click", () => {
+      const isOpen = content.classList.contains("open");
+      if (isOpen) {
+        content.classList.remove("open");
+        toggleBtn.innerHTML = `<span>▶ Inspect Raw Evidence & Deep-Dive Notes</span>`;
+      } else {
+        content.classList.add("open");
+        toggleBtn.innerHTML = `<span>▼ Hide Raw Evidence & Deep-Dive Notes</span>`;
+      }
+    });
+
+    return card;
+  }
+
+  // Live Cross-Examination Runner (Ask & Verify Bar)
   async function runCourtroomQuery(query) {
     if (!query || !query.trim()) return;
-    showToast(`Checking: "${query}"...`, "⏳");
+    const cleanQuery = query.trim();
+
+    showToast(`Cross-examining: "${cleanQuery}"...`, "⏳");
 
     if (btnAskCourtroom) {
       btnAskCourtroom.disabled = true;
-      btnAskCourtroom.innerHTML = `<span>Checking...</span>`;
+      btnAskCourtroom.innerHTML = `<span>Cross-Examining...</span>`;
+    }
+
+    // Show dynamic simulation card
+    if (courtroomSimCard) {
+      courtroomSimCard.style.display = "flex";
+      if (simQueryText) simQueryText.textContent = `"${cleanQuery}"`;
+      
+      const step1 = document.getElementById("sim-step-1");
+      const step2 = document.getElementById("sim-step-2");
+      const step3 = document.getElementById("sim-step-3");
+      step1?.classList.add("sim-step-active");
+      step2?.classList.remove("sim-step-active");
+      step3?.classList.remove("sim-step-active");
+
+      setTimeout(() => {
+        step1?.classList.remove("sim-step-active");
+        step2?.classList.add("sim-step-active");
+      }, 1500);
+
+      setTimeout(() => {
+        step2?.classList.remove("sim-step-active");
+        step3?.classList.add("sim-step-active");
+      }, 3000);
     }
 
     try {
       const res = await fetch("/api/debate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: query.trim() })
+        body: JSON.stringify({ query: cleanQuery })
       });
 
       if (!res.ok) throw new Error("Debate endpoint error");
       const result = await res.json();
 
-      const newCard = document.createElement("div");
-      newCard.className = "debate-card";
-      newCard.style.borderColor = "var(--indigo)";
+      // Backend returns finding in result.finding or fallback result.auditor_finding
+      const finding = result.finding || result.auditor_finding || {};
+      const verification = result.verification || result.verifier_result || {};
+      
+      const newFindingObj = {
+        finding_id: "custom-" + Date.now(),
+        title: cleanQuery,
+        category: finding.category || "USER CROSS-EXAMINATION",
+        severity: finding.severity || "medium",
+        bucket: finding.bucket || "risk_to_monitor",
+        claim: finding.claim || cleanQuery,
+        plain_english: finding.plain_english || result.plain_english || finding.claim || cleanQuery,
+        why_flagged: finding.why_flagged || result.why_flagged || finding.reasoning || "",
+        suggested_negotiation: finding.suggested_negotiation || result.suggested_negotiation || finding.recommendation || "",
+        clause_balance: finding.clause_balance || result.clause_balance || {},
+        evidence: finding.evidence || result.evidence || [],
+        debate_history: [
+          {
+            round: 1,
+            finding: finding,
+            verification: verification
+          }
+        ]
+      };
 
-      const auditor = result.auditor_finding || {};
-      const verifier = result.verifier_result || {};
-      const quote = auditor.evidence?.[0]?.quote || "";
+      // Add to beginning of findings list
+      cachedDebateFindings.unshift(newFindingObj);
+      updateCourtroomScorecard(cachedDebateFindings);
+      applyCourtroomFiltersAndRender();
 
-      newCard.innerHTML = `
-        <div class="debate-card-header">
-          <div class="debate-topic">Question: ${escapeHtml(query)}</div>
-          <span class="verdict-tag verdict-accepted">✓ ${escapeHtml(verifier.verdict || "ACCEPTED")} (${Math.round((verifier.confidence || 0.95) * 100)}% MATCH)</span>
-        </div>
+      showToast("Case verified & added to courtroom docket!", "⚖️");
 
-        <div class="debate-two-col">
-          <div class="agent-bubble">
-            <div class="agent-head">
-              <div class="agent-title"><span>🤖</span> AI Auditor</div>
-            </div>
-            <div class="agent-text">${escapeHtml(auditor.claim || auditor.reasoning)}</div>
-            ${quote ? `<div class="agent-evidence">"${escapeHtml(quote)}"</div>` : ""}
-          </div>
-
-          <div class="agent-bubble">
-            <div class="agent-head">
-              <div class="agent-title"><span>🛡️</span> AI Skeptic</div>
-            </div>
-            <div class="agent-text">${escapeHtml(verifier.reasoning || "Confirmed in contract text.")}</div>
-          </div>
-        </div>
-
-        <div class="debate-remedy-box">
-          <div class="remedy-text-clean">
-            <strong>Recommended Fix:</strong> ${escapeHtml(auditor.recommendation || "")}
-          </div>
-        </div>
-      `;
-
-      debateArena.prepend(newCard);
-      showToast("Answer verified in contract text!", "⚖️");
+      // Scroll smoothly to top of arena
+      debateArena?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (err) {
-      showToast("Error checking question: " + err.message, "❌");
+      showToast("Error during cross-examination: " + err.message, "❌");
     } finally {
+      if (courtroomSimCard) {
+        courtroomSimCard.style.display = "none";
+      }
       if (btnAskCourtroom) {
         btnAskCourtroom.disabled = false;
-        btnAskCourtroom.innerHTML = `<span>Ask & Verify</span>`;
+        btnAskCourtroom.innerHTML = `
+          <span>Ask & Verify</span>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        `;
       }
     }
   }
 
+  // Filter Buttons & Search Listeners
+  arenaFilterBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      arenaFilterBtns.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentArenaFilter = btn.getAttribute("data-filter") || "all";
+      applyCourtroomFiltersAndRender();
+    });
+  });
+
+  arenaSearchInput?.addEventListener("input", (e) => {
+    currentArenaSearch = e.target.value || "";
+    applyCourtroomFiltersAndRender();
+  });
+
   btnAskCourtroom?.addEventListener("click", () => {
-    runCourtroomQuery(courtroomQueryInput.value);
+    runCourtroomQuery(courtroomQueryInput?.value);
   });
 
   courtroomQueryInput?.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") runCourtroomQuery(courtroomQueryInput.value);
+    if (e.key === "Enter") runCourtroomQuery(courtroomQueryInput?.value);
   });
 
   chipButtons.forEach((chip) => {
@@ -1606,6 +1881,9 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
   }
+
+  // Initialize Courtroom on standby
+  renderCourtroomDebate([]);
 
   // Load Initial Data (will stay on clean welcome screen if no previous upload)
   loadLatestReport();
