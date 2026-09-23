@@ -996,39 +996,198 @@
 
             <!-- Ask & Cross-Examine Panel -->
             <div class="courtroom-ask-panel">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2 style="font-family: var(--font-serif); font-size: 19px; font-weight: 600;">AI Dual-Model Debate
-                  Arena</h2>
-                <span class="badge-ai-derived">Lead Auditor vs. Skeptic</span>
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div class="arena-title-icon">⚔️</div>
+                  <div>
+                    <h2 style="font-family: var(--font-serif); font-size: 20px; font-weight: 600; margin: 0;">AI Dual-Model Debate Arena</h2>
+                    <p style="font-size: 13px; color: var(--text-muted); margin: 3px 0 0 0;">
+                      Live adversarial cross-examination between <strong>OpenAI Lead Auditor</strong> and <strong>Gemini Skeptic</strong>.
+                    </p>
+                  </div>
+                </div>
+                <div class="model-pair-pill">
+                  <span class="model-badge-openai">OpenAI GPT-4o-mini</span>
+                  <span class="model-badge-vs">vs</span>
+                  <span class="model-badge-gemini">Gemini 3.6 Flash</span>
+                </div>
               </div>
-              <p style="font-size: 13px; color: var(--text-muted);">
-                Submit any question or clause to initiate a dual-model cross-examination against verbatim PDF
-                coordinates and uncover hidden risks.
-              </p>
 
+              <!-- Rechecks & Cross-Examination Depth Control -->
+              <div class="debate-config-row">
+                <span class="debate-config-label">Verification Depth / Rechecks:</span>
+                <div class="rechecks-btn-group" id="rechecks-btn-group">
+                  <button class="recheck-pill-btn" data-rounds="1">1 Recheck (Fast)</button>
+                  <button class="recheck-pill-btn active" data-rounds="2">2 Rechecks (Standard)</button>
+                  <button class="recheck-pill-btn" data-rounds="3">3 Rechecks (Adversarial)</button>
+                  <button class="recheck-pill-btn" data-rounds="4">4 Rechecks (Exhaustive)</button>
+                </div>
+              </div>
+
+              <!-- Query Input Row -->
               <div class="courtroom-input-row">
                 <input type="text" class="courtroom-text-input" id="courtroom-query-input"
-                  placeholder="e.g., Can the provider terminate for convenience without mutual rights?">
-                <button class="btn-dark" id="btn-run-courtroom-debate">Run AI Debate</button>
-              </div>
-
-              <div class="courtroom-presets-row">
-                <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 600;">Suggested debate
-                  inquiries:</span>
-                <button class="preset-chip-btn" data-query="Can the provider terminate for convenience?">Termination
-                  notice</button>
-                <button class="preset-chip-btn"
-                  data-query="What is the liability cap and does it cover data breach?">Liability cap limits</button>
-                <button class="preset-chip-btn" data-query="How long are deleted customer backups retained?">Backup
-                  retention window</button>
-                <button class="preset-chip-btn" data-query="Does the contract automatically renew?">Renewal notice
-                  period</button>
+                  placeholder="Type any custom clause or risk question to debate...">
+                <button class="btn-dark" id="btn-run-courtroom-debate">
+                  <span class="btn-debate-icon">⚡</span> Run AI Debate
+                </button>
               </div>
             </div>
 
-            <!-- Courtroom Cases Stack -->
-            <div id="courtroom-cases-stack" style="display: flex; flex-direction: column; gap: 16px;">
-              <!-- Dynamically populated dual-agent clash cards -->
+            <!-- LIVE DEBATE ARENA STAGE (Active ONLY after user clicks a topic or runs query) -->
+            <div id="debate-live-arena-stage" class="debate-live-stage" style="display: none;">
+              <!-- Dynamically populated live arena with animated turns -->
+            </div>
+
+            <!-- SUGGESTED DEBATE TOPICS ONLY (No pre-debated claims or pre-rendered cards) -->
+            <div class="suggested-topics-panel" id="suggested-topics-panel">
+              <div class="suggested-topics-header">
+                <div>
+                  <h3 class="suggested-topics-title">Suggested Debate Topics</h3>
+                  <p class="suggested-topics-subtitle">
+                    Select any commercial risk topic below to initiate an adversarial cross-examination between OpenAI and Gemini.
+                  </p>
+                </div>
+                <span class="badge-ai-derived" style="font-size: 11px;">8 Core Exposure Probes</span>
+              </div>
+
+              <div class="suggested-topics-grid" id="suggested-topics-grid">
+                <!-- Topic 1 -->
+                <div class="suggested-topic-card" data-topic-id="term-convenience">
+                  <div class="topic-card-top">
+                    <span class="topic-icon">⚖️</span>
+                    <span class="topic-category-tag">Contract Termination</span>
+                  </div>
+                  <h4 class="topic-card-title">Termination for Convenience Parity</h4>
+                  <p class="topic-card-desc">
+                    Can the provider terminate for convenience upon 15 days' notice while locking customer in for 12 months with 60-day notice?
+                  </p>
+                  <div class="topic-card-action">
+                    <button class="btn-debate-topic" data-query="Can the provider terminate for convenience without reciprocal rights?">
+                      <span>⚡</span> Debate This Topic
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Topic 2 -->
+                <div class="suggested-topic-card" data-topic-id="liability-cap">
+                  <div class="topic-card-top">
+                    <span class="topic-icon">🛡️</span>
+                    <span class="topic-category-tag">Liability Exposure</span>
+                  </div>
+                  <h4 class="topic-card-title">Aggregate Liability Cap Limits</h4>
+                  <p class="topic-card-desc">
+                    Is provider aggregate liability capped at only 3 months of fees and does it exclude data breach losses or confidentiality?
+                  </p>
+                  <div class="topic-card-action">
+                    <button class="btn-debate-topic" data-query="What is the liability cap and does it cover data breach?">
+                      <span>⚡</span> Debate This Topic
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Topic 3 -->
+                <div class="suggested-topic-card" data-topic-id="backup-retention">
+                  <div class="topic-card-top">
+                    <span class="topic-icon">💾</span>
+                    <span class="topic-category-tag">Data Privacy &amp; GDPR</span>
+                  </div>
+                  <h4 class="topic-card-title">Customer Backup &amp; Data Retention</h4>
+                  <p class="topic-card-desc">
+                    Can provider retain backup copies of sensitive customer data for up to 180 days after termination or deletion request?
+                  </p>
+                  <div class="topic-card-action">
+                    <button class="btn-debate-topic" data-query="How long are deleted customer backups retained?">
+                      <span>⚡</span> Debate This Topic
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Topic 4 -->
+                <div class="suggested-topic-card" data-topic-id="auto-renewal">
+                  <div class="topic-card-top">
+                    <span class="topic-icon">🔄</span>
+                    <span class="topic-category-tag">Lock-In Traps</span>
+                  </div>
+                  <h4 class="topic-card-title">Automatic Renewal &amp; Non-Renewal Trap</h4>
+                  <p class="topic-card-desc">
+                    Does the contract automatically renew for 12 months unless written notice of non-renewal is delivered 90 days before expiry?
+                  </p>
+                  <div class="topic-card-action">
+                    <button class="btn-debate-topic" data-query="Does the contract automatically renew and what is the notice window?">
+                      <span>⚡</span> Debate This Topic
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Topic 5 -->
+                <div class="suggested-topic-card" data-topic-id="unilateral-amend">
+                  <div class="topic-card-top">
+                    <span class="topic-icon">📝</span>
+                    <span class="topic-category-tag">Operational Control</span>
+                  </div>
+                  <h4 class="topic-card-title">Unilateral Service &amp; SLA Modifications</h4>
+                  <p class="topic-card-desc">
+                    Can the provider modify SLAs, security practices, or core specifications unilaterally upon posting changes online?
+                  </p>
+                  <div class="topic-card-action">
+                    <button class="btn-debate-topic" data-query="Can the provider unilaterally change service terms or SLAs?">
+                      <span>⚡</span> Debate This Topic
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Topic 6 -->
+                <div class="suggested-topic-card" data-topic-id="non-solicit">
+                  <div class="topic-card-top">
+                    <span class="topic-icon">🤝</span>
+                    <span class="topic-category-tag">Restrictive Covenants</span>
+                  </div>
+                  <h4 class="topic-card-title">Personnel Non-Solicitation Penalties</h4>
+                  <p class="topic-card-desc">
+                    Are customer personnel restricted from hiring or contracting under asymmetric liquidated damage penalties?
+                  </p>
+                  <div class="topic-card-action">
+                    <button class="btn-debate-topic" data-query="Are there non-solicitation restrictions or hiring penalties?">
+                      <span>⚡</span> Debate This Topic
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Topic 7 -->
+                <div class="suggested-topic-card" data-topic-id="ai-training">
+                  <div class="topic-card-top">
+                    <span class="topic-icon">📊</span>
+                    <span class="topic-category-tag">Intellectual Property</span>
+                  </div>
+                  <h4 class="topic-card-title">Customer Data &amp; AI Training Rights</h4>
+                  <p class="topic-card-desc">
+                    Does the provider retain rights to ingest customer confidential inputs or telemetry to train proprietary AI models?
+                  </p>
+                  <div class="topic-card-action">
+                    <button class="btn-debate-topic" data-query="Does the provider have rights to use customer data for AI model training?">
+                      <span>⚡</span> Debate This Topic
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Topic 8 -->
+                <div class="suggested-topic-card" data-topic-id="sla-credits">
+                  <div class="topic-card-top">
+                    <span class="topic-icon">⚡</span>
+                    <span class="topic-category-tag">Remedies &amp; SLAs</span>
+                  </div>
+                  <h4 class="topic-card-title">SLA Outage Credits as Exclusive Remedy</h4>
+                  <p class="topic-card-desc">
+                    Are fractional fee credits designated as customer's sole and exclusive remedy for catastrophic cloud service downtime?
+                  </p>
+                  <div class="topic-card-action">
+                    <button class="btn-debate-topic" data-query="Are service level credits customer's exclusive remedy for downtime?">
+                      <span>⚡</span> Debate This Topic
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
 
           </div>

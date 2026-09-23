@@ -56,19 +56,14 @@ async def health_check():
 
 @app.get("/api/report/latest")
 async def get_latest_report():
-    """Retrieve the most recently generated user audit report JSON."""
+    """Retrieve the baseline audit report JSON."""
     report_dir = PROJECT_ROOT / "data" / "reports"
-    # Find user-uploaded audit reports (excluding sample_contract files)
-    user_reports = [
-        p for p in report_dir.glob("*_audit.json")
-        if not p.name.startswith("sample_contract")
-    ]
-    if user_reports:
-        user_reports.sort(key=lambda p: p.stat().st_mtime, reverse=True)
-        with open(user_reports[0], "r", encoding="utf-8") as f:
+    sample_files = list(report_dir.glob("sample_contract_audit.json"))
+    if sample_files:
+        with open(sample_files[0], "r", encoding="utf-8") as f:
             return json.load(f)
 
-    raise HTTPException(status_code=404, detail="No user contract uploaded yet.")
+    raise HTTPException(status_code=404, detail="No audit report found.")
 
 
 @app.get("/api/sample/demo")
