@@ -1,1089 +1,1508 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Enterprise Auditor 2.0 — Smart Contract Reviewer</title>
-  <meta name="description" content="AI contract reviewer that spots unfair clauses, checks missing protections, and gives ready-to-use counter proposals.">
+  <title>Enterprise Auditor 2.0 — Contract Intelligence & Risk Review</title>
+  <meta name="description"
+    content="Enterprise contract risk auditing, evidence verification, and negotiation intelligence platform.">
+
+  <!-- Modern Editorial & UI Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500;1,6..72,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-  <!-- Top Navigation Header -->
-  <header class="app-header">
-    <div class="header-inner">
-      
-      <!-- Brand Logo & Plain Subtitle -->
-      <div class="brand-group" id="btn-nav-home" role="button" tabindex="0" title="Go to Summary">
-        <div class="brand-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            <path d="M9 12l2 2 4-4"/>
-          </svg>
+  <!-- ================================================================ -->
+  <!-- EDITORIAL LANDING PAGE (#landing-view)                           -->
+  <!-- ================================================================ -->
+  <div id="landing-view" class="landing-page-wrapper">
+    <!-- Institutional Navigation Header -->
+    <header class="landing-header">
+      <div class="landing-header-inner">
+        <div class="landing-brand" id="landing-logo-btn" role="button" tabindex="0">
+          <div class="landing-seal">EA</div>
+          <div class="landing-brand-text">
+            <span class="landing-brand-title">Enterprise Auditor 2.0</span>
+            <span class="landing-brand-sub">Contract Risk Intelligence</span>
+          </div>
         </div>
-        <div class="brand-text">
-          <div class="brand-title">Contract Auditor <span class="badge-version">2.0</span></div>
-          <div class="brand-subtitle">Smart AI Contract Reviewer</div>
+
+        <nav class="landing-nav-links">
+          <a href="#landing-methodology" class="landing-nav-link">Methodology & Pipeline</a>
+          <a href="#landing-teaser" class="landing-nav-link">Evidence Verification</a>
+          <a href="#landing-samples" class="landing-nav-link">Flagged Risks</a>
+          <a href="#landing-trust" class="landing-nav-link">Security</a>
+        </nav>
+
+        <div class="landing-header-actions">
+          <button class="btn-outline-legal" id="btn-landing-nav-upload">Upload Agreement</button>
+          <button class="btn-dark" id="btn-landing-nav-demo">See Live Demo →</button>
         </div>
       </div>
+    </header>
 
-      <!-- Navigation Tabs (Crisp SVG Icons, Fluid & Scrollable) -->
-      <nav class="nav-tabs" role="tablist">
-        <button class="nav-tab active" id="tab-welcome" data-screen="screen-welcome" role="tab" aria-selected="true">
-          <span class="tab-icon">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="17 8 12 3 7 8"/>
-              <line x1="12" y1="3" x2="12" y2="15"/>
-            </svg>
-          </span>
-          <span class="tab-label">Upload</span>
-        </button>
-        <button class="nav-tab" id="tab-overview" data-screen="screen-overview" role="tab" aria-selected="false">
-          <span class="tab-icon">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="7" height="9"/>
-              <rect x="14" y="3" width="7" height="5"/>
-              <rect x="14" y="12" width="7" height="9"/>
-              <rect x="3" y="16" width="7" height="5"/>
-            </svg>
-          </span>
-          <span class="tab-label">Summary</span>
-        </button>
-        <button class="nav-tab" id="tab-findings" data-screen="screen-findings" role="tab" aria-selected="false">
-          <span class="tab-icon">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            </svg>
-          </span>
-          <span class="tab-label">Risks & Fixes</span>
-          <span class="tab-badge badge-red" id="nav-badge-risks">0</span>
-        </button>
-        <button class="nav-tab" id="tab-missing" data-screen="screen-missing" role="tab" aria-selected="false">
-          <span class="tab-icon">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-          </span>
-          <span class="tab-label">Missing Protections</span>
-          <span class="tab-badge badge-amber" id="nav-badge-missing">0</span>
-        </button>
-        <button class="nav-tab" id="tab-courtroom" data-screen="screen-courtroom" role="tab" aria-selected="false">
-          <span class="tab-icon">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M16 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
-              <path d="M2 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
-              <path d="M7 21h10"/>
-              <path d="M12 3v18"/>
-              <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>
-            </svg>
-          </span>
-          <span class="tab-label">AI Debate</span>
-          <span class="tab-pulse"></span>
-        </button>
-        <button class="nav-tab" id="tab-timeline" data-screen="screen-timeline" role="tab" aria-selected="false">
-          <span class="tab-icon">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/>
-              <line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-          </span>
-          <span class="tab-label">Key Dates</span>
-          <span class="tab-badge badge-neutral" id="nav-badge-timeline">0</span>
-        </button>
-        <button class="nav-tab" id="tab-scanner" data-screen="screen-scanner" role="tab" aria-selected="false">
-          <span class="tab-icon">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-            </svg>
-          </span>
-          <span class="tab-label">Signatures & Fees</span>
-        </button>
-        <button class="nav-tab" id="tab-graph" data-screen="screen-graph" role="tab" aria-selected="false">
-          <span class="tab-icon">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="6" cy="6" r="3"/>
-              <circle cx="18" cy="18" r="3"/>
-              <circle cx="18" cy="6" r="3"/>
-              <line x1="8.5" y1="7.5" x2="15.5" y2="16.5"/>
-              <line x1="8.5" y1="6" x2="15.5" y2="6"/>
-            </svg>
-          </span>
-          <span class="tab-label">Contract Map</span>
-        </button>
-      </nav>
+    <!-- Main Landing Content -->
+    <main class="landing-main-content">
 
-      <!-- Quick Actions -->
-      <div class="header-actions">
-        <button class="btn btn-outline" id="btn-header-new-audit" title="Upload a new contract">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          <span>New Audit</span>
-        </button>
-        <button class="btn btn-outline" id="btn-download-memo" title="Download Printable Audit Report">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          <span>Download Report</span>
-        </button>
-        <input type="file" id="file-upload-input" accept=".pdf,.txt,.docx,.md" style="display:none;">
-        <button class="btn btn-primary" id="btn-choose-file" title="Upload a new contract">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
-          <span id="btn-upload-text">Upload Contract</span>
-        </button>
-      </div>
+      <!-- Hero Section -->
+      <section class="landing-hero-section" id="landing-hero">
+        <!-- Ambient Animated Background -->
+        <div class="hero-ambient-bg" aria-hidden="true">
+          <div class="ambient-glow-orb orb-1"></div>
+          <div class="ambient-glow-orb orb-2"></div>
+          <div class="ambient-glow-orb orb-3"></div>
+          <div class="hero-grid-overlay"></div>
+        </div>
 
-    </div>
-  </header>
+        <div class="landing-hero-content">
+          <div class="landing-hero-badge">
+            <span class="hero-badge-dot"></span>
+            <span>Institutional Contract Risk Intelligence</span>
+          </div>
 
-  <!-- Contract Sub-Header Strip -->
-  <div class="contract-strip empty-state" id="contract-strip">
-    <div class="strip-inner">
-      <div class="strip-left">
-        <span class="strip-label">STATUS:</span>
-        <span class="strip-filename" id="doc-filename">No contract loaded</span>
-        <span class="strip-pill" id="doc-pages-pill" style="display:none;">0 Pages</span>
-        <span class="strip-pill pill-parties" id="doc-parties-pill" style="display:none;">Waiting for document</span>
-      </div>
-      <div class="strip-right" id="strip-right-status">
-        <span class="system-status"><span class="status-dot"></span> Ready for Document Upload</span>
-      </div>
-    </div>
-  </div>
+          <h1 class="landing-hero-headline">
+            Auditing Complex Commercial Contracts with Verifiable Evidence.
+          </h1>
 
-  <!-- Main Multi-View Screen Container -->
-  <main class="app-main">
+          <p class="landing-hero-subhead">
+            Dual-model cross-examination corroborates every high-exposure provision against verbatim PDF coordinates.
+            Instant clarity on unilateral liabilities, unlimited indemnification, and hidden renewal traps before you
+            sign.
+          </p>
 
-    <!-- ============================================================== -->
-    <!-- 0. 📤 WELCOME & UPLOAD SCREEN (DEFAULT CLEAN SCREEN)           -->
-    <!-- ============================================================== -->
-    <section class="screen active" id="screen-welcome">
-      <div class="welcome-container">
-        <div class="welcome-hero">
-          <h1 class="welcome-title">Enterprise Contract Risk & Compliance Audit</h1>
-          <p class="welcome-subtitle">
-            Upload your agreement to spot unhedged liabilities, unilateral termination traps, and missing enterprise protections with dual-agent verification.
+          <!-- Single Central Primary CTA -->
+          <div class="landing-hero-cta-group">
+            <button class="btn-dark btn-hero-upload" id="btn-hero-upload-doc">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <span>Upload Contract (PDF, DOCX)</span>
+            </button>
+          </div>
+
+          <!-- Preloaded Sample Audit Launch Line Directly Below -->
+          <div class="landing-sample-indicator" id="btn-hero-sample-pill" role="button" tabindex="0"
+            title="Click to open preloaded sample audit">
+            <span class="sample-dot"></span>
+            <span>Preloaded Sample Audit:</span>
+            <strong>Cloud Services Master Agreement</strong>
+            <span class="sample-tag">42 Pages</span>
+            <span class="sample-tag">24 Risk Findings</span>
+            <span class="sample-tag">Safety Score: 72/100</span>
+            <span class="sample-arrow">Launch Demo →</span>
+          </div>
+
+          <!-- Subtle Scroll Down Prompt at Bottom of Hero Fold -->
+          <div class="hero-scroll-hint-wrap">
+            <a href="#landing-methodology" class="hero-scroll-prompt">
+              <span>Scroll to explore backend methodology & architecture</span>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- SECTION 1 (ON SCROLL): DETAILED BACKEND METHODOLOGY & FLOW   -->
+      <!-- ============================================================ -->
+      <section class="landing-features-section" id="landing-methodology">
+        <div class="section-head-centered">
+          <div class="section-eyebrow">AUTONOMOUS AUDITING METHODOLOGY</div>
+          <h2 class="section-title">How the Backend Engine Evaluates Every Clause</h2>
+          <p class="section-subtitle">
+            A 6-stage deterministic pipeline combining dense vector retrieval, dual-model adversarial cross-examination,
+            and verbatim PDF coordinate citation.
           </p>
         </div>
 
-        <!-- Interactive Drag & Drop Zone -->
-        <div class="drop-zone" id="drop-zone" role="button" tabindex="0" aria-label="Drop contract PDF here or click to browse">
-          <div class="drop-icon-wrap">
-            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="17 8 12 3 7 8"/>
-              <line x1="12" y1="3" x2="12" y2="15"/>
-            </svg>
-          </div>
-          <div class="drop-headline">Drag & drop your contract PDF here</div>
-          <div class="drop-subtext">or click anywhere in this area to browse files from your computer</div>
-          <div class="drop-actions">
-            <button type="button" class="btn btn-primary" id="btn-browse-trigger">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-              </svg>
-              <span>Browse File</span>
-            </button>
-          </div>
-          <div class="drop-format-pill">PDF, TXT, DOCX & MD formats • Secure processing • Up to 50MB</div>
-        </div>
-
-        <!-- Selected File Preview Card (Hidden until file selected) -->
-        <div class="file-preview-card" id="file-preview-card" style="display: none;">
-          <div class="file-preview-left">
-            <div class="file-preview-icon">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-              </svg>
-            </div>
-            <div class="file-preview-details">
-              <span class="file-preview-name" id="preview-filename">contract.pdf</span>
-              <span class="file-preview-size" id="preview-filesize">0 KB</span>
-            </div>
-          </div>
-          <div class="file-preview-actions">
-            <button type="button" class="btn btn-ghost btn-sm" id="btn-cancel-file" title="Choose another file">Cancel</button>
-            <button type="button" class="btn btn-primary" id="btn-start-audit">
-              <span>Analyze Contract</span>
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="5" y1="12" x2="19" y2="12"/>
-                <polyline points="12 5 19 12 12 19"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <!-- Live Audit Progress Card (Hidden until audit starts) -->
-        <div class="upload-progress-card" id="upload-progress-card" style="display: none;">
-          <div class="progress-header">
-            <div class="progress-title">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;">
-                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
-              </svg>
-              <span id="audit-progress-stage-title">Ingesting PDF & Extracting Text...</span>
-            </div>
-            <span class="progress-status-badge" id="audit-progress-badge">Dual AI Agents Active</span>
-          </div>
-          <div class="progress-bar-wrap">
-            <div class="progress-bar-fill"></div>
-          </div>
-          <div class="progress-steps-list">
-            <div class="progress-step-item active" id="prog-step-1">1. PDF & Tables</div>
-            <div class="progress-step-item" id="prog-step-2">2. Hybrid Index</div>
-            <div class="progress-step-item" id="prog-step-3">3. AI Debate</div>
-            <div class="progress-step-item" id="prog-step-4">4. 100-Pt Score</div>
-          </div>
-        </div>
-
-        <!-- Demo Contract Option -->
-        <div class="demo-bar">
-          <span>Need a sample agreement to test?</span>
-          <button type="button" class="btn-link" id="btn-try-demo">Load Sample Cloud MSA Contract</button>
-        </div>
-
-        <!-- 3 Simple How-It-Works Cards -->
-        <div class="welcome-features-grid">
-          <div class="welcome-feature-card">
-            <div class="feature-card-icon" style="background: var(--crimson-bg); color: var(--crimson);">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              </svg>
-            </div>
-            <div class="feature-card-title">Deal-Breakers & Risk Triage</div>
-            <div class="feature-card-desc">Automatically classifies findings into Deal-Breakers, Watch Out terms, and Protections with executive impact summaries.</div>
-          </div>
-          <div class="welcome-feature-card">
-            <div class="feature-card-icon" style="background: var(--indigo-bg); color: var(--indigo);">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M16 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
-                <path d="M2 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
-                <path d="M7 21h10"/>
-                <path d="M12 3v18"/>
-                <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>
-              </svg>
-            </div>
-            <div class="feature-card-title">Adversarial Courtroom Debate</div>
-            <div class="feature-card-desc">Risk Prosecutor flags exposure while an independent Skeptic verifier validates against verbatim cited text and pages.</div>
-          </div>
-          <div class="welcome-feature-card">
-            <div class="feature-card-icon" style="background: var(--emerald-bg); color: var(--emerald);">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-              </svg>
-            </div>
-            <div class="feature-card-title">Actionable Redline Language</div>
-            <div class="feature-card-desc">Receive pre-drafted protective counter-clauses and negotiation arguments ready for immediate clipboard copy.</div>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ============================================================== -->
-    <!-- 1. 📊 SUMMARY SCREEN (CALM, CLEAN & TRANSPARENT)               -->
-    <!-- ============================================================== -->
-    <section class="screen" id="screen-overview">
-      <div class="view-container">
-
-        <!-- Quick Actions Toolbar -->
-        <div class="summary-quick-actions">
-          <span class="quick-actions-label">Actions:</span>
-          <button type="button" class="btn btn-primary btn-sm" id="btn-qa-upload">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="17 8 12 3 7 8"/>
-              <line x1="12" y1="3" x2="12" y2="15"/>
-            </svg>
-            <span>Upload Another Contract</span>
-          </button>
-          <button type="button" class="btn btn-outline btn-sm" id="btn-qa-memo">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            <span>Download Audit Memo</span>
-          </button>
-          <button type="button" class="btn btn-outline btn-sm" id="btn-qa-json">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="16 18 22 12 16 6"/>
-              <polyline points="8 6 2 12 8 18"/>
-            </svg>
-            <span>Export Full JSON</span>
-          </button>
-          <button type="button" class="btn btn-outline btn-sm" id="btn-qa-ask">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M16 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
-              <path d="M2 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
-              <path d="M7 21h10"/>
-              <path d="M12 3v18"/>
-            </svg>
-            <span>Cross-Examine Agreement</span>
-          </button>
-        </div>
-
-        <!-- ============ VERDICT + SCORE GAUGE ROW ============ -->
-        <div class="overview-verdict-row">
-
-          <!-- Left: Score Gauge -->
-          <div class="verdict-gauge-card">
-            <div class="score-gauge-wrap">
-              <svg class="score-svg" viewBox="0 0 140 140">
-                <circle class="score-bg" cx="70" cy="70" r="54"></circle>
-                <circle class="score-fill" id="score-ring-fill" cx="70" cy="70" r="54"></circle>
-              </svg>
-              <div class="score-center">
-                <span class="score-val" id="score-number">—</span>
-                <span class="score-max">out of 100</span>
-              </div>
-            </div>
-            <div class="gauge-verdict-label" id="gauge-verdict-label">Waiting for analysis</div>
-          </div>
-
-          <!-- Center: Verdict + Headline -->
-          <div class="verdict-main-card">
-            <div class="verdict-badge-row">
-              <span class="verdict-badge" id="verdict-badge">PENDING</span>
-              <span class="verdict-action-hint" id="verdict-action-hint"></span>
-            </div>
-            <h1 class="verdict-headline" id="verdict-headline">Upload a contract to see your audit results</h1>
-            <p class="verdict-summary-text" id="verdict-summary-text">
-              Your contract will be scored based on deal-breaker clauses, warning-level terms, missing standard protections, and verified contract language.
+        <!-- 6-Stage Pipeline Flow Grid -->
+        <div class="pipeline-stages-grid">
+          <div class="pipeline-stage-card hover-lift-card">
+            <div class="stage-step-num">01</div>
+            <h4 class="stage-step-title">Ingestion & Coordinate Parsing</h4>
+            <p class="stage-step-desc">
+              Extracts text, page numbers, line ranges, and bounding coordinates from PDF, DOCX, and text agreements to
+              anchor citations to immutable source coordinates.
             </p>
-            <div class="verdict-cta-row">
-              <button class="btn btn-primary btn-lg" id="btn-hero-deep-dive">
-                <span>View Risks & Fixes</span>
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="5" y1="12" x2="19" y2="12"/>
-                  <polyline points="12 5 19 12 12 19"/>
-                </svg>
-              </button>
-              <button class="btn btn-outline btn-sm" id="btn-open-asymmetry-modal-top">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M16 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
-                  <path d="M2 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
-                  <path d="M7 21h10"/>
-                  <path d="M12 3v18"/>
-                </svg>
-                <span>Inspect Clause Asymmetry</span>
-              </button>
-            </div>
+            <div class="stage-tech-tag">PDFMiner & Character Coordinates</div>
           </div>
 
-          <!-- Right: Findings Donut Chart -->
-          <div class="donut-chart-card">
-            <div class="donut-chart-title">Findings Breakdown</div>
-            <canvas id="risk-donut-canvas" width="180" height="180"></canvas>
-            <div class="donut-legend" id="donut-legend"></div>
+          <div class="pipeline-stage-card hover-lift-card">
+            <div class="stage-step-num">02</div>
+            <h4 class="stage-step-title">Hybrid Semantic Indexing</h4>
+            <p class="stage-step-desc">
+              Couples dense vector embeddings (Cosine Similarity) with lexical BM25 retrieval to capture semantic intent
+              across non-standard legal wording.
+            </p>
+            <div class="stage-tech-tag">BM25 + Dense Vector Index</div>
+          </div>
+
+          <div class="pipeline-stage-card hover-lift-card">
+            <div class="stage-step-num">03</div>
+            <h4 class="stage-step-title">Deterministic Safety Scoring</h4>
+            <p class="stage-step-desc">
+              A 100-point institutional baseline with strict deduction taxonomy: Deal-Breakers (−15pts), Watch-Outs
+              (−5pts), and Missing Institutional Baselines (−4pts).
+            </p>
+            <div class="stage-tech-tag">Fortune 500 Baseline Calibration</div>
+          </div>
+
+          <div class="pipeline-stage-card hover-lift-card">
+            <div class="stage-step-num">04</div>
+            <h4 class="stage-step-title">Adversarial Dual-Model Debate</h4>
+            <p class="stage-step-desc">
+              Lead Auditor Review proposes findings, while an independent Verification Skeptic model rigorously
+              cross-examines evidence against PDF text to eliminate false positives.
+            </p>
+            <div class="stage-tech-tag">Two-Agent Consensus Engine</div>
+          </div>
+
+          <div class="pipeline-stage-card hover-lift-card">
+            <div class="stage-step-num">05</div>
+            <h4 class="stage-step-title">Knowledge Graph Simulation</h4>
+            <p class="stage-step-desc">
+              Force-directed physics simulation mapping relationships between contracting parties, liabilities,
+              indemnities, and notice window timelines.
+            </p>
+            <div class="stage-tech-tag">High-DPI Entity Graph</div>
+          </div>
+
+          <div class="pipeline-stage-card hover-lift-card">
+            <div class="stage-step-num">06</div>
+            <h4 class="stage-step-title">Automated Redline Counter-Proposals</h4>
+            <p class="stage-step-desc">
+              Generates precision redline edits and institutional substitution clauses ready for counsel copy-pasting
+              directly into contracts.
+            </p>
+            <div class="stage-tech-tag">Pre-Vetted Legal Redlines</div>
           </div>
         </div>
 
-        <!-- ============ COLLAPSIBLE SCORE BREAKDOWN ============ -->
-        <div class="dash-accordion" id="score-breakdown-accordion">
-          <button class="dash-accordion-toggle" id="toggle-score-breakdown" type="button">
-            <span class="accordion-toggle-icon">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="20" x2="18" y2="10"/>
-                <line x1="12" y1="20" x2="12" y2="4"/>
-                <line x1="6" y1="20" x2="6" y2="14"/>
+        <!-- 3 Core Pillars -->
+        <div class="methodology-grid" style="margin-top: 36px;">
+          <!-- Pillar 1 -->
+          <div class="methodology-card hover-lift-card" data-card="pillar1">
+            <div class="card-icon-wrap">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
-            </span>
-            <span class="accordion-toggle-text">Score Breakdown — How Your Score Was Calculated</span>
-            <span class="accordion-chevron">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6 9 12 15 18 9"/>
+            </div>
+            <h3 class="card-title">Dual-Model Corroboration</h3>
+            <p class="card-desc">
+              Lead Auditor Review and Independent Source Verification cross-examine every clause against verbatim PDF
+              coordinates to eliminate citation errors and unverified claims.
+            </p>
+            <div class="card-hover-detail">
+              <span>Pipeline: Semantic Chunking → Hybrid Indexing → Cross-Model Consensus</span>
+            </div>
+          </div>
+
+          <!-- Pillar 2 -->
+          <div class="methodology-card hover-lift-card" data-card="pillar2">
+            <div class="card-icon-wrap">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
               </svg>
-            </span>
-          </button>
-          <div class="dash-accordion-body" id="score-breakdown-body">
-            <div class="score-breakdown-row">
-              <div class="waterfall-card">
-                <div class="waterfall-card-title">Score Derivation Waterfall</div>
-                <div class="waterfall-bar-wrap">
-                  <div class="waterfall-bar" id="waterfall-bar"></div>
+            </div>
+            <h3 class="card-title">Deterministic Safety Scoring</h3>
+            <p class="card-desc">
+              A 100-point institutional baseline with strict deduction taxonomy: Deal-Breakers (−15pts), Watch-Outs
+              (−5pts), and Missing Institutional Baselines (−4pts).
+            </p>
+            <div class="card-hover-detail">
+              <span>Standard: Calibrated to Fortune 500 procurement baselines</span>
+            </div>
+          </div>
+
+          <!-- Pillar 3 -->
+          <div class="methodology-card hover-lift-card" data-card="pillar3">
+            <div class="card-icon-wrap">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="6" cy="6" r="3" />
+                <circle cx="18" cy="18" r="3" />
+                <circle cx="18" cy="6" r="3" />
+                <line x1="8.5" y1="7.5" x2="15.5" y2="16.5" />
+              </svg>
+            </div>
+            <h3 class="card-title">Contract Knowledge Graph</h3>
+            <p class="card-desc">
+              Force-directed physics simulation mapping relationships between parties, governing entities, indemnities,
+              obligations, and cross-clause liabilities.
+            </p>
+            <div class="card-hover-detail">
+              <span>Interactive: High-DPI physics canvas with node drag and deep inspector</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- SECTION 2: EVIDENCE VERIFICATION INTERACTIVE TEASER         -->
+      <!-- ============================================================ -->
+      <section class="landing-teaser-section" id="landing-teaser">
+        <div class="teaser-card">
+          <div class="teaser-card-header">
+            <div class="teaser-header-left">
+              <span class="pill-severity pill-critical">DEAL-BREAKER DETECTED</span>
+              <span class="clause-ref-code">Section 14.2 • Page 18, Paragraph 3</span>
+            </div>
+            <div class="teaser-header-right">
+              <span class="badge-ai-verified hover-popover-trigger"
+                title="Corroborated across PDF coordinates with 94% lexical and semantic match.">
+                ✓ Corroborated 94%
+              </span>
+            </div>
+          </div>
+
+          <div class="teaser-body-split">
+            <!-- Verbatim Source Clause with Hover Pins -->
+            <div class="teaser-clause-box">
+              <div class="teaser-box-label">Verbatim Contract Clause (PDF Source)</div>
+              <p class="teaser-clause-text">
+                "14.2 Termination for Convenience: Provider may terminate this Agreement or any applicable Order Form
+                <span class="clause-high-exposure hover-detail-trigger" data-detail="exposure-asymmetry">at any time
+                  upon thirty (30) days' prior written notice</span>
+                to Customer without cause and
+                <span class="clause-high-exposure hover-detail-trigger" data-detail="exposure-refund">without liability
+                  or refund of any prepaid fees</span>.
+                Customer shall have no reciprocal right to terminate for convenience."
+              </p>
+
+              <!-- Floating Detail Popover for Clause (Revealed on hover) -->
+              <div class="clause-hover-tooltip" id="clause-hover-tooltip">
+                <div class="tooltip-header">
+                  <span class="tooltip-badge">HIGH EXPOSURE RATIONALE</span>
                 </div>
-                <div class="waterfall-labels" id="waterfall-labels"></div>
+                <div class="tooltip-body" id="clause-tooltip-body">
+                  Hover over the highlighted phrases above to inspect institutional risk exposure rationale.
+                </div>
               </div>
-              <div class="impact-card">
-                <div class="impact-card-title">Score Impact by Category</div>
-                <div class="impact-bars-list" id="impact-bars-list"></div>
+
+              <div class="teaser-interactive-hint">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <span>Hover over highlighted terms to view legal exposure analysis</span>
+              </div>
+            </div>
+
+            <!-- Counter-Proposal & Resolution Card -->
+            <div class="teaser-solution-box">
+              <div class="teaser-box-label">Suggested Institutional Counter-Proposal</div>
+              <p class="teaser-solution-text">
+                "Either party may terminate this Agreement upon ninety (90) days' prior written notice. In the event of
+                provider termination without cause, Provider shall immediately issue a pro-rata refund of any prepaid,
+                unamortized subscription fees within thirty (30) days."
+              </p>
+              <div class="teaser-action-bar">
+                <button class="btn-dark btn-sm" id="btn-teaser-view-full">
+                  Examine Finding in Audit Workspace →
+                </button>
               </div>
             </div>
           </div>
         </div>
+      </section>
 
-        <!-- ============ 6 DASHBOARD FEATURE CARDS ============ -->
-        <div class="dash-section-label">Audit Modules</div>
 
-        <div class="dash-features-grid">
 
-          <!-- 1. Risks & Fixes -->
-          <div class="dash-feature-card dash-card-risks" id="dash-card-risks" role="button" tabindex="0" data-nav-screen="screen-findings" data-nav-tab="tab-findings">
-            <div class="dash-card-icon-wrap" style="--accent: var(--crimson); --accent-bg: var(--crimson-bg);">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              </svg>
-            </div>
-            <div class="dash-card-body">
-              <div class="dash-card-title">Risks & Fixes</div>
-              <div class="dash-card-stat" id="dash-stat-risks">Review critical exposures</div>
-            </div>
-            <div class="dash-card-arrow">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="9 18 15 12 9 6"/>
-              </svg>
-            </div>
-          </div>
-
-          <!-- 2. Missing Protections -->
-          <div class="dash-feature-card dash-card-missing" id="dash-card-missing" role="button" tabindex="0" data-nav-screen="screen-missing" data-nav-tab="tab-missing">
-            <div class="dash-card-icon-wrap" style="--accent: var(--amber); --accent-bg: var(--amber-bg);">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="12"/>
-                <line x1="12" y1="16" x2="12.01" y2="16"/>
-              </svg>
-            </div>
-            <div class="dash-card-body">
-              <div class="dash-card-title">Missing Protections</div>
-              <div class="dash-card-stat" id="dash-stat-missing">Inspect clause gaps</div>
-            </div>
-            <div class="dash-card-arrow">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="9 18 15 12 9 6"/>
-              </svg>
-            </div>
-          </div>
-
-          <!-- 3. AI Debate Arena -->
-          <div class="dash-feature-card dash-card-debate" id="dash-card-debate" role="button" tabindex="0" data-nav-screen="screen-courtroom" data-nav-tab="tab-courtroom">
-            <div class="dash-card-icon-wrap" style="--accent: var(--indigo); --accent-bg: var(--indigo-bg);">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M16 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
-                <path d="M2 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
-                <path d="M7 21h10"/>
-                <path d="M12 3v18"/>
-                <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>
-              </svg>
-            </div>
-            <div class="dash-card-body">
-              <div class="dash-card-title">AI Debate Arena</div>
-              <div class="dash-card-stat" id="dash-stat-debate">Dual-agent cross examination</div>
-            </div>
-            <div class="dash-card-arrow">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="9 18 15 12 9 6"/>
-              </svg>
-            </div>
-          </div>
-
-          <!-- 4. Key Dates -->
-          <div class="dash-feature-card dash-card-dates" id="dash-card-dates" role="button" tabindex="0" data-nav-screen="screen-timeline" data-nav-tab="tab-timeline">
-            <div class="dash-card-icon-wrap" style="--accent: var(--cyan); --accent-bg: var(--cyan-bg);">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                <line x1="16" y1="2" x2="16" y2="6"/>
-                <line x1="8" y1="2" x2="8" y2="6"/>
-                <line x1="3" y1="10" x2="21" y2="10"/>
-              </svg>
-            </div>
-            <div class="dash-card-body">
-              <div class="dash-card-title">Key Dates & Deadlines</div>
-              <div class="dash-card-stat" id="dash-stat-dates">Notice & renewal timelines</div>
-            </div>
-            <div class="dash-card-arrow">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="9 18 15 12 9 6"/>
-              </svg>
-            </div>
-          </div>
-
-          <!-- 5. Signatures & Fees -->
-          <div class="dash-feature-card dash-card-scanner" id="dash-card-scanner" role="button" tabindex="0" data-nav-screen="screen-scanner" data-nav-tab="tab-scanner">
-            <div class="dash-card-icon-wrap" style="--accent: var(--purple); --accent-bg: var(--purple-bg);">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-              </svg>
-            </div>
-            <div class="dash-card-body">
-              <div class="dash-card-title">Signatures & Fees</div>
-              <div class="dash-card-stat" id="dash-stat-scanner">Signatory & fee tables</div>
-            </div>
-            <div class="dash-card-arrow">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="9 18 15 12 9 6"/>
-              </svg>
-            </div>
-          </div>
-
-          <!-- 6. Contract Map -->
-          <div class="dash-feature-card dash-card-graph" id="dash-card-graph" role="button" tabindex="0" data-nav-screen="screen-graph" data-nav-tab="tab-graph">
-            <div class="dash-card-icon-wrap" style="--accent: var(--emerald); --accent-bg: var(--emerald-bg);">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="6" cy="6" r="3"/>
-                <circle cx="18" cy="18" r="3"/>
-                <circle cx="18" cy="6" r="3"/>
-                <line x1="8.5" y1="7.5" x2="15.5" y2="16.5"/>
-                <line x1="8.5" y1="6" x2="15.5" y2="6"/>
-              </svg>
-            </div>
-            <div class="dash-card-body">
-              <div class="dash-card-title">Contract Map</div>
-              <div class="dash-card-stat" id="dash-stat-graph">Interactive dependency graph</div>
-            </div>
-            <div class="dash-card-arrow">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="9 18 15 12 9 6"/>
-              </svg>
-            </div>
-          </div>
-
+      <!-- Live Teaser: Top Sample Findings -->
+      <section class="landing-samples-section" id="landing-samples">
+        <div class="section-head-centered">
+          <div class="section-eyebrow">PRELOADED AUDIT TEASER</div>
+          <h2 class="section-title">Key Risk Exposures Identified in Demo Contract</h2>
+          <p class="section-subtitle">
+            Click any flagged exposure below to immediately jump into that finding within the interactive audit console.
+          </p>
         </div>
 
-        <!-- Fairness Quick Action (kept for modal trigger) -->
-        <div class="dash-fairness-cta">
-          <button class="btn btn-outline btn-sm" id="btn-open-asymmetry-modal">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M16 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
-              <path d="M2 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
-              <path d="M7 21h10"/>
-              <path d="M12 3v18"/>
-            </svg>
-            <span>Compare Provider vs Customer Rights</span>
-          </button>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ============================================================== -->
-    <!-- 2. RISKS & FIXES SCREEN (DETAILED FINDINGS)                     -->
-    <!-- ============================================================== -->
-    <section class="screen" id="screen-findings">
-      <div class="view-container">
-        
-        <div class="view-header">
-          <div class="view-header-left">
-            <h1>Risks Identified & Recommended Redlines</h1>
-            <p>Direct verbatim contract citations accompanied by actionable counter-proposals.</p>
-          </div>
-          <div class="view-header-right">
-            <!-- Filter Pills -->
-            <div class="filter-pills-group">
-              <button class="filter-pill active" data-filter="all">All Items</button>
-              <button class="filter-pill pill-red" data-filter="deal_breaker">Deal-Breakers</button>
-              <button class="filter-pill pill-yellow" data-filter="watch_out">Watch Out</button>
-              <button class="filter-pill pill-green" data-filter="protection">Protective Clauses</button>
+        <div class="landing-teaser-findings-grid">
+          <!-- Finding 1 -->
+          <div class="landing-finding-item hover-lift-card" data-finding-type="deal_breaker" data-finding-id="db1">
+            <div class="finding-badge-row">
+              <span class="pill-severity pill-critical">DEAL-BREAKER</span>
+              <span class="clause-ref-code">Section 14.2</span>
             </div>
+            <h4 class="landing-finding-title">Asymmetric Termination Rights</h4>
+            <p class="landing-finding-desc">
+              Provider reserves the right to terminate at will on 30 days' notice with zero refund, leaving customer
+              without service continuity or fee recourse.
+            </p>
+            <button class="btn-link-action btn-jump-finding" data-target-filter="deal_breaker">
+              Inspect in Live Demo →
+            </button>
           </div>
-        </div>
 
-        <!-- Clean Findings List Container -->
-        <div class="findings-clean-list" id="findings-clean-list">
-          <!-- Dynamically populated via JS -->
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ============================================================== -->
-    <!-- 3. MISSING CLAUSES SCREEN (GAP ANALYSIS)                        -->
-    <!-- ============================================================== -->
-    <section class="screen" id="screen-missing">
-      <div class="view-container">
-        
-        <div class="view-header">
-          <div class="view-header-left">
-            <h1>Standard Protection Gap Analysis</h1>
-            <p>Standard enterprise agreements include these essential safeguards. Gaps shift financial and legal liability to you.</p>
+          <!-- Finding 2 -->
+          <div class="landing-finding-item hover-lift-card" data-finding-type="deal_breaker" data-finding-id="db2">
+            <div class="finding-badge-row">
+              <span class="pill-severity pill-critical">DEAL-BREAKER</span>
+              <span class="clause-ref-code">Section 11.1</span>
+            </div>
+            <h4 class="landing-finding-title">Disproportionate Liability Cap</h4>
+            <p class="landing-finding-desc">
+              Total provider liability is capped at fees paid in the prior 1 month, creating extreme under-insurance for
+              data breaches or confidentiality violations.
+            </p>
+            <button class="btn-link-action btn-jump-finding" data-target-filter="deal_breaker">
+              Inspect in Live Demo →
+            </button>
           </div>
-          <div class="view-header-right">
-            <button class="btn btn-outline" id="btn-download-missing-clauses">
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              <span>Download Gap Summary</span>
+
+          <!-- Finding 3 -->
+          <div class="landing-finding-item hover-lift-card" data-finding-type="watch_out" data-finding-id="wo1">
+            <div class="finding-badge-row">
+              <span class="pill-severity pill-amber">WATCH-OUT</span>
+              <span class="clause-ref-code">Section 3.2</span>
+            </div>
+            <h4 class="landing-finding-title">Automatic 24-Month Renewal Window</h4>
+            <p class="landing-finding-desc">
+              Agreement automatically renews for 2-year terms unless cancelled exactly 90 days before expiry, with
+              annual 8% automatic price escalators.
+            </p>
+            <button class="btn-link-action btn-jump-finding" data-target-filter="watch_out">
+              Inspect in Live Demo →
             </button>
           </div>
         </div>
+      </section>
 
-        <!-- Missing Clauses Table Card -->
-        <div class="clean-table-card">
-          <div class="table-responsive">
-            <table class="data-table" id="table-missing-clauses">
-              <thead>
-                <tr>
-                  <th style="width: 120px;">Status</th>
-                  <th>Standard Protection Needed</th>
-                  <th style="width: 110px;">Risk Level</th>
-                  <th>Why You Need This</th>
-                  <th style="width: 150px;">Suggested Fix</th>
-                </tr>
-              </thead>
-              <tbody id="tbody-missing-clauses">
-                <!-- Dynamically populated via JS -->
-              </tbody>
-            </table>
+      <!-- Trust & Security Strip -->
+      <section class="landing-trust-section" id="landing-trust">
+        <div class="trust-grid">
+          <div class="trust-item">
+            <div class="trust-title">Verbatim Citation Proof</div>
+            <div class="trust-desc">Every flagged claim links directly to the exact page, line, and bounding box
+              coordinates in the source PDF.</div>
+          </div>
+          <div class="trust-item">
+            <div class="trust-title">Private & Air-Gapped Ready</div>
+            <div class="trust-desc">Architecture designed for isolated VPC deployment. No customer documents are
+              retained or used to train third-party models.</div>
+          </div>
+          <div class="trust-item">
+            <div class="trust-title">Dual-Agent Consensus</div>
+            <div class="trust-desc">Independent auditor and verification models cross-examine each other before
+              producing executive findings.</div>
           </div>
         </div>
+      </section>
+    </main>
 
+    <!-- Editorial Footer -->
+    <footer class="landing-footer">
+      <div class="landing-footer-inner">
+        <div>
+          <div class="landing-footer-brand">Enterprise Auditor 2.0</div>
+          <p class="landing-footer-sub">Commercial contract risk auditing and negotiation intelligence console.</p>
+        </div>
+        <div class="landing-footer-links">
+          <button class="btn-dark btn-sm" id="btn-footer-demo">Launch Interactive Demo →</button>
+        </div>
       </div>
-    </section>
+    </footer>
+  </div>
 
-    <!-- ============================================================== -->
-    <!-- 4. AI DEBATE SCREEN (ADVERSARIAL COURTROOM ARENA)               -->
-    <!-- ============================================================== -->
-    <section class="screen" id="screen-courtroom">
-      <div class="view-container">
+  <!-- ================================================================ -->
+  <!-- AUDITOR WORKSPACE APP SHELL (Unified Minimal Top-Nav)            -->
+  <!-- ================================================================ -->
+  <div class="workspace-layout" id="app-shell" style="display: none;">
 
-        <!-- ======= STAGE 1: CLAIM SELECTION (Default View) ======= -->
-        <div class="debate-stage" id="debate-stage-claims">
-
-          <!-- Minimal Header -->
-          <div class="debate-stage-header">
-            <div class="debate-stage-header-left">
-              <h1>Adversarial Multi-Agent Debate Arena</h1>
-              <p>Select any contract claim below or input your own query. Two opposing AI models cross-examine verbatim contract language.</p>
-            </div>
-            <div class="debate-stage-header-right">
-              <div class="debate-agents-mini">
-                <span class="agent-mini-pill agent-mini-prosecutor">GPT-4o Prosecutor</span>
-                <span class="agent-mini-vs">VS</span>
-                <span class="agent-mini-pill agent-mini-skeptic">Gemini 2.5 Skeptic</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Custom Query Box -->
-          <div class="debate-custom-query-card">
-            <div class="custom-query-label">Cross-Examine Specific Clause or Question</div>
-            <div class="custom-query-input-row">
-              <span class="custom-query-icon">
-                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="11" cy="11" r="8"/>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-              </span>
-              <input type="text" id="courtroom-query-input" placeholder="Ask any question (e.g. Can provider cancel without cause, or use customer logo?)...">
-              <button class="btn btn-primary" id="btn-ask-courtroom">
-                <span>Start Debate</span>
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="5" y1="12" x2="19" y2="12"/>
-                  <polyline points="12 5 19 12 12 19"/>
-                </svg>
-              </button>
-            </div>
-            <div class="chips-row">
-              <span class="chips-label">Quick probe cases:</span>
-              <button class="chip" data-query="Can the Provider terminate the agreement without cause?">Termination Trap</button>
-              <button class="chip" data-query="What is the aggregate liability cap and how many months of fees does it cover?">Liability Cap</button>
-              <button class="chip" data-query="Does the contract automatically renew and what notice is required?">Auto-Renewal Window</button>
-              <button class="chip" data-query="Can the Provider use Customer's name or logo for marketing without consent?">Brand & Logo Usage</button>
-            </div>
-          </div>
-
-          <!-- Claims List -->
-          <div class="debate-claims-list-header">
-            <span class="claims-list-label">Contract Claims on Docket</span>
-            <span class="claims-list-count" id="claims-list-count">0 claims</span>
-          </div>
-          <div class="debate-claims-list" id="debate-claims-list">
-            <!-- Dynamically populated via JS -->
+    <!-- Unified Minimal Top Navigation Bar -->
+    <header class="workspace-top-nav">
+      <div class="workspace-nav-inner">
+        <!-- Brand Wordmark -->
+        <div class="workspace-brand" id="btn-workspace-home" role="button" tabindex="0" title="Return to Landing Page">
+          <div class="landing-seal">EA</div>
+          <div class="workspace-brand-text">
+            <span class="workspace-title">Enterprise Auditor</span>
+            <span class="workspace-sub">Contract Intelligence</span>
           </div>
         </div>
 
-        <!-- ======= STAGE 2: SINGLE DEBATE VIEW (Hidden) ======= -->
-        <div class="debate-stage" id="debate-stage-single" style="display: none;">
+        <!-- Unified Screen Navigation Tabs -->
+        <nav class="workspace-tabs-list" role="tablist">
+          <button class="workspace-tab-btn active" id="tab-overview" data-screen="screen-overview" role="tab"
+            aria-selected="true" title="Executive Summary & Contract Health">
+            <span>Overview</span>
+          </button>
+          <button class="workspace-tab-btn" id="tab-findings" data-screen="screen-findings" role="tab"
+            aria-selected="false" title="Risk Findings & Protection Gaps">
+            <span>Findings</span>
+            <span class="tab-badge" id="nav-count-risks">0</span>
+          </button>
+          <button class="workspace-tab-btn" id="tab-contract" data-screen="screen-contract" role="tab"
+            aria-selected="false" title="Contract Document Reader & Deadlines">
+            <span>Document</span>
+          </button>
+          <button class="workspace-tab-btn" id="tab-courtroom" data-screen="screen-courtroom" role="tab"
+            aria-selected="false" title="Dual-Model AI Debate Arena">
+            <span>AI Debate</span>
+          </button>
+          <button class="workspace-tab-btn" id="tab-graph" data-screen="screen-graph" role="tab" aria-selected="false"
+            title="Contract Knowledge Graph">
+            <span>Map</span>
+          </button>
+          <button class="workspace-tab-btn" id="tab-report" data-screen="screen-report" role="tab" aria-selected="false"
+            title="Audit Memo & Executive Summary">
+            <span>Memo</span>
+          </button>
+        </nav>
 
-          <!-- Back Button -->
-          <button class="debate-back-btn" id="btn-debate-back" type="button">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="19" y1="12" x2="5" y2="12"/>
-              <polyline points="12 19 5 12 12 5"/>
+        <!-- Right Utilities & Exit -->
+        <div class="workspace-nav-right">
+          <div class="search-box-wrap">
+            <svg class="search-icon-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
-            <span>Back to Docket</span>
+            <input type="text" class="topbar-search-input" id="global-search-input" placeholder="Search...">
+            <span class="search-shortcut-chip">⌘K</span>
+          </div>
+
+          <button class="btn-dark btn-sm" id="btn-header-new-audit"
+            style="display: inline-flex; align-items: center; gap: 5px; padding: 6px 11px;">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            <span>Upload</span>
           </button>
 
-          <!-- Debate Header -->
-          <div class="single-debate-header" id="single-debate-header">
-            <!-- Populated by JS -->
-          </div>
-
-          <!-- Simulation Loader (shown while API is running) -->
-          <div class="courtroom-simulation-card" id="courtroom-sim-card" style="display: none;">
-            <div class="sim-header">
-              <div class="sim-spinner-ring"></div>
-              <div class="sim-title-group">
-                <div class="sim-headline">Courtroom Session in Progress</div>
-                <div class="sim-query-text" id="sim-query-text">"Analyzing claim..."</div>
-              </div>
-            </div>
-            <div class="sim-steps-row">
-              <div class="sim-step" id="sim-step-1">
-                <div class="sim-step-icon">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M12 6v6l4 2"/>
-                  </svg>
-                </div>
-                <div class="sim-step-meta">
-                  <div class="sim-step-name">1. Risk Identification</div>
-                  <div class="sim-step-desc">GPT-4o scanning clause exposure...</div>
-                </div>
-              </div>
-              <div class="sim-step" id="sim-step-2">
-                <div class="sim-step-icon">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                  </svg>
-                </div>
-                <div class="sim-step-meta">
-                  <div class="sim-step-name">2. Verbatim Verification</div>
-                  <div class="sim-step-desc">Gemini cross-checking exact citations...</div>
-                </div>
-              </div>
-              <div class="sim-step" id="sim-step-3">
-                <div class="sim-step-icon">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                </div>
-                <div class="sim-step-meta">
-                  <div class="sim-step-name">3. Consensus Verdict</div>
-                  <div class="sim-step-desc">Synthesizing final recommendation...</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Single Debate Content (FOR vs AGAINST panels) -->
-          <div class="single-debate-content" id="single-debate-content">
-            <!-- Populated by JS with animated panels -->
-          </div>
+          <button class="btn-outline-legal btn-sm" id="btn-return-home"
+            style="display: inline-flex; align-items: center; gap: 5px; padding: 6px 10px;"
+            title="Exit to Landing Page">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            <span>Exit</span>
+          </button>
         </div>
-
       </div>
-    </section>
+    </header>
 
-    <!-- ============================================================== -->
-    <!-- 5. KEY DATES & DEADLINES SCREEN                                -->
-    <!-- ============================================================== -->
-    <section class="screen" id="screen-timeline">
-      <div class="view-container">
-        
-        <div class="view-header">
-          <div class="view-header-left">
-            <h1>Notice Windows & Obligation Deadlines</h1>
-            <p>Track renewal windows, termination notice deadlines, and payment schedules.</p>
-          </div>
-          <div class="view-header-right">
-            <div class="filter-pills-group" id="timeline-party-filter">
-              <button class="filter-pill active" data-party="all">All Deadlines</button>
-              <button class="filter-pill" data-party="Provider">Provider Duties</button>
-              <button class="filter-pill" data-party="Customer">Customer Duties</button>
+    <!-- MAIN CONTENT STAGE (Full Width) -->
+    <main class="main-stage">
+
+      <!-- Scrollable Main View Stage -->
+      <div class="view-stage-scroll" id="view-stage-scroll">
+
+        <!-- ============================================================ -->
+        <!-- CONTRACT HEADER BANNER (Editorial Legal Header)               -->
+        <!-- ============================================================ -->
+        <section class="contract-header-banner" id="contract-header-banner">
+
+          <div class="banner-left">
+            <div class="banner-doc-thumbnail" title="Document Preview Thumbnail">
+              <div class="thumb-line header"></div>
+              <div class="thumb-line long"></div>
+              <div class="thumb-line medium"></div>
+              <div class="thumb-line long"></div>
+              <div class="thumb-line short"></div>
+              <div class="thumb-line long"></div>
+              <div class="thumb-line medium"></div>
             </div>
-          </div>
-        </div>
 
-        <!-- Timeline Tree Container -->
-        <div class="timeline-full-wrap" id="timeline-full-wrap">
-          <div class="timeline-tree" id="timeline-tree">
-            <!-- Dynamically populated via JS -->
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ============================================================== -->
-    <!-- 6. SIGNATURES & PRICING FEES SCREEN                            -->
-    <!-- ============================================================== -->
-    <section class="screen" id="screen-scanner">
-      <div class="view-container">
-        
-        <div class="view-header">
-          <div class="view-header-left">
-            <h1>Signatures & Fee Schedules</h1>
-            <p>Verification of execution status, signatories, and embedded fee tables.</p>
-          </div>
-        </div>
-
-        <div class="scanner-two-col">
-
-          <!-- Signatures Inspection Card -->
-          <div class="scanner-panel" id="scanner-signatures-panel">
-            <div class="panel-header">
-              <div class="panel-title">
-                <span>Execution Status</span>
+            <div class="banner-text-group">
+              <h1 class="banner-contract-title" id="banner-contract-title">Cloud Services Agreement</h1>
+              <div class="banner-parties-subtitle" id="banner-parties-subtitle">
+                Acme Corporation <span class="parties-x">×</span> Vertex Cloud Solutions
               </div>
-              <span class="panel-tag" id="sig-page-tag">Page 5</span>
+              <div class="banner-meta-strip" id="banner-meta-strip">
+                <span id="banner-date">Uploaded 23 Sep 2024</span>
+                <span class="dot-sep">•</span>
+                <span id="banner-pages">42 pages</span>
+                <span class="dot-sep">•</span>
+                <span id="banner-format">PDF</span>
+                <span class="dot-sep">•</span>
+                <span id="banner-duration">Analyzed in 2m 14s</span>
+              </div>
             </div>
+          </div>
 
-            <div class="sig-status-card" id="sig-status-card">
-              <div class="sig-status-icon">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="12" y1="8" x2="12" y2="12"/>
-                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+          <div class="banner-right">
+            <div class="banner-status-actions">
+              <span class="status-badge-complete">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="20 6 9 17 4 12" />
                 </svg>
-              </div>
-              <div class="sig-status-info">
-                <div class="sig-status-main" id="sig-headline">UNEXECUTED DRAFT</div>
-                <div class="sig-status-detail" id="sig-subnotes">
-                  Blank signature blocks identified. No digital certificates or countersignatures detected.
-                </div>
-              </div>
-            </div>
-
-            <!-- Signature Parties Grid -->
-            <div class="sig-parties-box">
-              <div class="sig-party">
-                <div class="party-role">CUSTOMER</div>
-                <div class="party-name" id="sig-cust-name">Northstar Analytics Pvt. Ltd.</div>
-                <div class="sig-underlines">
-                  <div>Name: __________________________</div>
-                  <div>Title: ___________________________</div>
-                  <div>Date:  ___________________________</div>
-                </div>
-                <div class="sig-stamp unsigned" id="stamp-cust">UNSIGNED</div>
-              </div>
-
-              <div class="sig-party">
-                <div class="party-role">PROVIDER</div>
-                <div class="party-name" id="sig-prov-name">Meridian Cloud Systems Pvt. Ltd.</div>
-                <div class="sig-underlines">
-                  <div>Name: __________________________</div>
-                  <div>Title: ___________________________</div>
-                  <div>Date:  ___________________________</div>
-                </div>
-                <div class="sig-stamp unsigned" id="stamp-prov">UNSIGNED</div>
-              </div>
-            </div>
-
-            <div class="scanner-notice">
-              <span>Automatic execution scanner checks whether parties have affixed valid execution marks prior to closing.</span>
+                <span>Audit complete</span>
+              </span>
+              <button class="btn-outline-legal" id="btn-banner-view-original">View Document →</button>
             </div>
           </div>
 
-          <!-- Structured Tables & Risk Analysis Card -->
-          <div class="scanner-panel" id="scanner-tables-panel">
-            <div class="panel-header">
-              <div class="panel-title">
-                <span>Fee Tables & Schedule Inspection</span>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- SCREEN 1: OVERVIEW SCREEN                                    -->
+        <!-- ============================================================ -->
+        <section class="screen active" id="screen-overview">
+
+          <!-- 4-Column Metric Cards Grid -->
+          <div class="metric-cards-grid-4">
+
+            <!-- Card 1: Contract Safety Score -->
+            <div class="overview-kpi-card hover-lift-card" id="card-safety-score"
+              title="Implementation: 100 pt baseline. Deductions: Deal-Breakers −15pts each, Watch-Outs −5pts each, Missing Clauses −4pts each.">
+              <div class="card-header-row">
+                <div class="card-title-group">
+                  <span>Contract Safety Score</span>
+                  <span class="info-icon" title="Aggregated risk assessment score">ⓘ</span>
+                </div>
+                <span class="badge-ai-derived" title="Deterministic deduction algorithm">Audited Score</span>
               </div>
-              <div class="table-selector-tabs" id="table-tabs">
-                <!-- Dynamically populated via JS -->
+
+              <div class="safety-score-body">
+                <div class="circular-gauge-wrap" title="Score gauge: 72/100 (Moderate contractual exposure)">
+                  <svg class="circular-gauge-svg" viewBox="0 0 100 100">
+                    <circle class="gauge-track" cx="50" cy="50" r="40"></circle>
+                    <circle class="gauge-fill" id="gauge-fill-circle" cx="50" cy="50" r="40" stroke-dasharray="251.32"
+                      stroke-dashoffset="70"></circle>
+                  </svg>
+                  <div class="gauge-center-text">
+                    <div class="gauge-number" id="kpi-score-number">72</div>
+                    <div class="gauge-max">/ 100</div>
+                  </div>
+                </div>
+                <div class="score-assessment-text" id="kpi-score-assessment">
+                  <strong>Moderate risk.</strong> 3 critical issues require attention before signing.
+                </div>
+              </div>
+
+              <a class="card-link-action" id="link-how-calculated">How is this calculated? →</a>
+            </div>
+
+            <!-- Card 2: Findings Overview -->
+            <div class="overview-kpi-card hover-lift-card" id="card-findings-overview"
+              title="Click any tier to filter risk findings database">
+              <div class="card-header-row">
+                <div class="card-title-group">
+                  <span>Findings Overview</span>
+                </div>
+                <span class="card-sub-count" id="kpi-total-findings-count">24 total findings</span>
+              </div>
+
+              <div class="findings-overview-list">
+                <div class="findings-tier-row"
+                  title="High exposure provisions (−15 pts each): Unlimited liability, unilateral termination">
+                  <span class="tier-count-circle tier-circle-red" id="tier-count-dealbreakers">3</span>
+                  <div class="tier-text-group">
+                    <span class="tier-label">Deal-Breakers</span>
+                    <span class="tier-desc">High contractual exposure</span>
+                  </div>
+                </div>
+
+                <div class="findings-tier-row"
+                  title="Unbalanced terms (−5 pts each): Hidden auto-renewals, short cure periods">
+                  <span class="tier-count-circle tier-circle-amber" id="tier-count-watchout">7</span>
+                  <div class="tier-text-group">
+                    <span class="tier-label">Watch Out</span>
+                    <span class="tier-desc">Require closer attention</span>
+                  </div>
+                </div>
+
+                <div class="findings-tier-row"
+                  title="Favourable protections: Mutual IP safeguards, standard audit rights">
+                  <span class="tier-count-circle tier-circle-green" id="tier-count-protections">12</span>
+                  <div class="tier-text-group">
+                    <span class="tier-label">Protections</span>
+                    <span class="tier-desc">Favourable terms for your organisation</span>
+                  </div>
+                </div>
+
+                <div class="findings-tier-row"
+                  title="Omitted institutional clauses (−4 pts each): Mutual NDA, data return guarantee">
+                  <span class="tier-count-circle tier-circle-slate" id="tier-count-missing">5</span>
+                  <div class="tier-text-group">
+                    <span class="tier-label">Missing Protections</span>
+                    <span class="tier-desc">Common clauses not found</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div class="table-render-container" id="table-display-wrap">
-              <!-- Rendered Table HTML -->
+            <!-- Card 3: Contract Intelligence -->
+            <div class="overview-kpi-card hover-lift-card" id="card-contract-intelligence"
+              title="Pipeline metadata: Vector indexing, entity extraction, and clause retrieval">
+              <div class="card-header-row">
+                <div class="card-title-group">
+                  <span>Contract Intelligence</span>
+                </div>
+              </div>
+
+              <div class="intel-stats-list">
+                <div class="intel-stat-item"
+                  title="Extracted with PyMuPDF coordinate geometry and bounding box mapping">
+                  <svg class="intel-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  </svg>
+                  <span><strong class="intel-stat-num" id="intel-stat-pages">42</strong> Pages analyzed</span>
+                </div>
+
+                <div class="intel-stat-item"
+                  title="Segmented with 500-token semantic window chunking with 50-token overlap">
+                  <svg class="intel-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="8" y1="6" x2="21" y2="6" />
+                    <line x1="8" y1="12" x2="21" y2="12" />
+                    <line x1="8" y1="18" x2="21" y2="18" />
+                    <line x1="3" y1="6" x2="3.01" y2="6" />
+                    <line x1="3" y1="12" x2="3.01" y2="12" />
+                    <line x1="3" y1="18" x2="3.01" y2="18" />
+                  </svg>
+                  <span><strong class="intel-stat-num" id="intel-stat-sections">186</strong> Sections indexed</span>
+                </div>
+
+                <div class="intel-stat-item"
+                  title="Identified via GLiNER zero-shot legal entity extraction & regex patterns">
+                  <svg class="intel-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                  <span><strong class="intel-stat-num" id="intel-stat-entities">312</strong> Contractual entities
+                    extracted</span>
+                </div>
+
+                <div class="intel-stat-item" title="Retrieved using hybrid BM25 + dense cosine vector similarity">
+                  <svg class="intel-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 14 14" />
+                  </svg>
+                  <span><strong class="intel-stat-num" id="intel-stat-clauses">47</strong> Relevant clauses
+                    retrieved</span>
+                </div>
+
+                <div class="intel-stat-item"
+                  title="Independent Auditor + Verification Skeptic models cross-examine findings">
+                  <svg class="intel-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                  <span><strong class="intel-stat-num">2</strong> Verification models</span>
+                </div>
+
+                <div class="intel-stat-item"
+                  title="Force-directed physics simulation of parties, indemnities, and cross-clause obligations">
+                  <svg class="intel-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="6" cy="6" r="3" />
+                    <circle cx="18" cy="18" r="3" />
+                    <line x1="8.5" y1="7.5" x2="15.5" y2="16.5" />
+                  </svg>
+                  <span><strong class="intel-stat-num">1</strong> Knowledge graph</span>
+                </div>
+
+                <button class="btn-outline-legal" id="btn-open-courtroom-from-card"
+                  style="width: 100%; margin-top: 10px; height: 32px; font-size: 12px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                  <span>Launch AI Debate Arena →</span>
+                </button>
+              </div>
             </div>
 
-            <!-- Table Pricing Overages Warning -->
-            <div class="table-risks-callout" id="table-risks-container">
-              <!-- Populated via JS -->
+            <!-- Card 4: Document Preview -->
+            <div class="overview-kpi-card" id="card-doc-preview" style="cursor: pointer;">
+              <div class="card-header-row">
+                <div class="card-title-group">
+                  <span>Document Preview</span>
+                </div>
+                <span class="badge-ai-verified">PDF Verified</span>
+              </div>
+
+              <div class="doc-preview-widget">
+                <div class="doc-preview-paper-box" id="doc-preview-mini-page">
+                  <div class="doc-paper-header" id="mini-page-header">Cloud Services Agreement</div>
+                  <div class="doc-paper-sub">Acme Corporation — Vertex Cloud Solutions</div>
+                  <div class="doc-paper-line" style="width: 90%;"></div>
+                  <div class="doc-paper-line" style="width: 100%;"></div>
+                  <div class="doc-paper-line" style="width: 75%;"></div>
+                  <div class="doc-paper-line" style="width: 85%;"></div>
+                  <div class="doc-paper-line" style="width: 60%; margin-top: 6px;"></div>
+                  <div class="doc-paper-line" style="width: 95%;"></div>
+                  <div class="doc-paper-line" style="width: 80%;"></div>
+                </div>
+
+                <div class="sig-status-badge-wrap" id="card-sig-status-badge"
+                  style="margin-top: 8px; font-size: 11.5px; padding: 6px 10px; border-radius: 4px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); color: #B45309; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                  <span style="font-weight: 600;" id="card-sig-status-text">⚠️ Unexecuted Draft (Page 5)</span>
+                  <span style="font-size: 10.5px; text-decoration: underline; color: #92400E;">Inspect Signatures
+                    ↗</span>
+                </div>
+
+                <button class="btn-outline-legal" id="btn-open-doc-from-card"
+                  style="width: 100%; margin-top: 8px; height: 32px; font-size: 12px;">Open Document Reader →</button>
+              </div>
             </div>
+
           </div>
 
-        </div>
+          <!-- Lower 2/3 + 1/3 Split Grid -->
+          <div class="overview-bottom-grid">
+
+            <!-- Left: Top Findings Table (2/3 width) -->
+            <div class="top-findings-card">
+              <div class="card-top-head-row">
+                <div class="card-top-head-title">
+                  <span>Top Findings</span>
+                </div>
+                <a class="link-all-findings" id="link-see-all-findings">View all findings →</a>
+              </div>
+
+              <div class="table-responsive">
+                <table class="findings-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 14%;">SEVERITY</th>
+                      <th style="width: 44%;">FINDING</th>
+                      <th style="width: 12%;">CLAUSE</th>
+                      <th style="width: 8%;">PAGE</th>
+                      <th style="width: 14%;">VERIFICATION</th>
+                      <th style="width: 8%;">ACTIONS</th>
+                    </tr>
+                  </thead>
+                  <tbody id="top-findings-tbody">
+                    <!-- Populated dynamically via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Right Column: Key Dates & AI Insight (1/3 width) -->
+            <div class="overview-right-column">
+
+              <!-- Key Dates Card -->
+              <div class="dates-summary-card">
+                <div class="card-top-head-row">
+                  <div class="card-top-head-title">Key Dates & Obligations</div>
+                  <a class="link-all-findings" id="link-see-all-dates" style="font-size: 11.5px; cursor: pointer;">View
+                    Timeline →</a>
+                </div>
+
+                <div class="dates-timeline-list" id="overview-dates-list">
+                  <!-- Populated dynamically via JS -->
+                </div>
+              </div>
+
+              <!-- AI Insight Callout Card -->
+              <div class="ai-insight-box">
+                <div class="ai-insight-header">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="16" x2="12" y2="12" />
+                    <line x1="12" y1="8" x2="12.01" y2="8" />
+                  </svg>
+                  <span>Counsel Guidance</span>
+                </div>
+                <p class="ai-insight-text" id="overview-ai-insight-text">
+                  This agreement gives the provider broad termination rights without cause, while imposing significant
+                  data retention risks. Consider negotiating clearer service levels and mutual termination terms.
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- SCREEN 2: FINDINGS VIEW (All Risks & Fixes Database)          -->
+        <!-- ============================================================ -->
+        <section class="screen" id="screen-findings">
+          <div class="findings-screen-container">
+
+            <div class="screen-back-bar">
+              <button class="btn-back-overview">← Back to Overview</button>
+              <span class="screen-breadcrumb-title">Risk Findings & Negotiation Counter-Proposals</span>
+            </div>
+
+            <!-- Segmented Sub-view Switcher -->
+            <div class="findings-segmented-bar">
+              <div class="findings-segmented-control" role="tablist">
+                <button class="findings-sub-btn active" id="btn-findings-subview-risks" role="tab" aria-selected="true">
+                  <span>Flagged Risks (<span id="findings-count-tab">0</span>)</span>
+                </button>
+                <button class="findings-sub-btn" id="btn-findings-subview-gaps" role="tab" aria-selected="false">
+                  <span>Missing Safeguards & Gaps (<span id="missing-count-tab">0</span>)</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Subview 1: Flagged Risks Stack & Filters -->
+            <div id="findings-risks-wrapper">
+              <!-- Filters Toolbar -->
+              <div class="findings-filter-toolbar">
+                <div class="filter-pills-row">
+                  <button class="filter-pill-btn active" data-filter="all">All Findings (<span
+                      id="count-pill-all">0</span>)</button>
+                  <button class="filter-pill-btn" data-filter="deal_breaker">Deal-Breakers (<span
+                      id="count-pill-db">0</span>)</button>
+                  <button class="filter-pill-btn" data-filter="watch_out">Watch-Outs (<span
+                      id="count-pill-wo">0</span>)</button>
+                  <button class="filter-pill-btn" data-filter="protection">Protections (<span
+                      id="count-pill-pr">0</span>)</button>
+                </div>
+
+                <div style="display: flex; gap: 8px;">
+                  <button class="btn-outline-legal" id="btn-export-findings-json">Export JSON</button>
+                  <button class="btn-outline-legal" id="btn-copy-all-redlines">Copy All Counter-Proposals</button>
+                </div>
+              </div>
+
+              <!-- Findings Cards Stack -->
+              <div class="findings-cards-stack" id="findings-full-stack">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
+            <!-- Subview 2: Standard Protection Gap Analysis Table -->
+            <div id="missing-clauses-wrapper" style="display: none; flex-direction: column; gap: 16px;">
+              <div class="gap-analysis-banner">
+                <div class="gap-analysis-banner-text">
+                  <div class="gap-analysis-title">Institutional Standard Protection Gap Analysis</div>
+                  <p class="gap-analysis-desc">
+                    Enterprise agreements require essential safeguards. Missing or vague terms shift unilateral
+                    liability and operational risk onto your organization.
+                  </p>
+                </div>
+                <button class="btn-outline-legal" id="btn-download-missing-clauses" style="flex-shrink: 0;">
+                  <span>Download Gap Summary</span>
+                </button>
+              </div>
+
+              <div class="table-responsive clean-table-card">
+                <table class="findings-table" id="table-missing-clauses">
+                  <thead>
+                    <tr>
+                      <th style="width: 14%;">STATUS</th>
+                      <th style="width: 28%;">STANDARD PROTECTION NEEDED</th>
+                      <th style="width: 12%;">RISK LEVEL</th>
+                      <th style="width: 34%;">WHY YOU NEED THIS</th>
+                      <th style="width: 12%;">SUGGESTED FIX</th>
+                    </tr>
+                  </thead>
+                  <tbody id="missing-clauses-tbody">
+                    <!-- Populated dynamically via renderMissingProtections -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- SCREEN 3: CONTRACT VIEW (Page-by-page Verbatim Reader)        -->
+        <!-- ============================================================ -->
+        <section class="screen" id="screen-contract">
+          <div class="screen-back-bar">
+            <button class="btn-back-overview">← Back to Overview</button>
+            <span class="screen-breadcrumb-title">Contract Document Reader</span>
+          </div>
+          <div class="contract-view-container">
+
+            <div class="contract-outline-sidebar">
+              <!-- Sidebar Tabs -->
+              <div class="reader-sidebar-tabs">
+                <button class="reader-tab-btn active" id="btn-reader-tab-sections">Sections</button>
+                <button class="reader-tab-btn" id="btn-reader-tab-timeline">Deadlines (<span
+                    id="reader-deadlines-count">0</span>)</button>
+                <button class="reader-tab-btn" id="btn-reader-tab-tables">Fee Tables (<span
+                    id="reader-tables-count">0</span>)</button>
+              </div>
+
+              <!-- Tab Panel 1: Document Sections -->
+              <div class="reader-tab-panel active" id="reader-panel-sections">
+                <div class="outline-items-list" id="contract-sections-list">
+                  <!-- Dynamically populated section links -->
+                </div>
+              </div>
+
+              <!-- Tab Panel 2: Notice Windows & Deadlines -->
+              <div class="reader-tab-panel" id="reader-panel-timeline" style="display: none;">
+                <div class="reader-panel-inner">
+                  <div class="reader-filter-row" id="timeline-party-filter-group">
+                    <button class="filter-pill-btn active" data-party="all">All Duties</button>
+                    <button class="filter-pill-btn" data-party="Provider">Provider</button>
+                    <button class="filter-pill-btn" data-party="Customer">Customer</button>
+                  </div>
+                  <div class="timeline-tree" id="timeline-full-tree">
+                    <!-- Dynamically populated timeline nodes -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tab Panel 3: Structured Fee Tables & Schedules -->
+              <div class="reader-tab-panel" id="reader-panel-tables" style="display: none;">
+                <div class="reader-panel-inner">
+                  <div class="table-subtabs-row" id="scanner-table-tabs">
+                    <!-- Table selector buttons -->
+                  </div>
+                  <div id="scanner-table-render" class="scanner-table-wrap">
+                    <!-- Rendered markdown table -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="contract-document-viewer">
+              <div class="viewer-page-header-bar">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <button class="preview-arrow-btn" id="btn-docview-prev">‹</button>
+                  <span style="font-weight: 600; font-size: 13.5px;" id="docview-page-title">Page 1 of 5</span>
+                  <button class="preview-arrow-btn" id="btn-docview-next">›</button>
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted);">
+                  <span
+                    style="display: inline-block; width: 10px; height: 10px; background: rgba(254, 202, 202, 0.8); border: 1px solid #DC2626; border-radius: 2px; margin-right: 4px;"></span>
+                  Highlighted clauses have identified exposure
+                </div>
+              </div>
+
+              <div class="doc-verbatim-content" id="doc-verbatim-content">
+                <!-- Page verbatim text rendered here -->
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ============================================================ -->
+        <!-- SCREEN 4: AI DEBATE & CLAUSE VERIFICATION                     -->
+        <!-- ============================================================ -->
+        <section class="screen" id="screen-courtroom">
+          <div class="screen-back-bar">
+            <button class="btn-back-overview">← Back to Overview</button>
+            <span class="screen-breadcrumb-title">AI Debate & Clause Cross-Examination</span>
+          </div>
+          <div class="courtroom-container">
+
+            <!-- Ask & Cross-Examine Panel -->
+            <div class="courtroom-ask-panel">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="font-family: var(--font-serif); font-size: 19px; font-weight: 600;">AI Dual-Model Debate
+                  Arena</h2>
+                <span class="badge-ai-derived">Lead Auditor vs. Skeptic</span>
+              </div>
+              <p style="font-size: 13px; color: var(--text-muted);">
+                Submit any question or clause to initiate a dual-model cross-examination against verbatim PDF
+                coordinates and uncover hidden risks.
+              </p>
+
+              <div class="courtroom-input-row">
+                <input type="text" class="courtroom-text-input" id="courtroom-query-input"
+                  placeholder="e.g., Can the provider terminate for convenience without mutual rights?">
+                <button class="btn-dark" id="btn-run-courtroom-debate">Run AI Debate</button>
+              </div>
+
+              <div class="courtroom-presets-row">
+                <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 600;">Suggested debate
+                  inquiries:</span>
+                <button class="preset-chip-btn" data-query="Can the provider terminate for convenience?">Termination
+                  notice</button>
+                <button class="preset-chip-btn"
+                  data-query="What is the liability cap and does it cover data breach?">Liability cap limits</button>
+                <button class="preset-chip-btn" data-query="How long are deleted customer backups retained?">Backup
+                  retention window</button>
+                <button class="preset-chip-btn" data-query="Does the contract automatically renew?">Renewal notice
+                  period</button>
+              </div>
+            </div>
+
+            <!-- Courtroom Cases Stack -->
+            <div id="courtroom-cases-stack" style="display: flex; flex-direction: column; gap: 16px;">
+              <!-- Dynamically populated dual-agent clash cards -->
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ============================================================ -->
+        <!-- SCREEN 5: INTERACTIVE CONTRACT RELATIONSHIP MAP (GRAPH)       -->
+        <!-- ============================================================ -->
+        <section class="screen" id="screen-graph">
+          <div class="screen-back-bar">
+            <button class="btn-back-overview">← Back to Overview</button>
+            <span class="screen-breadcrumb-title">Contract Relationship Map</span>
+          </div>
+          <div class="graph-stage-wrapper">
+
+            <!-- Toolbar & Filter Header -->
+            <div class="graph-toolbar-row">
+              <div>
+                <h2 style="font-family: var(--font-serif); font-size: 20px; font-weight: 600;">Contract Relationship Map
+                </h2>
+                <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 3px;">
+                  Interactive network of parties, clause obligations, liability thresholds, and governed assets.
+                </p>
+              </div>
+
+              <!-- Filter Pills & Search -->
+              <div class="graph-actions-group">
+                <div class="graph-filter-chips">
+                  <button class="graph-chip-btn active" data-graph-filter="all">
+                    <span>All</span>
+                  </button>
+                  <button class="graph-chip-btn" data-graph-filter="party">
+                    <span class="chip-dot" style="background:#059669;"></span>
+                    <span>Parties</span>
+                  </button>
+                  <button class="graph-chip-btn" data-graph-filter="risk">
+                    <span class="chip-dot" style="background:#DC2626;"></span>
+                    <span>Risks</span>
+                  </button>
+                  <button class="graph-chip-btn" data-graph-filter="clause">
+                    <span class="chip-dot" style="background:#4F46E5;"></span>
+                    <span>Clauses</span>
+                  </button>
+                  <button class="graph-chip-btn" data-graph-filter="asset">
+                    <span class="chip-dot" style="background:#0284C7;"></span>
+                    <span>Assets</span>
+                  </button>
+                </div>
+
+                <button class="btn-outline-legal" id="btn-reset-graph-canvas" title="Reset layout and center graph">
+                  Reset View
+                </button>
+              </div>
+            </div>
+
+            <!-- Viewport Canvas Container -->
+            <div class="graph-interactive-viewport" id="graph-viewport-box">
+              <canvas id="knowledge-graph-canvas"></canvas>
+
+              <!-- Floating Zoom & Reset Controls -->
+              <div class="graph-floating-controls">
+                <button class="graph-zoom-btn" id="btn-graph-zoom-in" title="Zoom in">+</button>
+                <button class="graph-zoom-btn" id="btn-graph-zoom-out" title="Zoom out">−</button>
+                <button class="graph-zoom-btn" id="btn-graph-fit" title="Fit to view">⤢</button>
+              </div>
+
+              <!-- Floating Node Inspector Drawer -->
+              <div class="graph-node-inspector-drawer" id="graph-node-inspector">
+                <div class="inspector-header">
+                  <span class="inspector-badge" id="inspector-node-type">PARTY</span>
+                  <button class="btn-close" id="btn-close-inspector">&times;</button>
+                </div>
+                <div class="inspector-title" id="inspector-node-title">Entity Name</div>
+                <div class="inspector-desc" id="inspector-node-desc">Description of entity in contract.</div>
+                <div class="inspector-relations-list" id="inspector-node-relations"></div>
+                <button class="btn-dark" id="btn-inspector-action" style="width: 100%; height: 32px; font-size: 12px;">
+                  View Linked Clause →
+                </button>
+              </div>
+            </div>
+
+            <!-- Bottom Legend -->
+            <div
+              style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted); padding-top: 4px;">
+              <div style="display: flex; gap: 20px;">
+                <span><strong style="color: #059669;">●</strong> Parties</span>
+                <span><strong style="color: #DC2626;">●</strong> Risk Terms</span>
+                <span><strong style="color: #4F46E5;">●</strong> Contract Clauses</span>
+                <span><strong style="color: #0284C7;">●</strong> Governed Assets</span>
+              </div>
+              <span id="graph-stats-label">7 entities • 5 connections • Drag to explore</span>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- SCREEN 6: EXECUTIVE REPORT (Clean Editorial Memo)            -->
+        <!-- ============================================================ -->
+        <section class="screen" id="screen-report">
+          <div class="screen-back-bar">
+            <button class="btn-back-overview">← Back to Overview</button>
+            <span class="screen-breadcrumb-title">Executive Audit Memo</span>
+          </div>
+          <div class="executive-report-view">
+            <div class="report-memo-header">
+              <div class="memo-title-block">
+                <h1>Contract Audit Memo</h1>
+                <div style="font-size: 13px; color: var(--text-muted);" id="memo-meta-line">
+                  Prepared for Executive Review • Northstar Analytics
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn-outline-legal" id="btn-copy-memo-text">Copy Markdown</button>
+                <button class="btn-dark" id="btn-download-memo-file">Download Memo (.md)</button>
+              </div>
+            </div>
+
+            <div class="memo-body-markdown" id="executive-memo-rendered">
+              <!-- Rendered memo markdown content -->
+            </div>
+          </div>
+        </section>
 
       </div>
-    </section>
 
-    <!-- ============================================================== -->
-    <!-- 7. 🕸️ CONTRACT MAP SCREEN                                     -->
-    <!-- ============================================================== -->
-    <section class="screen" id="screen-graph">
-      <div class="view-container">
-        
-        <div class="view-header">
-          <div class="view-header-left">
-            <div class="view-badge">🕸️ VISUAL RELATIONSHIP MAP</div>
-            <h1>Visual Contract Map</h1>
-            <p>See how companies, clauses, liabilities, and assets are connected together.</p>
-          </div>
-          <div class="view-header-right">
-            <div class="graph-stats-chip">
-              <span id="graph-node-count">17 Items</span> • <span id="graph-edge-count">14 Connections</span>
-            </div>
-            <button class="btn btn-outline btn-sm" id="btn-reset-graph">Reset View</button>
-          </div>
-        </div>
+    </main>
 
-        <div class="graph-full-card">
-          <div class="canvas-wrapper">
-            <canvas id="knowledge-graph-canvas"></canvas>
-          </div>
-          <div class="graph-hint-footer">
-            <span>💡 <strong>Tip:</strong> You can drag items to explore. Green nodes are parties, Red nodes are risk terms, Blue nodes are contract assets.</span>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-  </main>
+  </div>
 
   <!-- ================================================================ -->
-  <!-- MODAL WINDOW 1: EVIDENCE & SUGGESTED FIX INSPECTOR               -->
+  <!-- MODAL: EVIDENCE & 6-STEP ANALYSIS TRACE                          -->
   <!-- ================================================================ -->
-  <dialog id="evidence-modal" class="app-dialog">
+  <dialog id="modal-evidence-trace" class="app-dialog">
     <div class="dialog-card">
       <div class="dialog-header">
-        <div class="dialog-title-wrap">
-          <span class="dialog-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
-          <h2 id="modal-title" style="font-size: 16px; font-weight: 700; margin: 0;">Why We Flagged This & How to Fix It</h2>
-        </div>
-        <button class="btn-close" id="btn-close-modal" aria-label="Close dialog">&times;</button>
+        <h3 class="dialog-title" id="modal-trace-title">Evidence and Analysis Trace</h3>
+        <button class="btn-close" id="btn-close-trace-modal">&times;</button>
       </div>
 
       <div class="dialog-body">
-        
-        <!-- Citation Badges -->
-        <div class="citation-pills-row">
-          <span class="pill-citation" id="modal-page">Page 3</span>
-          <span class="pill-citation" id="modal-chunk">chunk-0011</span>
-          <span class="pill-citation pill-section" id="modal-section">Section 9.2</span>
-          <span class="pill-citation pill-verdict" id="modal-verdict">✓ Verified 100% in PDF</span>
+
+        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+          <span class="pill-severity pill-critical" id="modal-trace-severity">CRITICAL</span>
+          <span class="clause-ref-code" id="modal-trace-clause">Section 12.4</span>
+          <span class="badge-ai-verified" id="modal-trace-verified">Verified 91%</span>
         </div>
 
-        <!-- 4-Step Transparent Reasoning Box -->
-        <div class="modal-reasoning-flow">
-          
-          <div class="reasoning-step">
-            <div class="r-label">1. WHAT THIS MEANS IN SIMPLE WORDS:</div>
-            <p id="modal-plain-english">...</p>
+        <div style="margin-bottom: 16px;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Summary:
           </div>
+          <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 4px;" id="modal-trace-plain"></p>
+        </div>
 
-          <div class="reasoning-step">
-            <div class="r-label">2. WHY THIS IS DANGEROUS FOR YOUR COMPANY:</div>
-            <p id="modal-why">...</p>
-          </div>
+        <div style="margin-bottom: 16px;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Risk
+            assessment:</div>
+          <p style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;" id="modal-trace-why"></p>
+        </div>
 
-          <div class="reasoning-step">
-            <div class="r-label">3. EXACT WORDS FOUND IN THE CONTRACT:</div>
-            <blockquote id="modal-quote">"..."</blockquote>
-          </div>
+        <div style="margin-bottom: 18px;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Contract
+            excerpt:</div>
+          <div class="finding-evidence-quote-box" id="modal-trace-quote" style="margin-top: 4px;"></div>
+        </div>
 
-          <div class="modal-remedy-card">
-            <div class="remedy-head">
-              <div class="remedy-label">4. WHAT TO SEND TO THE PROVIDER (READY-TO-COPY FIX):</div>
-              <button class="btn btn-sm btn-primary" id="btn-copy-modal-remedy">
-                <span>Copy Counter-Proposal</span>
-              </button>
+        <!-- 6-Step Progressive Disclosure Pipeline Trace -->
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+          Verification trace:</div>
+        <div class="trace-flow-container">
+          <div class="trace-step-item">
+            <span class="trace-step-num">1</span>
+            <div class="trace-step-content">
+              <div class="trace-step-title">Document clause retrieved</div>
+              <div class="trace-step-desc" id="trace-step-1-desc">Extracted from PDF coordinates (Page cited, Chunk
+                index).</div>
             </div>
-            <div class="remedy-body" id="modal-remedy">
-              Customer proposes amending...
+          </div>
+          <div class="trace-step-item">
+            <span class="trace-step-num">2</span>
+            <div class="trace-step-content">
+              <div class="trace-step-title">Semantic + keyword retrieval</div>
+              <div class="trace-step-desc">Indexed via BM25 lexical token matching and dense vector cosine embeddings.
+              </div>
             </div>
           </div>
+          <div class="trace-step-item">
+            <span class="trace-step-num">3</span>
+            <div class="trace-step-content">
+              <div class="trace-step-title">RRF ranking (k=60)</div>
+              <div class="trace-step-desc">Reciprocal Rank Fusion unified multi-modal retriever scores.</div>
+            </div>
+          </div>
+          <div class="trace-step-item">
+            <span class="trace-step-num">4</span>
+            <div class="trace-step-content">
+              <div class="trace-step-title">Auditor identified risk</div>
+              <div class="trace-step-desc">Synthesized exposure and unilateral notice conditions.</div>
+            </div>
+          </div>
+          <div class="trace-step-item">
+            <span class="trace-step-num">5</span>
+            <div class="trace-step-content">
+              <div class="trace-step-title">Verifier checked evidence</div>
+              <div class="trace-step-desc">Cross-checked exact verbatim quote fidelity against document text.</div>
+            </div>
+          </div>
+          <div class="trace-step-item">
+            <span class="trace-step-num">6</span>
+            <div class="trace-step-content">
+              <div class="trace-step-title">Finding confirmed</div>
+              <div class="trace-step-desc">Calculated score impact and drafted counter-proposal revision.</div>
+            </div>
+          </div>
+        </div>
 
+        <div
+          style="margin-top: 18px; padding: 14px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: var(--radius-md);">
+          <div style="font-size: 11px; font-weight: 700; color: #4F46E5; text-transform: uppercase;">Suggested revision:
+          </div>
+          <p style="font-size: 13px; color: var(--text-primary); margin-top: 4px;" id="modal-trace-remedy"></p>
         </div>
 
       </div>
 
       <div class="dialog-footer">
-        <button class="btn btn-outline" id="btn-close-modal-footer">Close Window</button>
+        <button class="btn-outline-legal" id="btn-copy-modal-trace-remedy">Copy Revision</button>
+        <button class="btn-dark" id="btn-close-trace-footer">Done</button>
       </div>
     </div>
   </dialog>
 
   <!-- ================================================================ -->
-  <!-- MODAL WINDOW 2: FAIRNESS CHECK (SIDE-BY-SIDE)                    -->
+  <!-- MODAL: QUICK SEARCH PALETTE (⌘K)                                  -->
   <!-- ================================================================ -->
-  <dialog id="asymmetry-modal" class="app-dialog">
-    <div class="dialog-card dialog-wide">
+  <dialog id="modal-quick-search" class="app-dialog">
+    <div class="dialog-card">
       <div class="dialog-header">
-        <div class="dialog-title-wrap">
-          <span class="dialog-icon">⚖️</span>
-          <h3>Fairness Comparison (Provider vs. Customer)</h3>
+        <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input type="text" id="palette-search-input" placeholder="Jump to clause, risk, date, or feature..."
+            style="flex: 1; border: none; font-size: 14px; outline: none; background: transparent;">
         </div>
-        <button class="btn-close" id="btn-close-asymmetry-modal" aria-label="Close dialog">&times;</button>
+        <button class="btn-close" id="btn-close-palette">&times;</button>
       </div>
 
+      <div class="dialog-body" style="padding: 12px 16px;">
+        <div id="palette-results-list" style="display: flex; flex-direction: column; gap: 4px;">
+          <!-- Dynamically populated quick jump items -->
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ================================================================ -->
+  <!-- MODAL: NEW AUDIT / FILE UPLOAD                                   -->
+  <!-- ================================================================ -->
+  <dialog id="modal-upload-audit" class="app-dialog">
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <h3 class="dialog-title">Upload Contract for Audit</h3>
+        <button class="btn-close" id="btn-close-upload-modal">&times;</button>
+      </div>
+
+      <div class="dialog-body" style="text-align: center; padding: 36px 24px;">
+
+        <input type="file" id="modal-file-input" accept=".pdf,.txt,.docx,.md" style="display: none;">
+
+        <div id="modal-drop-area"
+          style="border: 2px dashed #CBD5E1; border-radius: var(--radius-lg); padding: 36px 20px; cursor: pointer; transition: border-color 0.2s ease;">
+          <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.8"
+            style="color: var(--text-muted); margin-bottom: 8px;">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="12" y1="18" x2="12" y2="12" />
+            <line x1="9" y1="15" x2="15" y2="15" />
+          </svg>
+          <div style="font-size: 15px; font-weight: 700; color: var(--text-primary);">Drag and drop your contract PDF
+            here</div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Supports PDF, DOCX, TXT, and Markdown
+            files.</p>
+          <button class="btn-dark" style="margin-top: 14px;" id="btn-browse-modal">Select from Computer</button>
+        </div>
+
+        <div style="margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 12px;">
+          <span style="font-size: 12px; color: var(--text-dim);">— OR —</span>
+          <button class="btn-outline-legal" id="btn-modal-load-sample">Load Demo Contract (Cloud Agreement)</button>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div id="modal-upload-progress" style="display: none; margin-top: 24px; text-align: left;">
+          <div style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;"
+            id="upload-stage-text">
+            Ingesting document and extracting clauses...
+          </div>
+          <div style="height: 6px; width: 100%; background: #E2E8F0; border-radius: 3px; overflow: hidden;">
+            <div id="upload-stage-bar"
+              style="height: 100%; width: 30%; background: #111518; transition: width 0.4s ease;"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ================================================================ -->
+  <!-- MODAL: ASYMMETRY COMPARISON                                      -->
+  <!-- ================================================================ -->
+  <dialog id="modal-asymmetry" class="app-dialog" style="max-width: 760px;">
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <h3 class="dialog-title">Unilateral Terms and Asymmetry Matrix</h3>
+        <button class="btn-close" id="btn-close-asym-modal">&times;</button>
+      </div>
+      <div class="dialog-body" id="modal-asym-body">
+        <!-- Dynamically populated -->
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ================================================================ -->
+  <!-- MODAL: MISSING CLAUSE INSERTER                                   -->
+  <!-- ================================================================ -->
+  <dialog id="modal-missing-clause" class="app-dialog">
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <h3 class="dialog-title" id="missing-clause-modal-title">Recommended Protection Clause</h3>
+        <button class="btn-close" id="btn-close-missing-clause">&times;</button>
+      </div>
       <div class="dialog-body">
-        <p class="dialog-subtext">
-          We compared the rights given to the Provider against the rights given to your company. Here is where the contract is one-sided:
+        <div
+          style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase;">
+          Why this clause is recommended:</div>
+        <p style="font-size: 13.5px; color: var(--text-secondary); margin-bottom: 16px;" id="missing-clause-modal-why">
         </p>
 
-        <div class="asymmetry-matrix-container" id="asymmetry-matrix-container">
-          <!-- Dynamically populated via JS -->
-        </div>
+        <div
+          style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase;">
+          Proposed clause text:</div>
+        <div
+          style="background: #FAFBFB; border: 1px solid #E2E8F0; border-radius: var(--radius-sm); padding: 14px; font-family: var(--font-mono); font-size: 12px; color: #1E293B; white-space: pre-wrap;"
+          id="missing-clause-modal-code"></div>
       </div>
-
       <div class="dialog-footer">
-        <button class="btn btn-outline" id="btn-close-asymmetry-footer">Close Window</button>
+        <button class="btn-dark" id="btn-copy-missing-clause-code">Copy Clause</button>
       </div>
     </div>
   </dialog>
 
   <!-- ================================================================ -->
-  <!-- MODAL WINDOW 3: RECOMMENDED CLAUSE INSERTER                      -->
+  <!-- MODAL: SCORE CALCULATION BREAKDOWN                              -->
   <!-- ================================================================ -->
-  <dialog id="missing-clause-modal" class="app-dialog">
+  <dialog id="modal-score-calc" class="app-dialog" style="max-width: 580px;">
     <div class="dialog-card">
       <div class="dialog-header">
-        <div class="dialog-title-wrap">
-          <span class="dialog-icon">✍️</span>
-          <h3 id="missing-modal-title">Recommended Clause to Add</h3>
-        </div>
-        <button class="btn-close" id="btn-close-missing-modal" aria-label="Close dialog">&times;</button>
+        <h3 class="dialog-title">How the Contract Safety Score is Calculated</h3>
+        <button class="btn-close" id="btn-close-score-calc">&times;</button>
       </div>
+      <div class="dialog-body" style="display: flex; flex-direction: column; gap: 16px;">
+        <p style="font-size: 13.5px; color: var(--text-secondary); line-height: 1.55;">
+          Every contract starts at a baseline of <strong>100 points</strong>. Deductions are systematically applied
+          based on identified risk severity and standard protection omissions:
+        </p>
 
-      <div class="dialog-body">
-        <div class="missing-modal-info">
-          <div class="box-label">WHY YOUR CONTRACT NEEDS THIS:</div>
-          <p id="missing-modal-why">...</p>
-        </div>
-
-        <div class="missing-clause-code-box">
-          <div class="code-box-header">
-            <span>COPY AND PASTE THIS DIRECTLY INTO YOUR DRAFT</span>
-            <button class="btn btn-xs btn-primary" id="btn-copy-missing-clause">Copy Clause</button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div
+            style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: var(--radius-md); padding: 12px 14px;">
+            <div style="font-weight: 700; font-size: 13px; color: #991B1B; margin-bottom: 2px;">Deal-Breakers</div>
+            <div style="font-size: 12px; color: #7F1D1D;">-15 points per issue</div>
+            <div style="font-size: 11px; color: #B91C1C; margin-top: 4px;">Unlimited liability, broad indemnification,
+              one-sided termination</div>
           </div>
-          <pre id="missing-modal-code"><code>...</code></pre>
+          <div
+            style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: var(--radius-md); padding: 12px 14px;">
+            <div style="font-weight: 700; font-size: 13px; color: #92400E; margin-bottom: 2px;">Watch-Outs</div>
+            <div style="font-size: 12px; color: #78350F;">-5 points per issue</div>
+            <div style="font-size: 11px; color: #B45309; margin-top: 4px;">Auto-renewal traps, vague warranties, short
+              cure periods</div>
+          </div>
+          <div
+            style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: var(--radius-md); padding: 12px 14px;">
+            <div style="font-weight: 700; font-size: 13px; color: #1E40AF; margin-bottom: 2px;">Minor Terms</div>
+            <div style="font-size: 12px; color: #1E3A8A;">-2 points per issue</div>
+            <div style="font-size: 11px; color: #2563EB; margin-top: 4px;">Notice procedure specifics, audit record
+              retention timelines</div>
+          </div>
+          <div
+            style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: var(--radius-md); padding: 12px 14px;">
+            <div style="font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 2px;">Missing Clauses</div>
+            <div style="font-size: 12px; color: #475569;">-4 points per gap</div>
+            <div style="font-size: 11px; color: #64748B; margin-top: 4px;">Missing mutual NDA, data return guarantees,
+              force majeure</div>
+          </div>
+        </div>
+
+        <div
+          style="background: #F8FAFC; border-left: 3px solid var(--accent); padding: 10px 14px; font-size: 12.5px; color: var(--text-secondary); border-radius: 0 4px 4px 0;">
+          A score of <strong>80+ is low risk</strong>, <strong>60–79 requires standard revisions</strong>, and
+          <strong>below 60 indicates high-risk terms</strong> requiring legal renegotiation.
         </div>
       </div>
-
       <div class="dialog-footer">
-        <button class="btn btn-outline" id="btn-close-missing-footer">Close</button>
+        <button class="btn-dark" id="btn-close-score-calc-footer">Got It</button>
       </div>
     </div>
   </dialog>
 
-  <!-- Toast Notification System -->
+  <!-- Modal: Signatures & Execution Status -->
+  <dialog class="app-dialog" id="modal-sig-status" aria-labelledby="sig-status-modal-title">
+    <div class="dialog-card" style="max-width: 580px;">
+      <div class="dialog-header">
+        <div class="dialog-title-row">
+          <h2 class="dialog-title" id="sig-status-modal-title">Contract Execution & Signature Status</h2>
+          <button class="btn-dialog-close" id="btn-close-sig-status">×</button>
+        </div>
+        <p class="dialog-subtitle" id="sig-status-modal-sub">Forensic inspection of execution block, digital
+          certificates, and counterparties.</p>
+      </div>
+      <div class="dialog-body" style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="sig-status-card" id="sig-modal-status-box"
+          style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-md); padding: 14px; display: flex; gap: 12px; align-items: center;">
+          <div style="font-size: 24px;">⚠️</div>
+          <div>
+            <div style="font-weight: 700; font-size: 14px; color: #B45309;" id="sig-modal-headline">UNEXECUTED DRAFT
+            </div>
+            <div style="font-size: 12.5px; color: #78350F; margin-top: 2px;" id="sig-modal-subnotes">Blank signature
+              blocks identified on Page 5. No digital certificates detected.</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div
+            style="background: #F8FAFC; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px;">
+            <div
+              style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px;">
+              Provider Party</div>
+            <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);" id="sig-modal-prov-name">Vertex
+              Cloud Solutions</div>
+            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Status: Signature line blank
+            </div>
+          </div>
+          <div
+            style="background: #F8FAFC; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px;">
+            <div
+              style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px;">
+              Customer Party</div>
+            <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);" id="sig-modal-cust-name">Acme
+              Corporation</div>
+            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Status: Signature line blank
+            </div>
+          </div>
+        </div>
+
+        <div
+          style="background: var(--bg-subtle); border-radius: var(--radius-md); padding: 12px; font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
+          <strong>Legal Risk Assessment:</strong> Operating under an unexecuted agreement means dispute resolution,
+          limitation of liability, and indemnity clauses may not be legally enforceable until properly countersigned.
+        </div>
+      </div>
+      <div class="dialog-footer">
+        <button class="btn-dark" id="btn-close-sig-status-footer">Close</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Toast Notification Container -->
   <div class="toast-container" id="toast-container"></div>
 
+  <!-- App Controller Script -->
   <script src="app.js"></script>
 </body>
+
 </html>
