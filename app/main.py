@@ -2,8 +2,21 @@ import asyncio
 import json
 import os
 import shutil
+import sys
 from pathlib import Path
 from typing import Optional
+
+# Ensure UTF-8 output on Windows consoles to prevent charmap UnicodeEncodeError
+if sys.stdout and hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+if sys.stderr and hasattr(sys.stderr, "reconfigure"):
+    try:
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 from fastapi import FastAPI, File, UploadFile, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -113,18 +126,34 @@ async def upload_document(file: UploadFile = File(...)):
     if ext in (".txt", ".md", ".docx"):
         pdf_path = dest_dir / f"{stem}_converted.pdf"
         try:
+            if ext == ".docx":
+                import zipfile
+                import xml.etree.ElementTree as ET
+                import io
+                try:
+                    with zipfile.ZipFile(io.BytesIO(content)) as z:
+                        xml_content = z.read("word/document.xml")
+                    tree = ET.fromstring(xml_content)
+                    text_parts = [node.text for node in tree.iter() if node.tag.endswith("t") and node.text]
+                    text_str = "\n".join(text_parts) if text_parts else "Contract Document"
+                except Exception:
+                    text_str = content.decode("utf-8", errors="ignore")
+            else:
+                text_str = content.decode("utf-8", errors="ignore")
+
             import fitz
             doc = fitz.open()
-            page = doc.new_page()
-            text_str = content.decode("utf-8", errors="ignore")
-            # Wrap long text into PDF page
-            page.insert_text((50, 50), text_str[:4000], fontsize=11)
+            lines = text_str.split("\n")
+            lines_per_page = 45
+            for i in range(0, max(len(lines), 1), lines_per_page):
+                page = doc.new_page()
+                page_text = "\n".join(lines[i : i + lines_per_page])
+                page.insert_text((50, 50), page_text[:3500], fontsize=10)
             doc.save(pdf_path)
             doc.close()
             dest_path = pdf_path
         except Exception as conv_err:
             print(f"Text to PDF conversion warning: {conv_err}")
-            # Write raw content to file anyway
             with open(dest_path, "wb") as buffer:
                 buffer.write(content)
     else:
@@ -136,7 +165,7 @@ async def upload_document(file: UploadFile = File(...)):
         result = await asyncio.to_thread(
             pipeline.audit,
             pdf_path=dest_path,
-            max_probes=7,
+            max_probes=4,
         )
         return {
             "status": "success",

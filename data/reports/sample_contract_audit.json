@@ -5,20 +5,20 @@
     "provider": "Meridian Cloud Systems Pvt. Ltd."
   },
   "health": {
-    "health_score": 62.5,
-    "rating": "High Risk",
-    "headline": "Health Score: 62.5/100 (High Risk) — 2 Deal-Breakers, 4 Watch Out, 1 Protections",
-    "deal_breakers_count": 2,
-    "watch_out_count": 4,
-    "protections_count": 1,
+    "health_score": 80.0,
+    "rating": "Moderate",
+    "headline": "Health Score: 80.0/100 (Moderate) — 1 Deal-Breakers, 0 Watch Out, 0 Protections",
+    "deal_breakers_count": 1,
+    "watch_out_count": 0,
+    "protections_count": 0,
     "missing_protections_count": 7,
     "deal_breakers": [
       {
         "title": "Asymmetric Termination Rights",
         "category": "contractual risk",
-        "claim": "The Provider has the right to terminate for convenience with a 15-day notice, while the Customer can only terminate for convenience after 12 months with a 60-day notice.",
-        "plain_english": "The Provider has the right to terminate for convenience with a 15-day notice, while the Customer can only terminate for convenience after 12 months with a 60-day notice.",
-        "why_flagged": "The differing notice periods and conditions for termination for convenience create an imbalance in the rights of the parties, potentially disadvantaging the Customer.",
+        "claim": "The Provider has more favorable convenience termination rights compared to the Customer.",
+        "plain_english": "The Provider has more favorable convenience termination rights compared to the Customer.",
+        "why_flagged": "The Provider can terminate the agreement for convenience at any time with only 15 days' notice, while the Customer can only terminate for convenience after 12 months and must provide 60 days' notice. This creates an imbalance in termination rights.",
         "suggested_negotiation": "Consider aligning the termination rights and notice periods for both parties to ensure fairness and balance in the agreement.",
         "clause_balance": {
           "is_asymmetric": true,
@@ -40,174 +40,28 @@
         ],
         "severity": "medium",
         "bucket": "deal_breaker",
-        "confidence": 0.9
-      },
-      {
-        "title": "Aggregate Liability Cap and Coverage Duration",
-        "category": "liability risk",
-        "claim": "The aggregate liability cap is limited to the fees paid or payable by Customer to Provider during the three months preceding the event giving rise to the claim.",
-        "plain_english": "If something goes seriously wrong (e.g. data loss or major service outage), the maximum amount of money you can recover from the Provider is limited to only 3 months of subscription fees.",
-        "why_flagged": "1. Standard commercial software agreements provide a 12-month liability cap.\n2. 3 months of fees provides almost no meaningful recovery for catastrophic operational harm.\n3. Leaves Customer absorbing nearly all operational risk.",
-        "suggested_negotiation": "Customer proposes revising Section 9.2: Replace 'fees paid or payable... during the three months' with 'fees paid or payable... during the twelve (12) months preceding the event'.",
-        "clause_balance": {
-          "is_asymmetric": false,
-          "provider_terms": "Liability capped at 3 months of fees paid/payable.",
-          "customer_terms": "Liability capped at 3 months of fees paid/payable (except payment obligations).",
-          "asymmetry_summary": "Nominally mutual, but functionally protects the Provider as the service-delivering party while leaving customer recovery severely limited."
-        },
-        "evidence": [
-          {
-            "chunk_id": "chunk-0011",
-            "page": 3,
-            "quote": "each party’s aggregate liability arising out of or relating to this Agreement shall not exceed the fees paid or payable by Customer to Provider during the three months preceding the event giving rise to the claim."
-          }
-        ],
-        "severity": "medium",
-        "bucket": "deal_breaker",
-        "confidence": 0.9
-      }
-    ],
-    "watch_out": [
-      {
-        "title": "Retention of Backup Copies of Customer Data",
-        "category": "data management risk",
-        "claim": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems.",
-        "plain_english": "After you delete your data or end the contract, the Provider is legally permitted to keep backup copies of your sensitive company data in their systems for up to 180 days (6 months).",
-        "why_flagged": "1. 180 days is an unusually long data retention window for deleted customer information.\n2. Increases data exposure liability under modern privacy regulations (e.g. GDPR, DPDP).\n3. Standard enterprise practice is 30 to 60 days maximum retention for disaster-recovery backups.",
-        "suggested_negotiation": "Customer proposes amending Section 4.4: Reduce the backup retention period from 'up to 180 days' to 'up to 30 days', followed by irreversible overwrite or destruction.",
-        "clause_balance": {
-          "is_asymmetric": false,
-          "provider_terms": "",
-          "customer_terms": "",
-          "asymmetry_summary": ""
-        },
-        "evidence": [
-          {
-            "chunk_id": "chunk-0006",
-            "page": 2,
-            "quote": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems, provided such copies remain protected and are not restored except for disaster recovery purposes."
-          }
-        ],
-        "severity": "medium",
-        "bucket": "watch_out",
-        "confidence": 1.0
-      },
-      {
-        "title": "Automatic Renewal and Non-Renewal Notice Period",
-        "category": "contractual obligation",
-        "claim": "The contract automatically renews unless either Party gives written notice of non-renewal at least 90 days before expiration.",
-        "plain_english": "The contract automatically renews for another full year unless you send an official written non-renewal notice at least 90 days before the contract expires.",
-        "why_flagged": "1. Automatic 12-month lock-in without proactive reminder.\n2. 90-day non-renewal window is easy to miss, locking the company into another year of fees.",
-        "suggested_negotiation": "Customer proposes reducing the non-renewal notice period from 90 days to 30 days, and adding an obligation for Provider to issue a reminder 60 days prior to renewal.",
-        "clause_balance": {
-          "is_asymmetric": false,
-          "provider_terms": "",
-          "customer_terms": "",
-          "asymmetry_summary": ""
-        },
-        "evidence": [
-          {
-            "chunk_id": "chunk-0017",
-            "page": 5,
-            "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods."
-          }
-        ],
-        "severity": "medium",
-        "bucket": "watch_out",
-        "confidence": 1.0
-      },
-      {
-        "title": "Customer's Security Audit Rights",
-        "category": "audit rights",
-        "claim": "Customer may audit Provider’s compliance with security obligations once per calendar year with 20 business days’ prior written notice, and Provider can provide third-party security reports to satisfy the audit request.",
-        "plain_english": "Customer may audit Provider’s compliance with security obligations once per calendar year with 20 business days’ prior written notice, and Provider can provide third-party security reports to satisfy the audit request.",
-        "why_flagged": "This matters because it defines the frequency and notice period for audits, as well as the option for the Provider to use third-party reports, which could impact the thoroughness of the audit process.",
-        "suggested_negotiation": "Consider specifying the criteria for what constitutes a 'reasonably sufficient' third-party report to ensure clarity on the adequacy of the audit process.",
-        "clause_balance": {
-          "is_asymmetric": true,
-          "provider_terms": "May substitute an independent report in lieu of granting direct audit access.",
-          "customer_terms": "Restricted to once per calendar year upon 20 business days' advance notice.",
-          "asymmetry_summary": "Customer's audit rights are tightly constrained in timing and can be satisfied with existing reports."
-        },
-        "evidence": [
-          {
-            "chunk_id": "chunk-0021",
-            "page": 5,
-            "quote": "Customer may, no more than once per calendar year and upon 20 business days’ prior written notice, audit Provider’s compliance with the security obligations in Section 4. Provider may satisfy the request by providing an independent third-party security report where reasonably sufficient to address the requested controls."
-          }
-        ],
-        "severity": "medium",
-        "bucket": "watch_out",
-        "confidence": 1.0
-      },
-      {
-        "title": "Provider's Use of Customer's Name and Logo",
-        "category": "contract compliance",
-        "claim": "The Provider can use the Customer's name and logo in presentations and marketing materials without prior consent.",
-        "plain_english": "The Provider can use your company's name and brand logo on their website and marketing materials without asking for your prior permission.",
-        "why_flagged": "1. Unilateral publicity right without Customer marketing approval.\n2. Risks brand association or disclosure of vendor relationship before launch.",
-        "suggested_negotiation": "Customer proposes amending Section 19: Add 'subject to Customer's prior written approval in each instance'.",
-        "clause_balance": {
-          "is_asymmetric": false,
-          "provider_terms": "",
-          "customer_terms": "",
-          "asymmetry_summary": ""
-        },
-        "evidence": [
-          {
-            "chunk_id": "chunk-0022",
-            "page": 5,
-            "quote": "Provider may identify Customer by name and logo as a customer in Provider’s website, presentations, and marketing materials without obtaining additional approval from Customer."
-          }
-        ],
-        "severity": "medium",
-        "bucket": "watch_out",
         "confidence": 1.0
       }
     ],
-    "protections": [
-      {
-        "title": "Provider's Responsibility for Subcontractors",
-        "category": "contractual obligation",
-        "claim": "Provider remains responsible for the acts and omissions of its subcontractors.",
-        "plain_english": "The Provider remains fully responsible for any mistakes, security breaches, or failures committed by its third-party subcontractors.",
-        "why_flagged": "This is a key protection: the vendor cannot evade liability by blaming an outsourced subprocessor.",
-        "suggested_negotiation": "Maintain this provision as drafted. It protects Customer interests.",
-        "clause_balance": {
-          "is_asymmetric": false,
-          "provider_terms": "",
-          "customer_terms": "",
-          "asymmetry_summary": ""
-        },
-        "evidence": [
-          {
-            "chunk_id": "chunk-0006",
-            "page": 2,
-            "quote": "Provider remains responsible for the acts and omissions of its subcontractors to the same extent as if those acts or omissions were performed by Provider."
-          }
-        ],
-        "severity": "medium",
-        "bucket": "protection",
-        "confidence": 1.0
-      }
-    ],
+    "watch_out": [],
+    "protections": [],
     "score_breakdown": {
       "base_score": 100.0,
-      "deal_breaker_deductions": 16.0,
-      "watch_out_deductions": 12.0,
+      "deal_breaker_deductions": 8.0,
+      "watch_out_deductions": 0.0,
       "missing_deductions": 12.0,
-      "protection_rewards": 2.5
+      "protection_rewards": 0.0
     }
   },
   "summary": {
-    "health_score": 62.5,
-    "rating": "High Risk",
-    "headline": "Health Score: 62.5/100 (High Risk) — 2 Deal-Breakers, 4 Watch Out, 1 Protections",
-    "deal_breakers_count": 2,
-    "watch_out_count": 4,
-    "protections_count": 1,
+    "health_score": 80.0,
+    "rating": "Moderate",
+    "headline": "Health Score: 80.0/100 (Moderate) — 1 Deal-Breakers, 0 Watch Out, 0 Protections",
+    "deal_breakers_count": 1,
+    "watch_out_count": 0,
+    "protections_count": 0,
     "missing_protections_count": 7,
-    "total_verified_findings": 7
+    "total_verified_findings": 1
   },
   "findings": [
     {
@@ -216,9 +70,9 @@
       "category": "contractual risk",
       "severity": "medium",
       "bucket": "deal_breaker",
-      "claim": "The Provider has the right to terminate for convenience with a 15-day notice, while the Customer can only terminate for convenience after 12 months with a 60-day notice.",
-      "plain_english": "The Provider has the right to terminate for convenience with a 15-day notice, while the Customer can only terminate for convenience after 12 months with a 60-day notice.",
-      "why_flagged": "The differing notice periods and conditions for termination for convenience create an imbalance in the rights of the parties, potentially disadvantaging the Customer.",
+      "claim": "The Provider has more favorable convenience termination rights compared to the Customer.",
+      "plain_english": "The Provider has more favorable convenience termination rights compared to the Customer.",
+      "why_flagged": "The Provider can terminate the agreement for convenience at any time with only 15 days' notice, while the Customer can only terminate for convenience after 12 months and must provide 60 days' notice. This creates an imbalance in termination rights.",
       "suggested_negotiation": "Consider aligning the termination rights and notice periods for both parties to ensure fairness and balance in the agreement.",
       "clause_balance": {
         "is_asymmetric": true,
@@ -226,7 +80,7 @@
         "customer_terms": "Can terminate for convenience only after 12 months and upon 60 days' notice.",
         "asymmetry_summary": "Severe asymmetry: Provider can exit after 15 days; Customer is locked in for 12 months with 60-day notice."
       },
-      "confidence": 0.9,
+      "confidence": 1.0,
       "evidence": [
         {
           "chunk_id": "chunk-0012",
@@ -241,10 +95,10 @@
       ],
       "risk_score": {
         "severity_score": 0.5,
-        "confidence_score": 0.9,
+        "confidence_score": 1.0,
         "verification_score": 1.0,
         "evidence_score": 0.6666666666666666,
-        "final_score": 77.5,
+        "final_score": 80.0,
         "risk_level": "critical",
         "bucket": "deal_breaker"
       },
@@ -255,7 +109,7 @@
             "title": "Asymmetric Termination Rights",
             "category": "contractual risk",
             "severity": "medium",
-            "claim": "The Provider has the right to terminate for convenience with a 15-day notice, while the Customer can only terminate for convenience after 12 months with a 60-day notice.",
+            "claim": "The Provider has more favorable convenience termination rights compared to the Customer.",
             "evidence": [
               {
                 "chunk_id": "chunk-0012",
@@ -268,12 +122,12 @@
                 "quote": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice."
               }
             ],
-            "reasoning": "The differing notice periods and conditions for termination for convenience create an imbalance in the rights of the parties, potentially disadvantaging the Customer.",
+            "reasoning": "The Provider can terminate the agreement for convenience at any time with only 15 days' notice, while the Customer can only terminate for convenience after 12 months and must provide 60 days' notice. This creates an imbalance in termination rights.",
             "recommendation": "Consider aligning the termination rights and notice periods for both parties to ensure fairness and balance in the agreement.",
-            "confidence": 0.9,
+            "confidence": 1.0,
             "bucket": "deal_breaker",
-            "plain_english": "The Provider has the right to terminate for convenience with a 15-day notice, while the Customer can only terminate for convenience after 12 months with a 60-day notice.",
-            "why_flagged": "The differing notice periods and conditions for termination for convenience create an imbalance in the rights of the parties, potentially disadvantaging the Customer.",
+            "plain_english": "The Provider has more favorable convenience termination rights compared to the Customer.",
+            "why_flagged": "The Provider can terminate the agreement for convenience at any time with only 15 days' notice, while the Customer can only terminate for convenience after 12 months and must provide 60 days' notice. This creates an imbalance in termination rights.",
             "suggested_negotiation": "Consider aligning the termination rights and notice periods for both parties to ensure fairness and balance in the agreement.",
             "clause_balance": {
               "is_asymmetric": true,
@@ -285,7 +139,7 @@
           "verification": {
             "status": "verified",
             "verdict": "ACCEPTED",
-            "reasoning": "The Auditor's claim is fully supported by the contract text. Chunk-0012 (Page 3, Sections 10.3 and 10.4) contains the exact quoted text confirming that the Provider may terminate for convenience at any time upon 15 days' notice, while the Customer may only do so after 12 months with 60 days' notice. Chunk IDs, page numbers, and quoted text are completely accurate.",
+            "reasoning": "The Auditor's finding is supported by the contract evidence, which clearly states that the Provider can terminate the agreement for convenience with only 15 days' notice, while the Customer must wait 12 months and provide 60 days' notice. This demonstrates an imbalance in termination rights as claimed.",
             "supporting_evidence": [
               {
                 "chunk_id": "chunk-0012",
@@ -296,480 +150,6 @@
                 "chunk_id": "chunk-0012",
                 "page": 3,
                 "quote": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice."
-              }
-            ],
-            "contradictions": [],
-            "confidence": 1.0
-          }
-        }
-      ]
-    },
-    {
-      "finding_id": "finding-002",
-      "title": "Aggregate Liability Cap and Coverage Duration",
-      "category": "liability risk",
-      "severity": "medium",
-      "bucket": "deal_breaker",
-      "claim": "The aggregate liability cap is limited to the fees paid or payable by Customer to Provider during the three months preceding the event giving rise to the claim.",
-      "plain_english": "If something goes seriously wrong (e.g. data loss or major service outage), the maximum amount of money you can recover from the Provider is limited to only 3 months of subscription fees.",
-      "why_flagged": "1. Standard commercial software agreements provide a 12-month liability cap.\n2. 3 months of fees provides almost no meaningful recovery for catastrophic operational harm.\n3. Leaves Customer absorbing nearly all operational risk.",
-      "suggested_negotiation": "Customer proposes revising Section 9.2: Replace 'fees paid or payable... during the three months' with 'fees paid or payable... during the twelve (12) months preceding the event'.",
-      "clause_balance": {
-        "is_asymmetric": false,
-        "provider_terms": "Liability capped at 3 months of fees paid/payable.",
-        "customer_terms": "Liability capped at 3 months of fees paid/payable (except payment obligations).",
-        "asymmetry_summary": "Nominally mutual, but functionally protects the Provider as the service-delivering party while leaving customer recovery severely limited."
-      },
-      "confidence": 0.9,
-      "evidence": [
-        {
-          "chunk_id": "chunk-0011",
-          "page": 3,
-          "quote": "each party’s aggregate liability arising out of or relating to this Agreement shall not exceed the fees paid or payable by Customer to Provider during the three months preceding the event giving rise to the claim."
-        }
-      ],
-      "risk_score": {
-        "severity_score": 0.5,
-        "confidence_score": 0.9,
-        "verification_score": 1.0,
-        "evidence_score": 0.3333333333333333,
-        "final_score": 76.75,
-        "risk_level": "critical",
-        "bucket": "deal_breaker"
-      },
-      "debate_history": [
-        {
-          "round": 1,
-          "finding": {
-            "title": "Aggregate Liability Cap and Coverage Duration",
-            "category": "liability risk",
-            "severity": "medium",
-            "claim": "The aggregate liability cap is limited to the fees paid or payable by Customer to Provider during the three months preceding the event giving rise to the claim.",
-            "evidence": [
-              {
-                "chunk_id": "chunk-0011",
-                "page": 3,
-                "quote": "each party’s aggregate liability arising out of or relating to this Agreement shall not exceed the fees paid or payable by Customer to Provider during the three months preceding the event giving rise to the claim."
-              }
-            ],
-            "reasoning": "This limitation means that in the event of a claim, the maximum amount the Customer can recover is restricted to the fees paid in the last three months, which may not adequately cover potential damages or losses incurred.",
-            "recommendation": "Consider negotiating a higher liability cap or extending the coverage period beyond three months to better protect the Customer's interests.",
-            "confidence": 0.9,
-            "bucket": "deal_breaker",
-            "plain_english": "If something goes seriously wrong (e.g. data loss or major service outage), the maximum amount of money you can recover from the Provider is limited to only 3 months of subscription fees.",
-            "why_flagged": "1. Standard commercial software agreements provide a 12-month liability cap.\n2. 3 months of fees provides almost no meaningful recovery for catastrophic operational harm.\n3. Leaves Customer absorbing nearly all operational risk.",
-            "suggested_negotiation": "Customer proposes revising Section 9.2: Replace 'fees paid or payable... during the three months' with 'fees paid or payable... during the twelve (12) months preceding the event'.",
-            "clause_balance": {
-              "is_asymmetric": false,
-              "provider_terms": "Liability capped at 3 months of fees paid/payable.",
-              "customer_terms": "Liability capped at 3 months of fees paid/payable (except payment obligations).",
-              "asymmetry_summary": "Nominally mutual, but functionally protects the Provider as the service-delivering party while leaving customer recovery severely limited."
-            }
-          },
-          "verification": {
-            "status": "verified",
-            "verdict": "ACCEPTED",
-            "reasoning": "The Auditor's finding is fully supported by Section 9.2 in chunk-0011 (page 3), which establishes that each party's aggregate liability is limited to the fees paid or payable by Customer to Provider in the three months preceding the event giving rise to the claim. The chunk ID and page number cited by the Auditor are correct.",
-            "supporting_evidence": [
-              {
-                "chunk_id": "chunk-0011",
-                "page": 3,
-                "quote": "EXCEPT FOR CUSTOMER’S PAYMENT OBLIGATIONS, EACH PARTY’S AGGREGATE LIABILITY ARISING OUT OF OR RELATING TO THIS AGREEMENT SHALL NOT EXCEED THE FEES PAID OR PAYABLE BY CUSTOMER TO PROVIDER DURING THE THREE MONTHS PRECEDING THE EVENT GIVING RISE TO THE CLAIM."
-              }
-            ],
-            "contradictions": [],
-            "confidence": 0.95
-          }
-        }
-      ]
-    },
-    {
-      "finding_id": "finding-003",
-      "title": "Retention of Backup Copies of Customer Data",
-      "category": "data management risk",
-      "severity": "medium",
-      "bucket": "watch_out",
-      "claim": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems.",
-      "plain_english": "After you delete your data or end the contract, the Provider is legally permitted to keep backup copies of your sensitive company data in their systems for up to 180 days (6 months).",
-      "why_flagged": "1. 180 days is an unusually long data retention window for deleted customer information.\n2. Increases data exposure liability under modern privacy regulations (e.g. GDPR, DPDP).\n3. Standard enterprise practice is 30 to 60 days maximum retention for disaster-recovery backups.",
-      "suggested_negotiation": "Customer proposes amending Section 4.4: Reduce the backup retention period from 'up to 180 days' to 'up to 30 days', followed by irreversible overwrite or destruction.",
-      "clause_balance": {
-        "is_asymmetric": false,
-        "provider_terms": "",
-        "customer_terms": "",
-        "asymmetry_summary": ""
-      },
-      "confidence": 1.0,
-      "evidence": [
-        {
-          "chunk_id": "chunk-0006",
-          "page": 2,
-          "quote": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems, provided such copies remain protected and are not restored except for disaster recovery purposes."
-        }
-      ],
-      "risk_score": {
-        "severity_score": 0.5,
-        "confidence_score": 1.0,
-        "verification_score": 1.0,
-        "evidence_score": 0.3333333333333333,
-        "final_score": 80.0,
-        "risk_level": "critical",
-        "bucket": "watch_out"
-      },
-      "debate_history": [
-        {
-          "round": 1,
-          "finding": {
-            "title": "Retention of Backup Copies of Customer Data",
-            "category": "data management risk",
-            "severity": "medium",
-            "claim": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems.",
-            "evidence": [
-              {
-                "chunk_id": "chunk-0006",
-                "page": 2,
-                "quote": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems, provided such copies remain protected and are not restored except for disaster recovery purposes."
-              }
-            ],
-            "reasoning": "This matters because it establishes a clear timeframe for how long Customer Data can be retained in backup form after deletion, which could impact data privacy and compliance with regulations.",
-            "recommendation": "Consider specifying conditions under which backup data may be accessed or restored to enhance data protection measures.",
-            "confidence": 1.0,
-            "bucket": "watch_out",
-            "plain_english": "After you delete your data or end the contract, the Provider is legally permitted to keep backup copies of your sensitive company data in their systems for up to 180 days (6 months).",
-            "why_flagged": "1. 180 days is an unusually long data retention window for deleted customer information.\n2. Increases data exposure liability under modern privacy regulations (e.g. GDPR, DPDP).\n3. Standard enterprise practice is 30 to 60 days maximum retention for disaster-recovery backups.",
-            "suggested_negotiation": "Customer proposes amending Section 4.4: Reduce the backup retention period from 'up to 180 days' to 'up to 30 days', followed by irreversible overwrite or destruction.",
-            "clause_balance": {
-              "is_asymmetric": false,
-              "provider_terms": "",
-              "customer_terms": "",
-              "asymmetry_summary": ""
-            }
-          },
-          "verification": {
-            "status": "verified",
-            "verdict": "ACCEPTED",
-            "reasoning": "The Auditor's claim, quoted text, chunk ID, and page number are perfectly accurate and directly supported by Section 4.4 of the contract evidence provided in chunk-0006.",
-            "supporting_evidence": [
-              {
-                "chunk_id": "chunk-0006",
-                "page": 2,
-                "quote": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems, provided such copies remain protected and are not restored except for disaster recovery purposes."
-              }
-            ],
-            "contradictions": [],
-            "confidence": 1.0
-          }
-        }
-      ]
-    },
-    {
-      "finding_id": "finding-004",
-      "title": "Provider's Responsibility for Subcontractors",
-      "category": "contractual obligation",
-      "severity": "medium",
-      "bucket": "protection",
-      "claim": "Provider remains responsible for the acts and omissions of its subcontractors.",
-      "plain_english": "The Provider remains fully responsible for any mistakes, security breaches, or failures committed by its third-party subcontractors.",
-      "why_flagged": "This is a key protection: the vendor cannot evade liability by blaming an outsourced subprocessor.",
-      "suggested_negotiation": "Maintain this provision as drafted. It protects Customer interests.",
-      "clause_balance": {
-        "is_asymmetric": false,
-        "provider_terms": "",
-        "customer_terms": "",
-        "asymmetry_summary": ""
-      },
-      "confidence": 1.0,
-      "evidence": [
-        {
-          "chunk_id": "chunk-0006",
-          "page": 2,
-          "quote": "Provider remains responsible for the acts and omissions of its subcontractors to the same extent as if those acts or omissions were performed by Provider."
-        }
-      ],
-      "risk_score": {
-        "severity_score": 0.5,
-        "confidence_score": 1.0,
-        "verification_score": 1.0,
-        "evidence_score": 0.3333333333333333,
-        "final_score": 80.0,
-        "risk_level": "critical",
-        "bucket": "protection"
-      },
-      "debate_history": [
-        {
-          "round": 1,
-          "finding": {
-            "title": "Provider's Responsibility for Subcontractors",
-            "category": "contractual obligation",
-            "severity": "medium",
-            "claim": "Provider remains responsible for the acts and omissions of its subcontractors.",
-            "evidence": [
-              {
-                "chunk_id": "chunk-0006",
-                "page": 2,
-                "quote": "Provider remains responsible for the acts and omissions of its subcontractors to the same extent as if those acts or omissions were performed by Provider."
-              }
-            ],
-            "reasoning": "This matters because it establishes that the Provider cannot absolve itself of liability for the actions of its subcontractors, which is a critical aspect of ensuring accountability and protection for the Customer.",
-            "recommendation": "Consider including specific performance standards or requirements for subcontractors to further protect the Customer's interests.",
-            "confidence": 1.0,
-            "bucket": "protection",
-            "plain_english": "The Provider remains fully responsible for any mistakes, security breaches, or failures committed by its third-party subcontractors.",
-            "why_flagged": "This is a key protection: the vendor cannot evade liability by blaming an outsourced subprocessor.",
-            "suggested_negotiation": "Maintain this provision as drafted. It protects Customer interests.",
-            "clause_balance": {
-              "is_asymmetric": false,
-              "provider_terms": "",
-              "customer_terms": "",
-              "asymmetry_summary": ""
-            }
-          },
-          "verification": {
-            "status": "verified",
-            "verdict": "ACCEPTED",
-            "reasoning": "The auditor's finding is fully supported. The quoted text matches Section 4.2 in chunk-0006 on page 2 exactly, accurately reflecting the contract terms regarding Provider responsibility for subcontractor acts and omissions.",
-            "supporting_evidence": [
-              {
-                "chunk_id": "chunk-0006",
-                "page": 2,
-                "quote": "Provider remains responsible for the acts and omissions of its subcontractors to the same extent as if those acts or omissions were performed by Provider."
-              }
-            ],
-            "contradictions": [],
-            "confidence": 1.0
-          }
-        }
-      ]
-    },
-    {
-      "finding_id": "finding-005",
-      "title": "Automatic Renewal and Non-Renewal Notice Period",
-      "category": "contractual obligation",
-      "severity": "medium",
-      "bucket": "watch_out",
-      "claim": "The contract automatically renews unless either Party gives written notice of non-renewal at least 90 days before expiration.",
-      "plain_english": "The contract automatically renews for another full year unless you send an official written non-renewal notice at least 90 days before the contract expires.",
-      "why_flagged": "1. Automatic 12-month lock-in without proactive reminder.\n2. 90-day non-renewal window is easy to miss, locking the company into another year of fees.",
-      "suggested_negotiation": "Customer proposes reducing the non-renewal notice period from 90 days to 30 days, and adding an obligation for Provider to issue a reminder 60 days prior to renewal.",
-      "clause_balance": {
-        "is_asymmetric": false,
-        "provider_terms": "",
-        "customer_terms": "",
-        "asymmetry_summary": ""
-      },
-      "confidence": 1.0,
-      "evidence": [
-        {
-          "chunk_id": "chunk-0017",
-          "page": 5,
-          "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods."
-        }
-      ],
-      "risk_score": {
-        "severity_score": 0.5,
-        "confidence_score": 1.0,
-        "verification_score": 1.0,
-        "evidence_score": 0.3333333333333333,
-        "final_score": 80.0,
-        "risk_level": "critical",
-        "bucket": "watch_out"
-      },
-      "debate_history": [
-        {
-          "round": 1,
-          "finding": {
-            "title": "Automatic Renewal and Non-Renewal Notice Period",
-            "category": "contractual obligation",
-            "severity": "medium",
-            "claim": "The contract automatically renews unless either Party gives written notice of non-renewal at least 90 days before expiration.",
-            "evidence": [
-              {
-                "chunk_id": "chunk-0017",
-                "page": 5,
-                "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods."
-              }
-            ],
-            "reasoning": "This matters because the automatic renewal clause can lead to unintended extensions of the contract if the non-renewal notice is not provided in a timely manner, potentially locking the parties into additional terms without their explicit consent.",
-            "recommendation": "Consider revising the notice period to a shorter duration or implementing reminders for the non-renewal notice to avoid unintentional renewals.",
-            "confidence": 1.0,
-            "bucket": "watch_out",
-            "plain_english": "The contract automatically renews for another full year unless you send an official written non-renewal notice at least 90 days before the contract expires.",
-            "why_flagged": "1. Automatic 12-month lock-in without proactive reminder.\n2. 90-day non-renewal window is easy to miss, locking the company into another year of fees.",
-            "suggested_negotiation": "Customer proposes reducing the non-renewal notice period from 90 days to 30 days, and adding an obligation for Provider to issue a reminder 60 days prior to renewal.",
-            "clause_balance": {
-              "is_asymmetric": false,
-              "provider_terms": "",
-              "customer_terms": "",
-              "asymmetry_summary": ""
-            }
-          },
-          "verification": {
-            "status": "verified",
-            "verdict": "ACCEPTED",
-            "reasoning": "The Auditor's claim is completely accurate and verbatim supported by chunk-0017 on page 5. The quoted text, page number, and chunk ID match the provided contract evidence exactly, and there are no conflicting provisions elsewhere in the supplied text.",
-            "supporting_evidence": [
-              {
-                "chunk_id": "chunk-0017",
-                "page": 5,
-                "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods."
-              }
-            ],
-            "contradictions": [],
-            "confidence": 1.0
-          }
-        }
-      ]
-    },
-    {
-      "finding_id": "finding-006",
-      "title": "Customer's Security Audit Rights",
-      "category": "audit rights",
-      "severity": "medium",
-      "bucket": "watch_out",
-      "claim": "Customer may audit Provider’s compliance with security obligations once per calendar year with 20 business days’ prior written notice, and Provider can provide third-party security reports to satisfy the audit request.",
-      "plain_english": "Customer may audit Provider’s compliance with security obligations once per calendar year with 20 business days’ prior written notice, and Provider can provide third-party security reports to satisfy the audit request.",
-      "why_flagged": "This matters because it defines the frequency and notice period for audits, as well as the option for the Provider to use third-party reports, which could impact the thoroughness of the audit process.",
-      "suggested_negotiation": "Consider specifying the criteria for what constitutes a 'reasonably sufficient' third-party report to ensure clarity on the adequacy of the audit process.",
-      "clause_balance": {
-        "is_asymmetric": true,
-        "provider_terms": "May substitute an independent report in lieu of granting direct audit access.",
-        "customer_terms": "Restricted to once per calendar year upon 20 business days' advance notice.",
-        "asymmetry_summary": "Customer's audit rights are tightly constrained in timing and can be satisfied with existing reports."
-      },
-      "confidence": 1.0,
-      "evidence": [
-        {
-          "chunk_id": "chunk-0021",
-          "page": 5,
-          "quote": "Customer may, no more than once per calendar year and upon 20 business days’ prior written notice, audit Provider’s compliance with the security obligations in Section 4. Provider may satisfy the request by providing an independent third-party security report where reasonably sufficient to address the requested controls."
-        }
-      ],
-      "risk_score": {
-        "severity_score": 0.5,
-        "confidence_score": 1.0,
-        "verification_score": 1.0,
-        "evidence_score": 0.3333333333333333,
-        "final_score": 80.0,
-        "risk_level": "critical",
-        "bucket": "watch_out"
-      },
-      "debate_history": [
-        {
-          "round": 1,
-          "finding": {
-            "title": "Customer's Security Audit Rights",
-            "category": "audit rights",
-            "severity": "medium",
-            "claim": "Customer may audit Provider’s compliance with security obligations once per calendar year with 20 business days’ prior written notice, and Provider can provide third-party security reports to satisfy the audit request.",
-            "evidence": [
-              {
-                "chunk_id": "chunk-0021",
-                "page": 5,
-                "quote": "Customer may, no more than once per calendar year and upon 20 business days’ prior written notice, audit Provider’s compliance with the security obligations in Section 4. Provider may satisfy the request by providing an independent third-party security report where reasonably sufficient to address the requested controls."
-              }
-            ],
-            "reasoning": "This matters because it defines the frequency and notice period for audits, as well as the option for the Provider to use third-party reports, which could impact the thoroughness of the audit process.",
-            "recommendation": "Consider specifying the criteria for what constitutes a 'reasonably sufficient' third-party report to ensure clarity on the adequacy of the audit process.",
-            "confidence": 1.0,
-            "bucket": "watch_out",
-            "plain_english": "Customer may audit Provider’s compliance with security obligations once per calendar year with 20 business days’ prior written notice, and Provider can provide third-party security reports to satisfy the audit request.",
-            "why_flagged": "This matters because it defines the frequency and notice period for audits, as well as the option for the Provider to use third-party reports, which could impact the thoroughness of the audit process.",
-            "suggested_negotiation": "Consider specifying the criteria for what constitutes a 'reasonably sufficient' third-party report to ensure clarity on the adequacy of the audit process.",
-            "clause_balance": {
-              "is_asymmetric": true,
-              "provider_terms": "May substitute an independent report in lieu of granting direct audit access.",
-              "customer_terms": "Restricted to once per calendar year upon 20 business days' advance notice.",
-              "asymmetry_summary": "Customer's audit rights are tightly constrained in timing and can be satisfied with existing reports."
-            }
-          },
-          "verification": {
-            "status": "verified",
-            "verdict": "ACCEPTED",
-            "reasoning": "The auditor's finding is fully supported by the contract text. The quoted snippet exists verbatim in chunk-0021 on page 5, and the claim accurately summarizes the audit rights and third-party report provision contained within that section.",
-            "supporting_evidence": [
-              {
-                "chunk_id": "chunk-0021",
-                "page": 5,
-                "quote": "Customer may, no more than once per calendar year and upon 20 business days’ prior written notice, audit Provider’s compliance with the security obligations in Section 4. Provider may satisfy the request by providing an independent third-party security report where reasonably sufficient to address the requested controls."
-              }
-            ],
-            "contradictions": [],
-            "confidence": 1.0
-          }
-        }
-      ]
-    },
-    {
-      "finding_id": "finding-007",
-      "title": "Provider's Use of Customer's Name and Logo",
-      "category": "contract compliance",
-      "severity": "medium",
-      "bucket": "watch_out",
-      "claim": "The Provider can use the Customer's name and logo in presentations and marketing materials without prior consent.",
-      "plain_english": "The Provider can use your company's name and brand logo on their website and marketing materials without asking for your prior permission.",
-      "why_flagged": "1. Unilateral publicity right without Customer marketing approval.\n2. Risks brand association or disclosure of vendor relationship before launch.",
-      "suggested_negotiation": "Customer proposes amending Section 19: Add 'subject to Customer's prior written approval in each instance'.",
-      "clause_balance": {
-        "is_asymmetric": false,
-        "provider_terms": "",
-        "customer_terms": "",
-        "asymmetry_summary": ""
-      },
-      "confidence": 1.0,
-      "evidence": [
-        {
-          "chunk_id": "chunk-0022",
-          "page": 5,
-          "quote": "Provider may identify Customer by name and logo as a customer in Provider’s website, presentations, and marketing materials without obtaining additional approval from Customer."
-        }
-      ],
-      "risk_score": {
-        "severity_score": 0.5,
-        "confidence_score": 1.0,
-        "verification_score": 1.0,
-        "evidence_score": 0.3333333333333333,
-        "final_score": 80.0,
-        "risk_level": "critical",
-        "bucket": "watch_out"
-      },
-      "debate_history": [
-        {
-          "round": 1,
-          "finding": {
-            "title": "Provider's Use of Customer's Name and Logo",
-            "category": "contract compliance",
-            "severity": "medium",
-            "claim": "The Provider can use the Customer's name and logo in presentations and marketing materials without prior consent.",
-            "evidence": [
-              {
-                "chunk_id": "chunk-0022",
-                "page": 5,
-                "quote": "Provider may identify Customer by name and logo as a customer in Provider’s website, presentations, and marketing materials without obtaining additional approval from Customer."
-              }
-            ],
-            "reasoning": "This provision allows the Provider to use the Customer's name and logo freely in marketing contexts, which could lead to potential misrepresentation or unwanted association if the Customer's brand is used inappropriately.",
-            "recommendation": "Consider adding a clause that requires the Provider to seek prior consent for specific uses of the Customer's name and logo to mitigate risks of misrepresentation.",
-            "confidence": 1.0,
-            "bucket": "watch_out",
-            "plain_english": "The Provider can use your company's name and brand logo on their website and marketing materials without asking for your prior permission.",
-            "why_flagged": "1. Unilateral publicity right without Customer marketing approval.\n2. Risks brand association or disclosure of vendor relationship before launch.",
-            "suggested_negotiation": "Customer proposes amending Section 19: Add 'subject to Customer's prior written approval in each instance'.",
-            "clause_balance": {
-              "is_asymmetric": false,
-              "provider_terms": "",
-              "customer_terms": "",
-              "asymmetry_summary": ""
-            }
-          },
-          "verification": {
-            "status": "verified",
-            "verdict": "ACCEPTED",
-            "reasoning": "The Auditor's claim, quote, page number, and chunk ID are fully accurate and supported by the contract text in chunk-0022.",
-            "supporting_evidence": [
-              {
-                "chunk_id": "chunk-0022",
-                "page": 5,
-                "quote": "Provider may identify Customer by name and logo as a customer in Provider’s website, presentations, and marketing materials without obtaining additional approval from Customer."
               }
             ],
             "contradictions": [],
@@ -888,13 +268,6 @@
       "customer_terms": "Can terminate for convenience only after 12 months and upon 60 days' notice.",
       "asymmetry_summary": "Severe asymmetry: Provider can exit after 15 days; Customer is locked in for 12 months with 60-day notice.",
       "page": 3
-    },
-    {
-      "title": "Customer's Security Audit Rights",
-      "provider_terms": "May substitute an independent report in lieu of granting direct audit access.",
-      "customer_terms": "Restricted to once per calendar year upon 20 business days' advance notice.",
-      "asymmetry_summary": "Customer's audit rights are tightly constrained in timing and can be satisfied with existing reports.",
-      "page": 5
     }
   ],
   "obligations": {
@@ -1489,7 +862,7 @@
           "severity": "medium",
           "bucket": "deal_breaker",
           "category": "contractual risk",
-          "claim": "The Provider has the right to terminate for convenience with a 15-day notice, while the Customer can only terminate for convenience after 12 months with a 60-day notice."
+          "claim": "The Provider has more favorable convenience termination rights compared to the Customer."
         }
       },
       {
@@ -1501,139 +874,6 @@
           "label": "chunk-0012",
           "page_number": 3,
           "quote": "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer."
-        }
-      },
-      {
-        "id": "finding-0002",
-        "label": "Aggregate Liability Cap and Coverage Duration",
-        "node_type": "risk_finding",
-        "properties": {
-          "node_type": "risk_finding",
-          "label": "Aggregate Liability Cap and Coverage Duration",
-          "severity": "medium",
-          "bucket": "deal_breaker",
-          "category": "liability risk",
-          "claim": "The aggregate liability cap is limited to the fees paid or payable by Customer to Provider during the three months preceding the event giving rise to the claim."
-        }
-      },
-      {
-        "id": "evidence-chunk-0011",
-        "label": "chunk-0011",
-        "node_type": "evidence",
-        "properties": {
-          "node_type": "evidence",
-          "label": "chunk-0011",
-          "page_number": 3,
-          "quote": "each party’s aggregate liability arising out of or relating to this Agreement shall not exceed the fees paid or payable by Customer to Provider during the three months preceding the event giving rise to the claim."
-        }
-      },
-      {
-        "id": "finding-0003",
-        "label": "Retention of Backup Copies of Customer Data",
-        "node_type": "risk_finding",
-        "properties": {
-          "node_type": "risk_finding",
-          "label": "Retention of Backup Copies of Customer Data",
-          "severity": "medium",
-          "bucket": "watch_out",
-          "category": "data management risk",
-          "claim": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems."
-        }
-      },
-      {
-        "id": "evidence-chunk-0006",
-        "label": "chunk-0006",
-        "node_type": "evidence",
-        "properties": {
-          "node_type": "evidence",
-          "label": "chunk-0006",
-          "page_number": 2,
-          "quote": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems, provided such copies remain protected and are not restored except for disaster recovery purposes."
-        }
-      },
-      {
-        "id": "finding-0004",
-        "label": "Provider's Responsibility for Subcontractors",
-        "node_type": "risk_finding",
-        "properties": {
-          "node_type": "risk_finding",
-          "label": "Provider's Responsibility for Subcontractors",
-          "severity": "medium",
-          "bucket": "protection",
-          "category": "contractual obligation",
-          "claim": "Provider remains responsible for the acts and omissions of its subcontractors."
-        }
-      },
-      {
-        "id": "finding-0005",
-        "label": "Automatic Renewal and Non-Renewal Notice Period",
-        "node_type": "risk_finding",
-        "properties": {
-          "node_type": "risk_finding",
-          "label": "Automatic Renewal and Non-Renewal Notice Period",
-          "severity": "medium",
-          "bucket": "watch_out",
-          "category": "contractual obligation",
-          "claim": "The contract automatically renews unless either Party gives written notice of non-renewal at least 90 days before expiration."
-        }
-      },
-      {
-        "id": "evidence-chunk-0017",
-        "label": "chunk-0017",
-        "node_type": "evidence",
-        "properties": {
-          "node_type": "evidence",
-          "label": "chunk-0017",
-          "page_number": 5,
-          "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods."
-        }
-      },
-      {
-        "id": "finding-0006",
-        "label": "Customer's Security Audit Rights",
-        "node_type": "risk_finding",
-        "properties": {
-          "node_type": "risk_finding",
-          "label": "Customer's Security Audit Rights",
-          "severity": "medium",
-          "bucket": "watch_out",
-          "category": "audit rights",
-          "claim": "Customer may audit Provider’s compliance with security obligations once per calendar year with 20 business days’ prior written notice, and Provider can provide third-party security reports to satisfy the audit request."
-        }
-      },
-      {
-        "id": "evidence-chunk-0021",
-        "label": "chunk-0021",
-        "node_type": "evidence",
-        "properties": {
-          "node_type": "evidence",
-          "label": "chunk-0021",
-          "page_number": 5,
-          "quote": "Customer may, no more than once per calendar year and upon 20 business days’ prior written notice, audit Provider’s compliance with the security obligations in Section 4. Provider may satisfy the request by providing an independent third-party security report where reasonably sufficient to address the requested controls."
-        }
-      },
-      {
-        "id": "finding-0007",
-        "label": "Provider's Use of Customer's Name and Logo",
-        "node_type": "risk_finding",
-        "properties": {
-          "node_type": "risk_finding",
-          "label": "Provider's Use of Customer's Name and Logo",
-          "severity": "medium",
-          "bucket": "watch_out",
-          "category": "contract compliance",
-          "claim": "The Provider can use the Customer's name and logo in presentations and marketing materials without prior consent."
-        }
-      },
-      {
-        "id": "evidence-chunk-0022",
-        "label": "chunk-0022",
-        "node_type": "evidence",
-        "properties": {
-          "node_type": "evidence",
-          "label": "chunk-0022",
-          "page_number": 5,
-          "quote": "Provider may identify Customer by name and logo as a customer in Provider’s website, presentations, and marketing materials without obtaining additional approval from Customer."
         }
       }
     ],
@@ -1763,72 +1003,9 @@
         "chunk_id": "chunk-0012",
         "section": null,
         "quote": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice."
-      },
-      {
-        "source": "finding-0002",
-        "target": "term-3-months",
-        "relationship": "FLAGGED_CLAUSE",
-        "page_number": null,
-        "chunk_id": null,
-        "section": null,
-        "quote": ""
-      },
-      {
-        "source": "finding-0002",
-        "target": "evidence-chunk-0011",
-        "relationship": "SUPPORTED_BY",
-        "page_number": 3,
-        "chunk_id": "chunk-0011",
-        "section": null,
-        "quote": "each party’s aggregate liability arising out of or relating to this Agreement shall not exceed the fees paid or payable by Customer to Provider during the three months preceding the event giving rise to the claim."
-      },
-      {
-        "source": "finding-0003",
-        "target": "evidence-chunk-0006",
-        "relationship": "SUPPORTED_BY",
-        "page_number": 2,
-        "chunk_id": "chunk-0006",
-        "section": null,
-        "quote": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems, provided such copies remain protected and are not restored except for disaster recovery purposes."
-      },
-      {
-        "source": "finding-0004",
-        "target": "evidence-chunk-0006",
-        "relationship": "SUPPORTED_BY",
-        "page_number": 2,
-        "chunk_id": "chunk-0006",
-        "section": null,
-        "quote": "Provider remains responsible for the acts and omissions of its subcontractors to the same extent as if those acts or omissions were performed by Provider."
-      },
-      {
-        "source": "finding-0005",
-        "target": "evidence-chunk-0017",
-        "relationship": "SUPPORTED_BY",
-        "page_number": 5,
-        "chunk_id": "chunk-0017",
-        "section": null,
-        "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods."
-      },
-      {
-        "source": "finding-0006",
-        "target": "evidence-chunk-0021",
-        "relationship": "SUPPORTED_BY",
-        "page_number": 5,
-        "chunk_id": "chunk-0021",
-        "section": null,
-        "quote": "Customer may, no more than once per calendar year and upon 20 business days’ prior written notice, audit Provider’s compliance with the security obligations in Section 4. Provider may satisfy the request by providing an independent third-party security report where reasonably sufficient to address the requested controls."
-      },
-      {
-        "source": "finding-0007",
-        "target": "evidence-chunk-0022",
-        "relationship": "SUPPORTED_BY",
-        "page_number": 5,
-        "chunk_id": "chunk-0022",
-        "section": null,
-        "quote": "Provider may identify Customer by name and logo as a customer in Provider’s website, presentations, and marketing materials without obtaining additional approval from Customer."
       }
     ],
-    "total_nodes": 28,
-    "total_links": 21
+    "total_nodes": 17,
+    "total_links": 14
   }
 }

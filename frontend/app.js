@@ -2584,13 +2584,23 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!modalUploadAudit) return;
     if (modalUploadProgress) modalUploadProgress.style.display = "none";
     if (modalDropArea) modalDropArea.style.display = "block";
+    if (uploadStageBar) uploadStageBar.style.width = "10%";
+    if (uploadStageText) uploadStageText.textContent = "Ingesting document and extracting clauses...";
     modalUploadAudit.showModal();
   }
 
   btnHeaderNewAudit?.addEventListener("click", openUploadModal);
   btnCloseUploadModal?.addEventListener("click", () => modalUploadAudit?.close());
 
-  btnBrowseModal?.addEventListener("click", () => {
+  // Allow clicking anywhere inside the drop area to open file picker
+  modalDropArea?.addEventListener("click", (e) => {
+    if (e.target !== btnModalLoadSample && !btnModalLoadSample?.contains(e.target)) {
+      modalFileInput?.click();
+    }
+  });
+
+  btnBrowseModal?.addEventListener("click", (e) => {
+    e.stopPropagation();
     modalFileInput?.click();
   });
 
@@ -2613,6 +2623,20 @@ document.addEventListener("DOMContentLoaded", () => {
     modalDropArea.style.borderColor = "#CBD5E1";
     const file = e.dataTransfer?.files?.[0];
     if (file) executeUpload(file);
+  });
+
+  // Global window drag-and-drop: dropping a document anywhere opens the upload modal and runs the audit
+  window.addEventListener("dragover", (e) => {
+    e.preventDefault();
+  });
+
+  window.addEventListener("drop", (e) => {
+    e.preventDefault();
+    const file = e.dataTransfer?.files?.[0];
+    if (file && (file.name.endsWith(".pdf") || file.name.endsWith(".docx") || file.name.endsWith(".txt") || file.name.endsWith(".md"))) {
+      openUploadModal();
+      executeUpload(file);
+    }
   });
 
   btnModalLoadSample?.addEventListener("click", async () => {
@@ -2643,20 +2667,32 @@ document.addEventListener("DOMContentLoaded", () => {
     if (modalUploadProgress) modalUploadProgress.style.display = "block";
 
     const stages = [
-      { text: "Ingesting PDF and extracting structured text...", pct: "25%" },
-      { text: "Building BM25 and dense vector indexes...", pct: "50%" },
-      { text: "Cross-verifying clauses against contract terms...", pct: "75%" },
-      { text: "Finalizing contract safety score and audit memo...", pct: "95%" }
+      { text: "Ingesting document structure & mapping pages...", pct: "18%" },
+      { text: "Scanning tables & signature block authenticity...", pct: "36%" },
+      { text: "Constructing section-aware semantic chunks...", pct: "52%" },
+      { text: "Populating BM25 and dense vector indexes...", pct: "68%" },
+      { text: "AI Courtroom: Multi-agent debate cross-examining clauses...", pct: "84%" },
+      { text: "Synthesizing executive audit memo & safety score...", pct: "93%" }
     ];
 
     let sIdx = 0;
+    let secondsElapsed = 0;
     const timer = setInterval(() => {
+      secondsElapsed++;
       if (sIdx < stages.length) {
-        if (uploadStageText) uploadStageText.textContent = stages[sIdx].text;
+        if (uploadStageText) {
+          uploadStageText.innerHTML = `<span>${stages[sIdx].text}</span> <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); float: right;">${secondsElapsed}s</span>`;
+        }
         if (uploadStageBar) uploadStageBar.style.width = stages[sIdx].pct;
-        sIdx++;
+        if (secondsElapsed % 3 === 0 && sIdx < stages.length - 1) {
+          sIdx++;
+        }
+      } else {
+        if (uploadStageText) {
+          uploadStageText.innerHTML = `<span>Finalizing adversarial consensus & redline suggestions...</span> <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); float: right;">${secondsElapsed}s</span>`;
+        }
       }
-    }, 2800);
+    }, 1000);
 
     const formData = new FormData();
     formData.append("file", file);
@@ -2667,10 +2703,22 @@ document.addEventListener("DOMContentLoaded", () => {
         body: formData
       });
 
-      if (!res.ok) throw new Error(`Upload failed with status ${res.status}`);
+      if (!res.ok) {
+        let errDetail = `Server returned HTTP ${res.status}`;
+        try {
+          const errJson = await res.json();
+          if (errJson.detail) errDetail = errJson.detail;
+        } catch (_) {}
+        throw new Error(errDetail);
+      }
+
       const data = await res.json();
 
       if (data.report) {
+        if (uploadStageBar) uploadStageBar.style.width = "100%";
+        if (uploadStageText) uploadStageText.textContent = "Audit complete! Opening workspace...";
+        await new Promise((r) => setTimeout(r, 600));
+
         renderAll(data.report);
         modalUploadAudit.close();
         showToast(`Audit complete for "${file.name}"!`, "success");
@@ -2809,7 +2857,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btn-hero-upload-doc")
   ].forEach((btn) => {
     btn?.addEventListener("click", () => {
-      modalUploadAudit?.showModal();
+      openUploadModal();
     });
   });
 
