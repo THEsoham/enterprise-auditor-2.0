@@ -308,132 +308,102 @@
           </div>
         </div>
 
-        <!-- ============ VISUAL SCORE BREAKDOWN ROW ============ -->
-        <div class="score-breakdown-row">
-
-          <!-- Waterfall Bar -->
-          <div class="waterfall-card">
-            <div class="waterfall-card-title">How Your Score Was Built</div>
-            <div class="waterfall-bar-wrap">
-              <div class="waterfall-bar" id="waterfall-bar"></div>
-            </div>
-            <div class="waterfall-labels" id="waterfall-labels"></div>
-          </div>
-
-          <!-- Category Impact Bars -->
-          <div class="impact-card">
-            <div class="impact-card-title">What's Affecting the Score</div>
-            <div class="impact-bars-list" id="impact-bars-list"></div>
-          </div>
-        </div>
-
-        <!-- ============ 3 INTERACTIVE METRIC CARDS ============ -->
-        <div class="metrics-row">
-          
-          <div class="metric-card card-dealbreaker" id="metric-card-dealbreakers" role="button" tabindex="0" title="Click to view deal-breakers">
-            <div class="metric-top">
-              <span class="metric-icon">🔴</span>
-              <span class="metric-badge">MUST FIX</span>
-            </div>
-            <div class="metric-count" id="count-dealbreakers">0</div>
-            <div class="metric-title">Deal-Breakers</div>
-            <p class="metric-desc" id="metric-desc-dealbreakers">Dangerous clauses that could cost you money or lock you into an unfair deal.</p>
-            <div class="metric-action">See Deal-Breakers & Fixes →</div>
-          </div>
-
-          <div class="metric-card card-watchout" id="metric-card-watchout" role="button" tabindex="0" title="Click to view warning flags">
-            <div class="metric-top">
-              <span class="metric-icon">🟡</span>
-              <span class="metric-badge">WARNING</span>
-            </div>
-            <div class="metric-count" id="count-watchout">0</div>
-            <div class="metric-title">Watch Out</div>
-            <p class="metric-desc" id="metric-desc-watchout">Unfavorable terms that may limit your flexibility or increase your exposure.</p>
-            <div class="metric-action">See Warnings & Fixes →</div>
-          </div>
-
-          <div class="metric-card card-protection" id="metric-card-protections" role="button" tabindex="0" title="Click to view good clauses">
-            <div class="metric-top">
-              <span class="metric-icon">🟢</span>
-              <span class="metric-badge">GOOD CLAUSE</span>
-            </div>
-            <div class="metric-count" id="count-protections">0</div>
-            <div class="metric-title">Protections</div>
-            <p class="metric-desc" id="metric-desc-protections">Clauses that are fair and protect your company's interests.</p>
-            <div class="metric-action">See Good Clauses →</div>
-          </div>
-
-        </div>
-
-        <!-- #1 Priority Alert Banner -->
-        <div class="spotlight-banner">
-          <div class="spotlight-badge">🔴 BIGGEST RISK FOUND IN THIS CONTRACT</div>
-          <div class="spotlight-content">
-            <div class="spotlight-main">
-              <h3 id="spotlight-title">Unfair Cancellation Rule (Section 10.3 vs 10.4)</h3>
-              <p id="spotlight-desc">
-                The Provider can cancel this contract anytime with only <strong>15 days notice</strong>, but your company is trapped for <strong>12 months</strong> and must give <strong>60 days notice</strong> to leave.
-              </p>
-            </div>
-            <div class="spotlight-actions">
-              <button class="btn btn-outline" id="btn-spotlight-asymmetry">⚖️ Compare Rights</button>
-              <button class="btn btn-primary" id="btn-spotlight-redline">See Quote & Suggested Fix ↗</button>
+        <!-- ============ COLLAPSIBLE SCORE BREAKDOWN ============ -->
+        <div class="dash-accordion" id="score-breakdown-accordion">
+          <button class="dash-accordion-toggle" id="toggle-score-breakdown" type="button">
+            <span class="accordion-toggle-icon">📊</span>
+            <span class="accordion-toggle-text">Score Breakdown — How Your Score Was Built</span>
+            <span class="accordion-chevron">▶</span>
+          </button>
+          <div class="dash-accordion-body" id="score-breakdown-body">
+            <div class="score-breakdown-row">
+              <div class="waterfall-card">
+                <div class="waterfall-card-title">How Your Score Was Built</div>
+                <div class="waterfall-bar-wrap">
+                  <div class="waterfall-bar" id="waterfall-bar"></div>
+                </div>
+                <div class="waterfall-labels" id="waterfall-labels"></div>
+              </div>
+              <div class="impact-card">
+                <div class="impact-card-title">What's Affecting the Score</div>
+                <div class="impact-bars-list" id="impact-bars-list"></div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- 4 Quick Module Cards -->
-        <div class="hub-section-header">
-          <h2>More Detailed Sections</h2>
-          <p>Click any card to open a dedicated view or window without cluttering your screen.</p>
+        <!-- ============ 6 DASHBOARD FEATURE CARDS ============ -->
+        <div class="dash-section-label">Explore Your Audit</div>
+
+        <div class="dash-features-grid">
+
+          <!-- 1. Risks & Fixes -->
+          <div class="dash-feature-card dash-card-risks" id="dash-card-risks" role="button" tabindex="0">
+            <div class="dash-card-icon-wrap" style="--accent: var(--crimson); --accent-bg: var(--crimson-bg);">🛡️</div>
+            <div class="dash-card-body">
+              <div class="dash-card-title">Risks & Fixes</div>
+              <div class="dash-card-stat" id="dash-stat-risks">0 issues found</div>
+            </div>
+            <div class="dash-card-arrow">→</div>
+          </div>
+
+          <!-- 2. Missing Protections -->
+          <div class="dash-feature-card dash-card-missing" id="dash-card-missing" role="button" tabindex="0">
+            <div class="dash-card-icon-wrap" style="--accent: var(--amber); --accent-bg: var(--amber-bg);">⚠️</div>
+            <div class="dash-card-body">
+              <div class="dash-card-title">Missing Protections</div>
+              <div class="dash-card-stat" id="dash-stat-missing">0 gaps</div>
+            </div>
+            <div class="dash-card-arrow">→</div>
+          </div>
+
+          <!-- 3. AI Debate Arena -->
+          <div class="dash-feature-card dash-card-debate" id="dash-card-debate" role="button" tabindex="0">
+            <div class="dash-card-icon-wrap" style="--accent: var(--indigo); --accent-bg: var(--indigo-bg);">⚖️</div>
+            <div class="dash-card-body">
+              <div class="dash-card-title">AI Debate Arena</div>
+              <div class="dash-card-stat" id="dash-stat-debate">0 claims ready</div>
+            </div>
+            <div class="dash-card-arrow">→</div>
+          </div>
+
+          <!-- 4. Key Dates -->
+          <div class="dash-feature-card dash-card-dates" id="dash-card-dates" role="button" tabindex="0">
+            <div class="dash-card-icon-wrap" style="--accent: var(--cyan); --accent-bg: var(--cyan-bg);">📅</div>
+            <div class="dash-card-body">
+              <div class="dash-card-title">Key Dates & Deadlines</div>
+              <div class="dash-card-stat" id="dash-stat-dates">0 deadlines</div>
+            </div>
+            <div class="dash-card-arrow">→</div>
+          </div>
+
+          <!-- 5. Signatures & Fees -->
+          <div class="dash-feature-card dash-card-scanner" id="dash-card-scanner" role="button" tabindex="0">
+            <div class="dash-card-icon-wrap" style="--accent: var(--purple); --accent-bg: var(--purple-bg);">✍️</div>
+            <div class="dash-card-body">
+              <div class="dash-card-title">Signatures & Fees</div>
+              <div class="dash-card-stat" id="dash-stat-scanner">Check status</div>
+            </div>
+            <div class="dash-card-arrow">→</div>
+          </div>
+
+          <!-- 6. Contract Map -->
+          <div class="dash-feature-card dash-card-graph" id="dash-card-graph" role="button" tabindex="0">
+            <div class="dash-card-icon-wrap" style="--accent: var(--emerald); --accent-bg: var(--emerald-bg);">🕸️</div>
+            <div class="dash-card-body">
+              <div class="dash-card-title">Contract Map</div>
+              <div class="dash-card-stat" id="dash-stat-graph">Visual relationship view</div>
+            </div>
+            <div class="dash-card-arrow">→</div>
+          </div>
+
         </div>
 
-        <div class="hub-grid">
-
-          <div class="hub-card" id="hub-card-asymmetry">
-            <div class="hub-icon-wrap icon-purple">⚖️</div>
-            <div class="hub-content">
-              <h3>Fairness Check (Who Has More Rights?)</h3>
-              <p>Compare provider rights side-by-side with customer rights to spot one-sided terms.</p>
-              <button class="btn btn-sm btn-outline" id="btn-open-asymmetry-modal">
-                Open Fairness Window ↗
-              </button>
-            </div>
-          </div>
-
-          <div class="hub-card" id="hub-card-missing">
-            <div class="hub-icon-wrap icon-amber">⚠️</div>
-            <div class="hub-content">
-              <h3>Missing Standard Protections</h3>
-              <p>7 basic clauses that standard contracts have, but are missing from this draft.</p>
-              <button class="btn btn-sm btn-outline" id="btn-nav-to-missing">
-                View Missing Checklist →
-              </button>
-            </div>
-          </div>
-
-          <div class="hub-card" id="hub-card-timeline">
-            <div class="hub-icon-wrap icon-blue">📅</div>
-            <div class="hub-content">
-              <h3>Important Dates & Deadlines</h3>
-              <p>12 time-sensitive deadlines you must follow (e.g. 90-day non-renewal notice).</p>
-              <button class="btn btn-sm btn-outline" id="btn-nav-to-timeline">
-                View All Deadlines →
-              </button>
-            </div>
-          </div>
-
-          <div class="hub-card" id="hub-card-scanner">
-            <div class="hub-icon-wrap icon-cyan">✍️</div>
-            <div class="hub-content">
-              <h3>Signatures & Hidden Fees</h3>
-              <p>Checks whether the document is signed, plus alerts for storage overage fees.</p>
-              <button class="btn btn-sm btn-outline" id="btn-nav-to-scanner">
-                Open Scanner & Fees →
-              </button>
-            </div>
-          </div>
-
+        <!-- Fairness Quick Action (kept for modal trigger) -->
+        <div class="dash-fairness-cta">
+          <button class="btn btn-outline btn-sm" id="btn-open-asymmetry-modal">
+            <span>⚖️ Compare Provider vs Customer Rights</span>
+          </button>
         </div>
 
       </div>
@@ -517,196 +487,110 @@
     <!-- ============================================================== -->
     <section class="screen" id="screen-courtroom">
       <div class="view-container">
-        
-        <!-- Courtroom Arena Hero -->
-        <div class="courtroom-hero-card">
-          <div class="courtroom-hero-top">
-            <div class="courtroom-badge-row">
-              <span class="arena-live-pulse"><span class="pulse-dot"></span> COURTROOM IN SESSION</span>
-              <span class="view-badge">⚖️ ADVERSARIAL MULTI-AGENT ARENA</span>
-            </div>
-            <h1 class="courtroom-title">Dual-Agent Contract Trial & Cross-Examination</h1>
-            <p class="courtroom-subtitle">
-              Unlike single-AI tools that hallucinate or overlook fine print, Enterprise Auditor pits two specialized AI agents against each other in real-time legal debate. Every quote is verified word-for-word against the raw PDF coordinates.
-            </p>
-          </div>
 
-          <!-- Dual Agent Face-Off Showcase -->
-          <div class="courtroom-agents-grid">
-            <!-- Agent Alpha: Prosecutor -->
-            <div class="agent-persona-card persona-prosecutor">
-              <div class="persona-header">
-                <div class="persona-avatar-wrap">
-                  <span class="persona-avatar">🤖</span>
-                  <span class="persona-indicator indicator-red"></span>
-                </div>
-                <div class="persona-identity">
-                  <div class="persona-role">AI PROSECUTOR / RISK AUDITOR</div>
-                  <div class="persona-engine">OpenAI GPT-4o Engine</div>
-                </div>
-              </div>
-              <p class="persona-mission">
-                Aggressively interrogates every section. Flags unilateral cancellation clauses, uncapped liabilities, missing audit rights, and traps hidden in fine print.
-              </p>
-              <div class="persona-traits">
-                <span class="trait-tag">⚡ Aggressive Trap Hunting</span>
-                <span class="trait-tag">🔍 Fine-Print Scrutiny</span>
-              </div>
-            </div>
+        <!-- ======= STAGE 1: CLAIM SELECTION (Default View) ======= -->
+        <div class="debate-stage" id="debate-stage-claims">
 
-            <!-- VS Clash Emblem -->
-            <div class="courtroom-vs-divider">
-              <div class="vs-circle">
-                <span class="vs-text">VS</span>
-              </div>
-              <div class="vs-label">MUTUAL CROSS-EXAMINATION</div>
+          <!-- Minimal Header -->
+          <div class="debate-stage-header">
+            <div class="debate-stage-header-left">
+              <div class="view-badge">⚖️ AI DEBATE ARENA</div>
+              <h1>Select a Claim to Debate</h1>
+              <p>Choose a contract finding below, or ask your own question. Two AI agents will argue FOR and AGAINST with cited evidence.</p>
             </div>
-
-            <!-- Agent Beta: Skeptic -->
-            <div class="agent-persona-card persona-skeptic">
-              <div class="persona-header">
-                <div class="persona-avatar-wrap">
-                  <span class="persona-avatar">🛡️</span>
-                  <span class="persona-indicator indicator-green"></span>
-                </div>
-                <div class="persona-identity">
-                  <div class="persona-role">AI SKEPTIC / INDEPENDENT VERIFIER</div>
-                  <div class="persona-engine">Google Gemini 2.5 Engine</div>
-                </div>
-              </div>
-              <p class="persona-mission">
-                Cross-examines the prosecutor. Retrieves raw PDF chunks, verifies exact quotations character-by-character, and checks surrounding context for exceptions.
-              </p>
-              <div class="persona-traits">
-                <span class="trait-tag">✓ 100% Quote Verification</span>
-                <span class="trait-tag">🚫 Zero Hallucinations</span>
+            <div class="debate-stage-header-right">
+              <div class="debate-agents-mini">
+                <span class="agent-mini-pill agent-mini-prosecutor">🤖 GPT-4o</span>
+                <span class="agent-mini-vs">VS</span>
+                <span class="agent-mini-pill agent-mini-skeptic">🛡️ Gemini 2.5</span>
               </div>
             </div>
           </div>
 
-          <!-- Arena Scorecard: 4 High-Impact Visual Metrics -->
-          <div class="courtroom-scorecard">
-            <div class="scorecard-kpi-item">
-              <div class="kpi-icon-box">⚖️</div>
-              <div class="kpi-content">
-                <div class="kpi-val" id="courtroom-stat-debates">0</div>
-                <div class="kpi-label">Clauses On Trial</div>
-                <div class="kpi-sub">Cross-examined by dual agents</div>
-              </div>
+          <!-- Custom Query Box -->
+          <div class="debate-custom-query-card">
+            <div class="custom-query-label">Ask Your Own Question</div>
+            <div class="custom-query-input-row">
+              <span class="custom-query-icon">🔍</span>
+              <input type="text" id="courtroom-query-input" placeholder="Type any question about this contract (e.g., Can the provider cancel anytime?)...">
+              <button class="btn btn-primary" id="btn-ask-courtroom">
+                <span>Start Debate</span>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13"/>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+              </button>
             </div>
-            <div class="scorecard-kpi-item">
-              <div class="kpi-icon-box" style="background: rgba(16, 185, 129, 0.12); color: #059669;">🛡️</div>
-              <div class="kpi-content">
-                <div class="kpi-val" id="courtroom-stat-accuracy">100%</div>
-                <div class="kpi-label">Citation Accuracy</div>
-                <div class="kpi-sub">Word-for-word PDF quote match</div>
-              </div>
+            <div class="chips-row">
+              <span class="chips-label">Quick probes:</span>
+              <button class="chip" data-query="Can the Provider terminate the agreement without cause?"><span class="chip-emoji">⚡</span> Termination</button>
+              <button class="chip" data-query="What is the aggregate liability cap and how many months of fees does it cover?"><span class="chip-emoji">💰</span> Liability</button>
+              <button class="chip" data-query="Does the contract automatically renew and what notice is required?"><span class="chip-emoji">🔄</span> Auto-Renewal</button>
+              <button class="chip" data-query="Can the Provider use Customer's name or logo for marketing without consent?"><span class="chip-emoji">🏷️</span> Brand Use</button>
             </div>
-            <div class="scorecard-kpi-item">
-              <div class="kpi-icon-box" style="background: rgba(245, 158, 11, 0.12); color: #D97706;">⚠️</div>
-              <div class="kpi-content">
-                <div class="kpi-val" id="courtroom-stat-asymmetric">0</div>
-                <div class="kpi-label">Asymmetric Traps</div>
-                <div class="kpi-sub">Unilateral terms favoring vendor</div>
-              </div>
-            </div>
-            <div class="scorecard-kpi-item">
-              <div class="kpi-icon-box" style="background: rgba(79, 70, 229, 0.12); color: #4F46E5;">🤝</div>
-              <div class="kpi-content">
-                <div class="kpi-val" id="courtroom-stat-consensus">100%</div>
-                <div class="kpi-label">Unanimous Consensus</div>
-                <div class="kpi-sub">Both AI models in agreement</div>
-              </div>
-            </div>
+          </div>
+
+          <!-- Claims List -->
+          <div class="debate-claims-list-header">
+            <span class="claims-list-label">Contract Claims Found</span>
+            <span class="claims-list-count" id="claims-list-count">0 claims</span>
+          </div>
+          <div class="debate-claims-list" id="debate-claims-list">
+            <!-- Dynamically populated via JS -->
           </div>
         </div>
 
-        <!-- Live Cross-Examination Chamber (Ask Anything Bar) -->
-        <div class="courtroom-ask-card">
-          <div class="chamber-header-row">
-            <div class="chamber-title-wrap">
-              <span class="chamber-glow-badge">LIVE PROBE</span>
-              <span class="chamber-heading">Cross-Examine Agreement in Real-Time</span>
-            </div>
-            <span class="chamber-hint">Dual agents will debate your question against the loaded document</span>
+        <!-- ======= STAGE 2: SINGLE DEBATE VIEW (Hidden) ======= -->
+        <div class="debate-stage" id="debate-stage-single" style="display: none;">
+
+          <!-- Back Button -->
+          <button class="debate-back-btn" id="btn-debate-back" type="button">
+            <span>← Back to Claims</span>
+          </button>
+
+          <!-- Debate Header -->
+          <div class="single-debate-header" id="single-debate-header">
+            <!-- Populated by JS -->
           </div>
 
-          <div class="ask-input-group">
-            <span class="ask-icon">🔍</span>
-            <input type="text" id="courtroom-query-input" placeholder="Ask any question (e.g., Can the provider cancel without cause, or use our brand in ads?)...">
-            <button class="btn btn-primary btn-chamber-ask" id="btn-ask-courtroom">
-              <span>Ask & Verify</span>
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="22" y1="2" x2="11" y2="13"/>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-              </svg>
-            </button>
-          </div>
-
-          <!-- Quick Probe Chips -->
-          <div class="chips-row">
-            <span class="chips-label">Preset Case Probes:</span>
-            <button class="chip" data-query="Can the Provider terminate the agreement without cause?"><span class="chip-emoji">⚡</span> Termination Trap</button>
-            <button class="chip" data-query="What is the aggregate liability cap and how many months of fees does it cover?"><span class="chip-emoji">💰</span> Money Liability Cap</button>
-            <button class="chip" data-query="What happens to backup data after deletion and how long is it retained?"><span class="chip-emoji">🔒</span> Backup Retention</button>
-            <button class="chip" data-query="Does the contract automatically renew and what notice is required?"><span class="chip-emoji">🔄</span> Auto-Renewal Window</button>
-            <button class="chip" data-query="Can the Provider use Customer's name or logo for marketing without consent?"><span class="chip-emoji">🏷️</span> Brand & Logo Use</button>
-          </div>
-        </div>
-
-        <!-- Live Simulation Chamber (Shows active debate animation when querying) -->
-        <div class="courtroom-simulation-card" id="courtroom-sim-card" style="display: none;">
-          <div class="sim-header">
-            <div class="sim-spinner-ring"></div>
-            <div class="sim-title-group">
-              <div class="sim-headline">Courtroom In Session: Cross-Examining Query...</div>
-              <div class="sim-query-text" id="sim-query-text">"Can provider cancel anytime?"</div>
-            </div>
-          </div>
-          <div class="sim-steps-row">
-            <div class="sim-step" id="sim-step-1">
-              <div class="sim-step-icon">🤖</div>
-              <div class="sim-step-meta">
-                <div class="sim-step-name">1. Prosecutor Analysis</div>
-                <div class="sim-step-desc">OpenAI GPT-4o scanning clauses...</div>
+          <!-- Simulation Loader (shown while API is running) -->
+          <div class="courtroom-simulation-card" id="courtroom-sim-card" style="display: none;">
+            <div class="sim-header">
+              <div class="sim-spinner-ring"></div>
+              <div class="sim-title-group">
+                <div class="sim-headline">Courtroom In Session...</div>
+                <div class="sim-query-text" id="sim-query-text">"Analyzing claim..."</div>
               </div>
             </div>
-            <div class="sim-step" id="sim-step-2">
-              <div class="sim-step-icon">🛡️</div>
-              <div class="sim-step-meta">
-                <div class="sim-step-name">2. Skeptic Cross-Check</div>
-                <div class="sim-step-desc">Gemini cross-checking verbatim text...</div>
+            <div class="sim-steps-row">
+              <div class="sim-step" id="sim-step-1">
+                <div class="sim-step-icon">🤖</div>
+                <div class="sim-step-meta">
+                  <div class="sim-step-name">1. Prosecutor Analysis</div>
+                  <div class="sim-step-desc">GPT-4o scanning clauses...</div>
+                </div>
               </div>
-            </div>
-            <div class="sim-step" id="sim-step-3">
-              <div class="sim-step-icon">⚖️</div>
-              <div class="sim-step-meta">
-                <div class="sim-step-name">3. Delivering Verdict</div>
-                <div class="sim-step-desc">Synthesizing consensus & redline...</div>
+              <div class="sim-step" id="sim-step-2">
+                <div class="sim-step-icon">🛡️</div>
+                <div class="sim-step-meta">
+                  <div class="sim-step-name">2. Skeptic Verification</div>
+                  <div class="sim-step-desc">Gemini cross-checking...</div>
+                </div>
+              </div>
+              <div class="sim-step" id="sim-step-3">
+                <div class="sim-step-icon">⚖️</div>
+                <div class="sim-step-meta">
+                  <div class="sim-step-name">3. Final Verdict</div>
+                  <div class="sim-step-desc">Synthesizing consensus...</div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Arena Control / Filter Bar -->
-        <div class="arena-filter-bar">
-          <div class="arena-filter-left">
-            <button class="arena-filter-btn active" data-filter="all">All Cases (<span id="filter-count-all">0</span>)</button>
-            <button class="arena-filter-btn" data-filter="deal_breaker">🚨 Deal-Breakers (<span id="filter-count-critical">0</span>)</button>
-            <button class="arena-filter-btn" data-filter="asymmetric">⚖️ Asymmetric Traps (<span id="filter-count-asym">0</span>)</button>
-            <button class="arena-filter-btn" data-filter="unanimous">✓ Unanimous Consensus (<span id="filter-count-unanimous">0</span>)</button>
+          <!-- Single Debate Content (FOR vs AGAINST panels) -->
+          <div class="single-debate-content" id="single-debate-content">
+            <!-- Populated by JS with animated panels -->
           </div>
-          <div class="arena-filter-right">
-            <div class="arena-search-wrap">
-              <span class="arena-search-icon">🔍</span>
-              <input type="text" id="arena-search-input" placeholder="Search courtroom cases...">
-            </div>
-          </div>
-        </div>
-
-        <!-- Live Debate Area -->
-        <div class="debate-arena" id="debate-arena">
-          <!-- Dynamically populated via JS -->
         </div>
 
       </div>

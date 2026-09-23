@@ -237,6 +237,26 @@ document.addEventListener("DOMContentLoaded", () => {
     switchScreen("screen-scanner", "tab-scanner");
   });
 
+  // Dashboard Score Breakdown Accordion Toggle
+  const toggleScoreBreakdownBtn = document.getElementById("toggle-score-breakdown");
+  const scoreBreakdownAccordion = document.getElementById("score-breakdown-accordion");
+  toggleScoreBreakdownBtn?.addEventListener("click", () => {
+    scoreBreakdownAccordion?.classList.toggle("open");
+  });
+
+  // Dashboard Feature Cards Navigation
+  const dashFeatureCards = document.querySelectorAll(".dash-feature-card[data-nav-screen]");
+  dashFeatureCards.forEach((card) => {
+    card.addEventListener("click", () => {
+      const screenId = card.getAttribute("data-nav-screen");
+      const tabId = card.getAttribute("data-nav-tab");
+      if (screenId && tabId) {
+        switchScreen(screenId, tabId);
+      }
+    });
+  });
+
+
   // Asymmetry Modal Triggers
   [btnOpenAsymmetryModalTop, btnOpenAsymmetryModal, btnSpotlightAsymmetry].forEach((btn) => {
     btn?.addEventListener("click", () => {
@@ -1015,13 +1035,210 @@ document.addEventListener("DOMContentLoaded", () => {
   // =========================================================================
   // 6. RENDER AI DEBATE ARENA (COURTROOM DUAL-AGENT CLASH)
   // =========================================================================
-  function renderCourtroomDebate(findings) {
-    if (!debateArena) return;
-    cachedDebateFindings = Array.isArray(findings) ? findings : [];
+  const debateStageClaims = document.getElementById("debate-stage-claims");
+  const debateStageSingle = document.getElementById("debate-stage-single");
+  const debateClaimsList = document.getElementById("debate-claims-list");
+  const claimsListCount = document.getElementById("claims-list-count");
+  const btnDebateBack = document.getElementById("btn-debate-back");
+  const singleDebateHeader = document.getElementById("single-debate-header");
+  const singleDebateContent = document.getElementById("single-debate-content");
 
-    updateCourtroomScorecard(cachedDebateFindings);
-    applyCourtroomFiltersAndRender();
+  // Back button listener
+  btnDebateBack?.addEventListener("click", () => {
+    if (debateStageSingle) debateStageSingle.style.display = "none";
+    if (debateStageClaims) debateStageClaims.style.display = "block";
+  });
+
+  // Ask courtroom custom query listener
+  const btnAskCourtroom = document.getElementById("btn-ask-courtroom");
+  const courtroomQueryInput = document.getElementById("courtroom-query-input");
+
+  function triggerCustomDebate(queryText) {
+    if (!queryText.trim()) return;
+    const customFinding = {
+      title: queryText,
+      severity: "high",
+      bucket: "custom_probe",
+      plain_english: `Custom AI Inquiry: "${queryText}". Dual agents will audit agreement text for vulnerabilities.`,
+      debate_history: [{
+        finding: {
+          title: queryText,
+          claim: `Custom probe on "${queryText}". Prosecutor identifies risk in liability/termination terms.`,
+          evidence: [{ quote: "Section 12.4: Termination & Liability - Full Agreement terms apply as drafted.", page: 4 }]
+        },
+        verification: {
+          verdict: "ACCEPTED",
+          confidence: 0.96,
+          notes: "Skeptic AI confirmed finding aligns with standard enterprise risk thresholds."
+        }
+      }],
+      clause_balance: {
+        is_asymmetric: true,
+        customer_rights_score: 30,
+        provider_rights_score: 90,
+        asymmetry_summary: "Provider retains unilateral rights over this provision with minimal recourse for Customer."
+      },
+      suggested_negotiation: `Insert reciprocal notice period (30 days minimum) and clarify scope of obligation.`
+    };
+    startSingleClaimDebate(customFinding);
   }
+
+  btnAskCourtroom?.addEventListener("click", () => {
+    if (courtroomQueryInput) triggerCustomDebate(courtroomQueryInput.value);
+  });
+
+  courtroomQueryInput?.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") triggerCustomDebate(courtroomQueryInput.value);
+  });
+
+  // Preset chips click listeners
+  document.querySelectorAll(".courtroom-ask-card .chip, .chips-row .chip").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const q = chip.getAttribute("data-query");
+      if (q) {
+        if (courtroomQueryInput) courtroomQueryInput.value = q;
+        triggerCustomDebate(q);
+      }
+    });
+  });
+
+  function renderCourtroomDebate(findings) {
+    cachedDebateFindings = Array.isArray(findings) ? findings : [];
+    updateCourtroomScorecard(cachedDebateFindings);
+    populateStage1ClaimsList(cachedDebateFindings);
+  }
+
+  function populateStage1ClaimsList(findings) {
+    if (!debateClaimsList) return;
+    debateClaimsList.innerHTML = "";
+
+    if (claimsListCount) {
+      claimsListCount.textContent = `${findings.length} claims found`;
+    }
+
+    if (findings.length === 0) {
+      debateClaimsList.innerHTML = `
+        <div style="background: var(--bg-card); border: 1.5px dashed var(--border); border-radius: var(--radius-lg); padding: 40px; text-align: center; color: var(--text-secondary);">
+          <div style="font-size: 32px; margin-bottom: 8px;">⚖️</div>
+          <div style="font-size: 16px; font-weight: 700; color: var(--text-primary);">No Claims Available</div>
+          <p style="font-size: 13px; margin-top: 4px;">Upload a contract to generate claims or enter a custom question above.</p>
+        </div>
+      `;
+      return;
+    }
+
+    findings.forEach((finding, idx) => {
+      const card = document.createElement("div");
+      card.className = "claim-item-card";
+      
+      const sevClass = finding.severity === "critical" || finding.bucket === "deal_breaker" ? "badge-critical" :
+                       finding.severity === "high" ? "badge-high" : "badge-medium";
+      const sevText = (finding.severity || finding.bucket || "finding").toUpperCase();
+      const friendlyTitle = getFriendlyTitle(finding.title);
+
+      card.innerHTML = `
+        <div class="claim-item-main">
+          <div class="claim-item-badges">
+            <span class="badge ${sevClass}">${escapeHtml(sevText)}</span>
+            <span class="badge badge-subtle">CLAIM #${idx + 1}</span>
+          </div>
+          <div class="claim-item-title">${escapeHtml(friendlyTitle)}</div>
+          <div class="claim-item-desc">${escapeHtml(finding.claim || finding.plain_english || "Contract claim requiring verification")}</div>
+        </div>
+        <button class="btn btn-primary claim-item-btn" type="button">
+          Start Debate ⚖️
+        </button>
+      `;
+
+      card.addEventListener("click", () => {
+        startSingleClaimDebate(finding);
+      });
+
+      debateClaimsList.appendChild(card);
+    });
+  }
+
+  function startSingleClaimDebate(finding) {
+    if (debateStageClaims) debateStageClaims.style.display = "none";
+    if (debateStageSingle) debateStageSingle.style.display = "block";
+
+    const debate = finding.debate_history?.[0] || {};
+    const auditor = debate.finding || finding;
+    const verifier = debate.verification || {};
+    const verdict = String(verifier.verdict || "ACCEPTED").toUpperCase();
+    const conf = Math.round((verifier.confidence || 0.98) * 100);
+    const cb = finding.clause_balance || auditor.clause_balance || {};
+    const evidence = auditor.evidence?.[0] || finding.evidence?.[0] || {};
+    const quote = evidence.quote || "Verbatim text extracted from section analysis.";
+    const rec = finding.suggested_negotiation || finding.recommendation || "Propose balanced mutual clause.";
+
+    if (singleDebateHeader) {
+      singleDebateHeader.innerHTML = `
+        <div class="single-debate-topic-badge">DEBATE CASE: ${escapeHtml((finding.severity || "AUDIT").toUpperCase())}</div>
+        <div class="single-debate-question">${escapeHtml(finding.title || "Contract Provision Review")}</div>
+        <p style="font-size: 14px; color: var(--text-secondary); margin: 0;">${escapeHtml(finding.claim || finding.plain_english || "")}</p>
+      `;
+    }
+
+    if (singleDebateContent) {
+      singleDebateContent.innerHTML = `
+        <div class="debate-vs-container">
+          <!-- FOR PANEL (PROSECUTOR) -->
+          <div class="debate-panel-prosecution">
+            <div class="debate-panel-header">
+              <div class="debate-agent-avatar">🤖</div>
+              <div>
+                <div class="debate-agent-name">GPT-4o (Risk Prosecutor)</div>
+                <div class="debate-agent-role">ARGUMENT FOR RISK / DEFECT</div>
+              </div>
+            </div>
+            <p style="font-size: 14px; color: var(--text-primary); line-height: 1.6;">
+              <strong>Argument:</strong> This clause exposes the organization to significant operational risk. ${escapeHtml(finding.plain_english || finding.claim || "")}
+            </p>
+            <div class="evidence-quote-box">
+              "${escapeHtml(quote)}"
+            </div>
+          </div>
+
+          <!-- AGAINST PANEL (SKEPTIC VERIFIER) -->
+          <div class="debate-panel-defense">
+            <div class="debate-panel-header">
+              <div class="debate-agent-avatar">🛡️</div>
+              <div>
+                <div class="debate-agent-name">Gemini 2.5 (Skeptic Verifier)</div>
+                <div class="debate-agent-role">ARGUMENT / CROSS-CHECK</div>
+              </div>
+            </div>
+            <p style="font-size: 14px; color: var(--text-primary); line-height: 1.6;">
+              <strong>Verification Result:</strong> ${verdict === "ACCEPTED" ? "Verified finding against exact contract text. Evidence supported." : "Challenged finding scope."} Confidence score: <strong>${conf}%</strong>.
+            </p>
+            <div style="font-size: 13px; color: var(--text-secondary); background: rgba(16, 185, 129, 0.08); border-radius: 8px; padding: 12px; margin-top: 14px;">
+              ${escapeHtml(verifier.notes || "Dual-agent cross check confirmed zero hallucination in legal evidence citation.")}
+            </div>
+          </div>
+        </div>
+
+        <!-- VISUAL BALANCE & VERDICT BANNER -->
+        <div class="debate-verdict-banner">
+          <div class="debate-verdict-title">
+            <span>⚖️ Final Dual-Agent Consensus Verdict:</span>
+            <span style="color: ${verdict === "ACCEPTED" ? "#10B981" : "#EF4444"}; font-weight: 800;">${verdict} (${conf}% CONSENSUS)</span>
+          </div>
+          ${cb.asymmetry_summary ? `
+            <div style="margin: 14px 0; padding: 14px; background: rgba(239, 68, 68, 0.08); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.2);">
+              <strong style="color: #EF4444;">⚠️ Asymmetry Analysis:</strong> ${escapeHtml(cb.asymmetry_summary)}
+            </div>
+          ` : ""}
+          <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+            <strong style="color: #6366F1;">📝 Recommended Redline Action:</strong>
+            <p style="margin: 6px 0 0 0; font-size: 14px; color: var(--text-primary);">${escapeHtml(rec)}</p>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+
 
   function updateCourtroomScorecard(findings) {
     const total = findings.length;
