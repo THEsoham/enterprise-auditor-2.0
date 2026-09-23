@@ -93,26 +93,48 @@ async def get_sample_demo_report():
 
 @app.post("/api/upload")
 async def upload_document(file: UploadFile = File(...)):
-    """Upload a new PDF contract and run the autonomous audit pipeline."""
-    if not file.filename.lower().endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Only PDF files (.pdf) are supported.")
+    """Upload a new contract PDF/text document and run the autonomous audit pipeline."""
+    allowed_exts = (".pdf", ".txt", ".docx", ".md")
+    ext = Path(file.filename).suffix.lower()
+    if not ext.endswith(allowed_exts):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file format '{ext}'. Supported formats: PDF, TXT, DOCX, MD."
+        )
 
     dest_dir = PROJECT_ROOT / "data" / "documents"
     dest_dir.mkdir(parents=True, exist_ok=True)
 
-    # Generate a unique filename to avoid overwriting locked/existing files
     stem = Path(file.filename).stem
-    suffix = Path(file.filename).suffix
     dest_path = dest_dir / file.filename
     if dest_path.exists():
         import time
         timestamp = int(time.time())
-        dest_path = dest_dir / f"{stem}_{timestamp}{suffix}"
+        dest_path = dest_dir / f"{stem}_{timestamp}{ext}"
 
-    # Read file content into memory before writing (avoids SpooledTemporaryFile issues)
     content = await file.read()
-    with open(dest_path, "wb") as buffer:
-        buffer.write(content)
+
+    # If file is text/md/docx, convert to a valid PDF for the pipeline
+    if ext in (".txt", ".md", ".docx"):
+        pdf_path = dest_dir / f"{stem}_converted.pdf"
+        try:
+            import fitz
+            doc = fitz.open()
+            page = doc.new_page()
+            text_str = content.decode("utf-8", errors="ignore")
+            # Wrap long text into PDF page
+            page.insert_text((50, 50), text_str[:4000], fontsize=11)
+            doc.save(pdf_path)
+            doc.close()
+            dest_path = pdf_path
+        except Exception as conv_err:
+            print(f"Text to PDF conversion warning: {conv_err}")
+            # Write raw content to file anyway
+            with open(dest_path, "wb") as buffer:
+                buffer.write(content)
+    else:
+        with open(dest_path, "wb") as buffer:
+            buffer.write(content)
 
     try:
         pipeline = AuditPipeline(max_debate_rounds=2)
@@ -131,6 +153,7 @@ async def upload_document(file: UploadFile = File(...)):
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Audit failed for {file.filename}: {str(e)}")
+
 
 
 @app.post("/api/audit")

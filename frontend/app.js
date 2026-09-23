@@ -1840,8 +1840,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function stageFileForAudit(file) {
     if (!file) return;
-    if (!file.name.toLowerCase().endsWith(".pdf")) {
-      showToast("Only PDF files (.pdf) are supported.", "⚠️");
+    const nameLower = file.name.toLowerCase();
+    const validExts = [".pdf", ".txt", ".docx", ".md"];
+    const isValid = validExts.some((ext) => nameLower.endsWith(ext));
+
+    if (!isValid) {
+      showToast("Supported formats: PDF, TXT, DOCX, and MD files.", "⚠️");
       return;
     }
     selectedFile = file;
@@ -1850,9 +1854,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const kb = (file.size / 1024).toFixed(1);
       previewFilesize.textContent = `${kb} KB`;
     }
-    if (dropZone) dropZone.style.display = "none";
-    if (filePreviewCard) filePreviewCard.style.display = "flex";
-    if (uploadProgressCard) uploadProgressCard.style.display = "none";
+
+    // Auto-execute audit immediately when file is selected/dropped
+    executeAudit(file);
   }
 
   // Drag and Drop Events on #drop-zone
@@ -1910,14 +1914,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (selectedFile) {
       executeAudit(selectedFile);
     } else {
-      showToast("Please select a contract PDF first.", "⚠️");
+      showToast("Please select a contract PDF or text file first.", "⚠️");
     }
   });
 
   // Header quick upload button
   btnChooseFile?.addEventListener("click", () => {
+    switchScreen("screen-welcome", "tab-welcome");
     fileUploadInput?.click();
   });
+
 
   // Core Audit Execution
   async function executeAudit(file) {
