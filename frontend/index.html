@@ -7,7 +7,7 @@
   <meta name="description" content="AI contract reviewer that spots unfair clauses, checks missing protections, and gives ready-to-use counter proposals.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -30,42 +30,95 @@
         </div>
       </div>
 
-      <!-- Navigation Tabs (Simple Words, Fluid & Scrollable) -->
+      <!-- Navigation Tabs (Crisp SVG Icons, Fluid & Scrollable) -->
       <nav class="nav-tabs" role="tablist">
         <button class="nav-tab active" id="tab-welcome" data-screen="screen-welcome" role="tab" aria-selected="true">
-          <span class="tab-icon">📤</span>
+          <span class="tab-icon">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </span>
           <span class="tab-label">Upload</span>
         </button>
         <button class="nav-tab" id="tab-overview" data-screen="screen-overview" role="tab" aria-selected="false">
-          <span class="tab-icon">📊</span>
+          <span class="tab-icon">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="9"/>
+              <rect x="14" y="3" width="7" height="5"/>
+              <rect x="14" y="12" width="7" height="9"/>
+              <rect x="3" y="16" width="7" height="5"/>
+            </svg>
+          </span>
           <span class="tab-label">Summary</span>
         </button>
         <button class="nav-tab" id="tab-findings" data-screen="screen-findings" role="tab" aria-selected="false">
-          <span class="tab-icon">🛡️</span>
+          <span class="tab-icon">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </span>
           <span class="tab-label">Risks & Fixes</span>
           <span class="tab-badge badge-red" id="nav-badge-risks">0</span>
         </button>
         <button class="nav-tab" id="tab-missing" data-screen="screen-missing" role="tab" aria-selected="false">
-          <span class="tab-icon">⚠️</span>
+          <span class="tab-icon">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </span>
           <span class="tab-label">Missing Protections</span>
           <span class="tab-badge badge-amber" id="nav-badge-missing">0</span>
         </button>
         <button class="nav-tab" id="tab-courtroom" data-screen="screen-courtroom" role="tab" aria-selected="false">
-          <span class="tab-icon">⚖️</span>
+          <span class="tab-icon">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
+              <path d="M2 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
+              <path d="M7 21h10"/>
+              <path d="M12 3v18"/>
+              <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>
+            </svg>
+          </span>
           <span class="tab-label">AI Debate</span>
           <span class="tab-pulse"></span>
         </button>
         <button class="nav-tab" id="tab-timeline" data-screen="screen-timeline" role="tab" aria-selected="false">
-          <span class="tab-icon">📅</span>
+          <span class="tab-icon">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </span>
           <span class="tab-label">Key Dates</span>
           <span class="tab-badge badge-neutral" id="nav-badge-timeline">0</span>
         </button>
         <button class="nav-tab" id="tab-scanner" data-screen="screen-scanner" role="tab" aria-selected="false">
-          <span class="tab-icon">✍️</span>
+          <span class="tab-icon">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </span>
           <span class="tab-label">Signatures & Fees</span>
         </button>
         <button class="nav-tab" id="tab-graph" data-screen="screen-graph" role="tab" aria-selected="false">
-          <span class="tab-icon">🕸️</span>
+          <span class="tab-icon">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="6" cy="6" r="3"/>
+              <circle cx="18" cy="18" r="3"/>
+              <circle cx="18" cy="6" r="3"/>
+              <line x1="8.5" y1="7.5" x2="15.5" y2="16.5"/>
+              <line x1="8.5" y1="6" x2="15.5" y2="6"/>
+            </svg>
+          </span>
           <span class="tab-label">Contract Map</span>
         </button>
       </nav>
@@ -124,14 +177,10 @@
     <!-- ============================================================== -->
     <section class="screen active" id="screen-welcome">
       <div class="welcome-container">
-        
         <div class="welcome-hero">
-          <div class="welcome-badge">
-            <span>⚡</span> AI Autonomous Contract Review
-          </div>
-          <h1 class="welcome-title">Audit Your Enterprise Contract in Seconds</h1>
+          <h1 class="welcome-title">Enterprise Contract Risk & Compliance Audit</h1>
           <p class="welcome-subtitle">
-            Upload your agreement PDF to spot fatal liabilities, unilateral cancellation terms, and missing enterprise protections with dual-agent courtroom debate.
+            Upload your agreement to spot unhedged liabilities, unilateral termination traps, and missing enterprise protections with dual-agent verification.
           </p>
         </div>
 
@@ -161,7 +210,14 @@
         <!-- Selected File Preview Card (Hidden until file selected) -->
         <div class="file-preview-card" id="file-preview-card" style="display: none;">
           <div class="file-preview-left">
-            <div class="file-preview-icon">📄</div>
+            <div class="file-preview-icon">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+              </svg>
+            </div>
             <div class="file-preview-details">
               <span class="file-preview-name" id="preview-filename">contract.pdf</span>
               <span class="file-preview-size" id="preview-filesize">0 KB</span>
@@ -170,7 +226,11 @@
           <div class="file-preview-actions">
             <button type="button" class="btn btn-ghost btn-sm" id="btn-cancel-file" title="Choose another file">Cancel</button>
             <button type="button" class="btn btn-primary" id="btn-start-audit">
-              <span>🚀 Start AI Contract Audit</span>
+              <span>Analyze Contract</span>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+              </svg>
             </button>
           </div>
         </div>
@@ -199,26 +259,45 @@
 
         <!-- Demo Contract Option -->
         <div class="demo-bar">
-          <span>💡 Don't have a contract PDF right now?</span>
-          <button type="button" class="btn-link" id="btn-try-demo">Load Sample Demo Contract</button>
+          <span>Need a sample agreement to test?</span>
+          <button type="button" class="btn-link" id="btn-try-demo">Load Sample Cloud MSA Contract</button>
         </div>
 
         <!-- 3 Simple How-It-Works Cards -->
         <div class="welcome-features-grid">
           <div class="welcome-feature-card">
-            <div class="feature-card-icon" style="background: var(--crimson-bg); color: var(--crimson);">🚨</div>
-            <div class="feature-card-title">1. Deal-Breakers & Risk Buckets</div>
-            <div class="feature-card-desc">Automatically sorts findings into Deal-Breakers, Watch Out terms, and Protections with plain-English impact explanations.</div>
+            <div class="feature-card-icon" style="background: var(--crimson-bg); color: var(--crimson);">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+            <div class="feature-card-title">Deal-Breakers & Risk Triage</div>
+            <div class="feature-card-desc">Automatically classifies findings into Deal-Breakers, Watch Out terms, and Protections with executive impact summaries.</div>
           </div>
           <div class="welcome-feature-card">
-            <div class="feature-card-icon" style="background: var(--indigo-bg); color: var(--indigo);">⚖️</div>
-            <div class="feature-card-title">2. Adversarial Courtroom Debate</div>
-            <div class="feature-card-desc">Auditor flags commercial exposure while an independent Skeptic verifier validates against exact cited quotes and pages.</div>
+            <div class="feature-card-icon" style="background: var(--indigo-bg); color: var(--indigo);">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
+                <path d="M2 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
+                <path d="M7 21h10"/>
+                <path d="M12 3v18"/>
+                <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>
+              </svg>
+            </div>
+            <div class="feature-card-title">Adversarial Courtroom Debate</div>
+            <div class="feature-card-desc">Risk Prosecutor flags exposure while an independent Skeptic verifier validates against verbatim cited text and pages.</div>
           </div>
           <div class="welcome-feature-card">
-            <div class="feature-card-icon" style="background: var(--emerald-bg); color: var(--emerald);">📋</div>
-            <div class="feature-card-title">3. Copy-Paste Counter Proposals</div>
-            <div class="feature-card-desc">Get pre-drafted protective redlines and negotiation suggestions that you can copy to your clipboard with one click.</div>
+            <div class="feature-card-icon" style="background: var(--emerald-bg); color: var(--emerald);">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+              </svg>
+            </div>
+            <div class="feature-card-title">Actionable Redline Language</div>
+            <div class="feature-card-desc">Receive pre-drafted protective counter-clauses and negotiation arguments ready for immediate clipboard copy.</div>
           </div>
         </div>
 
@@ -258,7 +337,13 @@
             <span>Export Full JSON</span>
           </button>
           <button type="button" class="btn btn-outline btn-sm" id="btn-qa-ask">
-            <span>⚖️ Ask Courtroom a Question</span>
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
+              <path d="M2 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
+              <path d="M7 21h10"/>
+              <path d="M12 3v18"/>
+            </svg>
+            <span>Cross-Examine Agreement</span>
           </button>
         </div>
 
@@ -288,14 +373,24 @@
             </div>
             <h1 class="verdict-headline" id="verdict-headline">Upload a contract to see your audit results</h1>
             <p class="verdict-summary-text" id="verdict-summary-text">
-              Your contract will be scored based on deal-breaker clauses, warning-level terms, missing standard protections, and good clauses found.
+              Your contract will be scored based on deal-breaker clauses, warning-level terms, missing standard protections, and verified contract language.
             </p>
             <div class="verdict-cta-row">
               <button class="btn btn-primary btn-lg" id="btn-hero-deep-dive">
-                <span>View All Risks & Fixes →</span>
+                <span>View Risks & Fixes</span>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                  <polyline points="12 5 19 12 12 19"/>
+                </svg>
               </button>
               <button class="btn btn-outline btn-sm" id="btn-open-asymmetry-modal-top">
-                <span>⚖️ Check Who Has More Rights</span>
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M16 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
+                  <path d="M2 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
+                  <path d="M7 21h10"/>
+                  <path d="M12 3v18"/>
+                </svg>
+                <span>Inspect Clause Asymmetry</span>
               </button>
             </div>
           </div>
@@ -311,21 +406,31 @@
         <!-- ============ COLLAPSIBLE SCORE BREAKDOWN ============ -->
         <div class="dash-accordion" id="score-breakdown-accordion">
           <button class="dash-accordion-toggle" id="toggle-score-breakdown" type="button">
-            <span class="accordion-toggle-icon">📊</span>
-            <span class="accordion-toggle-text">Score Breakdown — How Your Score Was Built</span>
-            <span class="accordion-chevron">▶</span>
+            <span class="accordion-toggle-icon">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="20" x2="18" y2="10"/>
+                <line x1="12" y1="20" x2="12" y2="4"/>
+                <line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
+            </span>
+            <span class="accordion-toggle-text">Score Breakdown — How Your Score Was Calculated</span>
+            <span class="accordion-chevron">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </span>
           </button>
           <div class="dash-accordion-body" id="score-breakdown-body">
             <div class="score-breakdown-row">
               <div class="waterfall-card">
-                <div class="waterfall-card-title">How Your Score Was Built</div>
+                <div class="waterfall-card-title">Score Derivation Waterfall</div>
                 <div class="waterfall-bar-wrap">
                   <div class="waterfall-bar" id="waterfall-bar"></div>
                 </div>
                 <div class="waterfall-labels" id="waterfall-labels"></div>
               </div>
               <div class="impact-card">
-                <div class="impact-card-title">What's Affecting the Score</div>
+                <div class="impact-card-title">Score Impact by Category</div>
                 <div class="impact-bars-list" id="impact-bars-list"></div>
               </div>
             </div>
@@ -333,68 +438,132 @@
         </div>
 
         <!-- ============ 6 DASHBOARD FEATURE CARDS ============ -->
-        <div class="dash-section-label">Explore Your Audit</div>
+        <div class="dash-section-label">Audit Modules</div>
 
         <div class="dash-features-grid">
 
           <!-- 1. Risks & Fixes -->
-          <div class="dash-feature-card dash-card-risks" id="dash-card-risks" role="button" tabindex="0">
-            <div class="dash-card-icon-wrap" style="--accent: var(--crimson); --accent-bg: var(--crimson-bg);">🛡️</div>
+          <div class="dash-feature-card dash-card-risks" id="dash-card-risks" role="button" tabindex="0" data-nav-screen="screen-findings" data-nav-tab="tab-findings">
+            <div class="dash-card-icon-wrap" style="--accent: var(--crimson); --accent-bg: var(--crimson-bg);">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
             <div class="dash-card-body">
               <div class="dash-card-title">Risks & Fixes</div>
-              <div class="dash-card-stat" id="dash-stat-risks">0 issues found</div>
+              <div class="dash-card-stat" id="dash-stat-risks">Review critical exposures</div>
             </div>
-            <div class="dash-card-arrow">→</div>
+            <div class="dash-card-arrow">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </div>
           </div>
 
           <!-- 2. Missing Protections -->
-          <div class="dash-feature-card dash-card-missing" id="dash-card-missing" role="button" tabindex="0">
-            <div class="dash-card-icon-wrap" style="--accent: var(--amber); --accent-bg: var(--amber-bg);">⚠️</div>
+          <div class="dash-feature-card dash-card-missing" id="dash-card-missing" role="button" tabindex="0" data-nav-screen="screen-missing" data-nav-tab="tab-missing">
+            <div class="dash-card-icon-wrap" style="--accent: var(--amber); --accent-bg: var(--amber-bg);">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+            </div>
             <div class="dash-card-body">
               <div class="dash-card-title">Missing Protections</div>
-              <div class="dash-card-stat" id="dash-stat-missing">0 gaps</div>
+              <div class="dash-card-stat" id="dash-stat-missing">Inspect clause gaps</div>
             </div>
-            <div class="dash-card-arrow">→</div>
+            <div class="dash-card-arrow">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </div>
           </div>
 
           <!-- 3. AI Debate Arena -->
-          <div class="dash-feature-card dash-card-debate" id="dash-card-debate" role="button" tabindex="0">
-            <div class="dash-card-icon-wrap" style="--accent: var(--indigo); --accent-bg: var(--indigo-bg);">⚖️</div>
+          <div class="dash-feature-card dash-card-debate" id="dash-card-debate" role="button" tabindex="0" data-nav-screen="screen-courtroom" data-nav-tab="tab-courtroom">
+            <div class="dash-card-icon-wrap" style="--accent: var(--indigo); --accent-bg: var(--indigo-bg);">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
+                <path d="M2 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
+                <path d="M7 21h10"/>
+                <path d="M12 3v18"/>
+                <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>
+              </svg>
+            </div>
             <div class="dash-card-body">
               <div class="dash-card-title">AI Debate Arena</div>
-              <div class="dash-card-stat" id="dash-stat-debate">0 claims ready</div>
+              <div class="dash-card-stat" id="dash-stat-debate">Dual-agent cross examination</div>
             </div>
-            <div class="dash-card-arrow">→</div>
+            <div class="dash-card-arrow">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </div>
           </div>
 
           <!-- 4. Key Dates -->
-          <div class="dash-feature-card dash-card-dates" id="dash-card-dates" role="button" tabindex="0">
-            <div class="dash-card-icon-wrap" style="--accent: var(--cyan); --accent-bg: var(--cyan-bg);">📅</div>
+          <div class="dash-feature-card dash-card-dates" id="dash-card-dates" role="button" tabindex="0" data-nav-screen="screen-timeline" data-nav-tab="tab-timeline">
+            <div class="dash-card-icon-wrap" style="--accent: var(--cyan); --accent-bg: var(--cyan-bg);">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            </div>
             <div class="dash-card-body">
               <div class="dash-card-title">Key Dates & Deadlines</div>
-              <div class="dash-card-stat" id="dash-stat-dates">0 deadlines</div>
+              <div class="dash-card-stat" id="dash-stat-dates">Notice & renewal timelines</div>
             </div>
-            <div class="dash-card-arrow">→</div>
+            <div class="dash-card-arrow">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </div>
           </div>
 
           <!-- 5. Signatures & Fees -->
-          <div class="dash-feature-card dash-card-scanner" id="dash-card-scanner" role="button" tabindex="0">
-            <div class="dash-card-icon-wrap" style="--accent: var(--purple); --accent-bg: var(--purple-bg);">✍️</div>
+          <div class="dash-feature-card dash-card-scanner" id="dash-card-scanner" role="button" tabindex="0" data-nav-screen="screen-scanner" data-nav-tab="tab-scanner">
+            <div class="dash-card-icon-wrap" style="--accent: var(--purple); --accent-bg: var(--purple-bg);">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+              </svg>
+            </div>
             <div class="dash-card-body">
               <div class="dash-card-title">Signatures & Fees</div>
-              <div class="dash-card-stat" id="dash-stat-scanner">Check status</div>
+              <div class="dash-card-stat" id="dash-stat-scanner">Signatory & fee tables</div>
             </div>
-            <div class="dash-card-arrow">→</div>
+            <div class="dash-card-arrow">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </div>
           </div>
 
           <!-- 6. Contract Map -->
-          <div class="dash-feature-card dash-card-graph" id="dash-card-graph" role="button" tabindex="0">
-            <div class="dash-card-icon-wrap" style="--accent: var(--emerald); --accent-bg: var(--emerald-bg);">🕸️</div>
+          <div class="dash-feature-card dash-card-graph" id="dash-card-graph" role="button" tabindex="0" data-nav-screen="screen-graph" data-nav-tab="tab-graph">
+            <div class="dash-card-icon-wrap" style="--accent: var(--emerald); --accent-bg: var(--emerald-bg);">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="6" cy="6" r="3"/>
+                <circle cx="18" cy="18" r="3"/>
+                <circle cx="18" cy="6" r="3"/>
+                <line x1="8.5" y1="7.5" x2="15.5" y2="16.5"/>
+                <line x1="8.5" y1="6" x2="15.5" y2="6"/>
+              </svg>
+            </div>
             <div class="dash-card-body">
               <div class="dash-card-title">Contract Map</div>
-              <div class="dash-card-stat" id="dash-stat-graph">Visual relationship view</div>
+              <div class="dash-card-stat" id="dash-stat-graph">Interactive dependency graph</div>
             </div>
-            <div class="dash-card-arrow">→</div>
+            <div class="dash-card-arrow">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </div>
           </div>
 
         </div>
@@ -402,7 +571,13 @@
         <!-- Fairness Quick Action (kept for modal trigger) -->
         <div class="dash-fairness-cta">
           <button class="btn btn-outline btn-sm" id="btn-open-asymmetry-modal">
-            <span>⚖️ Compare Provider vs Customer Rights</span>
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
+              <path d="M2 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/>
+              <path d="M7 21h10"/>
+              <path d="M12 3v18"/>
+            </svg>
+            <span>Compare Provider vs Customer Rights</span>
           </button>
         </div>
 
@@ -410,24 +585,23 @@
     </section>
 
     <!-- ============================================================== -->
-    <!-- 2. 🛡️ RISKS & FIXES SCREEN (DETAILED FINDINGS)                 -->
+    <!-- 2. RISKS & FIXES SCREEN (DETAILED FINDINGS)                     -->
     <!-- ============================================================== -->
     <section class="screen" id="screen-findings">
       <div class="view-container">
         
         <div class="view-header">
           <div class="view-header-left">
-            <div class="view-badge">🛡️ CLAUSE RISKS & RECOMMENDED REDLINES</div>
-            <h1>Risks Found & How to Fix Them</h1>
-            <p>Written in simple, plain language with the exact contract lines quoted and ready-to-copy counter proposals.</p>
+            <h1>Risks Identified & Recommended Redlines</h1>
+            <p>Direct verbatim contract citations accompanied by actionable counter-proposals.</p>
           </div>
           <div class="view-header-right">
             <!-- Filter Pills -->
             <div class="filter-pills-group">
-              <button class="filter-pill active" data-filter="all">All Items (7)</button>
-              <button class="filter-pill pill-red" data-filter="deal_breaker">🔴 Deal-Breakers (2)</button>
-              <button class="filter-pill pill-yellow" data-filter="watch_out">🟡 Watch Out (4)</button>
-              <button class="filter-pill pill-green" data-filter="protection">🟢 Good Clauses (1)</button>
+              <button class="filter-pill active" data-filter="all">All Items</button>
+              <button class="filter-pill pill-red" data-filter="deal_breaker">Deal-Breakers</button>
+              <button class="filter-pill pill-yellow" data-filter="watch_out">Watch Out</button>
+              <button class="filter-pill pill-green" data-filter="protection">Protective Clauses</button>
             </div>
           </div>
         </div>
@@ -441,19 +615,23 @@
     </section>
 
     <!-- ============================================================== -->
-    <!-- 3. ⚠️ MISSING CLAUSES SCREEN (GAP ANALYSIS)                    -->
+    <!-- 3. MISSING CLAUSES SCREEN (GAP ANALYSIS)                        -->
     <!-- ============================================================== -->
     <section class="screen" id="screen-missing">
       <div class="view-container">
         
         <div class="view-header">
           <div class="view-header-left">
-            <div class="view-badge badge-amber">⚠️ MISSING STANDARD CLAUSES</div>
-            <h1>Important Protections Left Out</h1>
-            <p>Standard business contracts include these 7 safeguards. If they are missing, you bear the risk.</p>
+            <h1>Standard Protection Gap Analysis</h1>
+            <p>Standard enterprise agreements include these essential safeguards. Gaps shift financial and legal liability to you.</p>
           </div>
           <div class="view-header-right">
             <button class="btn btn-outline" id="btn-download-missing-clauses">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
               <span>Download Gap Summary</span>
             </button>
           </div>
@@ -483,7 +661,7 @@
     </section>
 
     <!-- ============================================================== -->
-    <!-- 4. ⚖️ AI DEBATE SCREEN (ADVERSARIAL COURTROOM ARENA)           -->
+    <!-- 4. AI DEBATE SCREEN (ADVERSARIAL COURTROOM ARENA)               -->
     <!-- ============================================================== -->
     <section class="screen" id="screen-courtroom">
       <div class="view-container">
@@ -494,45 +672,49 @@
           <!-- Minimal Header -->
           <div class="debate-stage-header">
             <div class="debate-stage-header-left">
-              <div class="view-badge">⚖️ AI DEBATE ARENA</div>
-              <h1>Select a Claim to Debate</h1>
-              <p>Choose a contract finding below, or ask your own question. Two AI agents will argue FOR and AGAINST with cited evidence.</p>
+              <h1>Adversarial Multi-Agent Debate Arena</h1>
+              <p>Select any contract claim below or input your own query. Two opposing AI models cross-examine verbatim contract language.</p>
             </div>
             <div class="debate-stage-header-right">
               <div class="debate-agents-mini">
-                <span class="agent-mini-pill agent-mini-prosecutor">🤖 GPT-4o</span>
+                <span class="agent-mini-pill agent-mini-prosecutor">GPT-4o Prosecutor</span>
                 <span class="agent-mini-vs">VS</span>
-                <span class="agent-mini-pill agent-mini-skeptic">🛡️ Gemini 2.5</span>
+                <span class="agent-mini-pill agent-mini-skeptic">Gemini 2.5 Skeptic</span>
               </div>
             </div>
           </div>
 
           <!-- Custom Query Box -->
           <div class="debate-custom-query-card">
-            <div class="custom-query-label">Ask Your Own Question</div>
+            <div class="custom-query-label">Cross-Examine Specific Clause or Question</div>
             <div class="custom-query-input-row">
-              <span class="custom-query-icon">🔍</span>
-              <input type="text" id="courtroom-query-input" placeholder="Type any question about this contract (e.g., Can the provider cancel anytime?)...">
+              <span class="custom-query-icon">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </span>
+              <input type="text" id="courtroom-query-input" placeholder="Ask any question (e.g. Can provider cancel without cause, or use customer logo?)...">
               <button class="btn btn-primary" id="btn-ask-courtroom">
                 <span>Start Debate</span>
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="22" y1="2" x2="11" y2="13"/>
-                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                  <polyline points="12 5 19 12 12 19"/>
                 </svg>
               </button>
             </div>
             <div class="chips-row">
-              <span class="chips-label">Quick probes:</span>
-              <button class="chip" data-query="Can the Provider terminate the agreement without cause?"><span class="chip-emoji">⚡</span> Termination</button>
-              <button class="chip" data-query="What is the aggregate liability cap and how many months of fees does it cover?"><span class="chip-emoji">💰</span> Liability</button>
-              <button class="chip" data-query="Does the contract automatically renew and what notice is required?"><span class="chip-emoji">🔄</span> Auto-Renewal</button>
-              <button class="chip" data-query="Can the Provider use Customer's name or logo for marketing without consent?"><span class="chip-emoji">🏷️</span> Brand Use</button>
+              <span class="chips-label">Quick probe cases:</span>
+              <button class="chip" data-query="Can the Provider terminate the agreement without cause?">Termination Trap</button>
+              <button class="chip" data-query="What is the aggregate liability cap and how many months of fees does it cover?">Liability Cap</button>
+              <button class="chip" data-query="Does the contract automatically renew and what notice is required?">Auto-Renewal Window</button>
+              <button class="chip" data-query="Can the Provider use Customer's name or logo for marketing without consent?">Brand & Logo Usage</button>
             </div>
           </div>
 
           <!-- Claims List -->
           <div class="debate-claims-list-header">
-            <span class="claims-list-label">Contract Claims Found</span>
+            <span class="claims-list-label">Contract Claims on Docket</span>
             <span class="claims-list-count" id="claims-list-count">0 claims</span>
           </div>
           <div class="debate-claims-list" id="debate-claims-list">
@@ -545,7 +727,11 @@
 
           <!-- Back Button -->
           <button class="debate-back-btn" id="btn-debate-back" type="button">
-            <span>← Back to Claims</span>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="19" y1="12" x2="5" y2="12"/>
+              <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            <span>Back to Docket</span>
           </button>
 
           <!-- Debate Header -->
@@ -558,30 +744,43 @@
             <div class="sim-header">
               <div class="sim-spinner-ring"></div>
               <div class="sim-title-group">
-                <div class="sim-headline">Courtroom In Session...</div>
+                <div class="sim-headline">Courtroom Session in Progress</div>
                 <div class="sim-query-text" id="sim-query-text">"Analyzing claim..."</div>
               </div>
             </div>
             <div class="sim-steps-row">
               <div class="sim-step" id="sim-step-1">
-                <div class="sim-step-icon">🤖</div>
+                <div class="sim-step-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 6v6l4 2"/>
+                  </svg>
+                </div>
                 <div class="sim-step-meta">
-                  <div class="sim-step-name">1. Prosecutor Analysis</div>
-                  <div class="sim-step-desc">GPT-4o scanning clauses...</div>
+                  <div class="sim-step-name">1. Risk Identification</div>
+                  <div class="sim-step-desc">GPT-4o scanning clause exposure...</div>
                 </div>
               </div>
               <div class="sim-step" id="sim-step-2">
-                <div class="sim-step-icon">🛡️</div>
+                <div class="sim-step-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                </div>
                 <div class="sim-step-meta">
-                  <div class="sim-step-name">2. Skeptic Verification</div>
-                  <div class="sim-step-desc">Gemini cross-checking...</div>
+                  <div class="sim-step-name">2. Verbatim Verification</div>
+                  <div class="sim-step-desc">Gemini cross-checking exact citations...</div>
                 </div>
               </div>
               <div class="sim-step" id="sim-step-3">
-                <div class="sim-step-icon">⚖️</div>
+                <div class="sim-step-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </div>
                 <div class="sim-step-meta">
-                  <div class="sim-step-name">3. Final Verdict</div>
-                  <div class="sim-step-desc">Synthesizing consensus...</div>
+                  <div class="sim-step-name">3. Consensus Verdict</div>
+                  <div class="sim-step-desc">Synthesizing final recommendation...</div>
                 </div>
               </div>
             </div>
@@ -597,22 +796,21 @@
     </section>
 
     <!-- ============================================================== -->
-    <!-- 5. 📅 KEY DATES & DEADLINES SCREEN                             -->
+    <!-- 5. KEY DATES & DEADLINES SCREEN                                -->
     <!-- ============================================================== -->
     <section class="screen" id="screen-timeline">
       <div class="view-container">
         
         <div class="view-header">
           <div class="view-header-left">
-            <div class="view-badge">📅 TIME-SENSITIVE RULES</div>
-            <h1>Key Dates & Notice Deadlines</h1>
-            <p>Never miss an important notice window or contract renewal milestone.</p>
+            <h1>Notice Windows & Obligation Deadlines</h1>
+            <p>Track renewal windows, termination notice deadlines, and payment schedules.</p>
           </div>
           <div class="view-header-right">
             <div class="filter-pills-group" id="timeline-party-filter">
-              <button class="filter-pill active" data-party="all">All Dates</button>
-              <button class="filter-pill" data-party="Provider">Provider Rules</button>
-              <button class="filter-pill" data-party="Customer">Customer Rules</button>
+              <button class="filter-pill active" data-party="all">All Deadlines</button>
+              <button class="filter-pill" data-party="Provider">Provider Duties</button>
+              <button class="filter-pill" data-party="Customer">Customer Duties</button>
             </div>
           </div>
         </div>
@@ -628,16 +826,15 @@
     </section>
 
     <!-- ============================================================== -->
-    <!-- 6. ✍️ SIGNATURES & PRICING FEES SCREEN                         -->
+    <!-- 6. SIGNATURES & PRICING FEES SCREEN                            -->
     <!-- ============================================================== -->
     <section class="screen" id="screen-scanner">
       <div class="view-container">
         
         <div class="view-header">
           <div class="view-header-left">
-            <div class="view-badge">✍️ DOCUMENT STATUS & PRICING</div>
             <h1>Signatures & Fee Schedules</h1>
-            <p>Verifying whether the contract has been signed, and scanning embedded tables for hidden charges.</p>
+            <p>Verification of execution status, signatories, and embedded fee tables.</p>
           </div>
         </div>
 
@@ -647,17 +844,23 @@
           <div class="scanner-panel" id="scanner-signatures-panel">
             <div class="panel-header">
               <div class="panel-title">
-                <span>✍️</span> Signature Check
+                <span>Execution Status</span>
               </div>
               <span class="panel-tag" id="sig-page-tag">Page 5</span>
             </div>
 
             <div class="sig-status-card" id="sig-status-card">
-              <div class="sig-status-icon">⚠️</div>
+              <div class="sig-status-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+              </div>
               <div class="sig-status-info">
-                <div class="sig-status-main" id="sig-headline">NOT SIGNED YET (DRAFT)</div>
+                <div class="sig-status-main" id="sig-headline">UNEXECUTED DRAFT</div>
                 <div class="sig-status-detail" id="sig-subnotes">
-                  Blank signature lines found on Page 5. No handwritten signatures or digital certificates detected.
+                  Blank signature blocks identified. No digital certificates or countersignatures detected.
                 </div>
               </div>
             </div>
@@ -672,7 +875,7 @@
                   <div>Title: ___________________________</div>
                   <div>Date:  ___________________________</div>
                 </div>
-                <div class="sig-stamp unsigned" id="stamp-cust">UNSIGNED ❌</div>
+                <div class="sig-stamp unsigned" id="stamp-cust">UNSIGNED</div>
               </div>
 
               <div class="sig-party">
@@ -683,12 +886,12 @@
                   <div>Title: ___________________________</div>
                   <div>Date:  ___________________________</div>
                 </div>
-                <div class="sig-stamp unsigned" id="stamp-prov">UNSIGNED ❌</div>
+                <div class="sig-stamp unsigned" id="stamp-prov">UNSIGNED</div>
               </div>
             </div>
 
             <div class="scanner-notice">
-              <span>ℹ️ This visual check spots whether signature lines are filled in before you proceed to execution.</span>
+              <span>Automatic execution scanner checks whether parties have affixed valid execution marks prior to closing.</span>
             </div>
           </div>
 
@@ -696,7 +899,7 @@
           <div class="scanner-panel" id="scanner-tables-panel">
             <div class="panel-header">
               <div class="panel-title">
-                <span>📊</span> Pricing Tables & Storage Fees
+                <span>Fee Tables & Schedule Inspection</span>
               </div>
               <div class="table-selector-tabs" id="table-tabs">
                 <!-- Dynamically populated via JS -->
@@ -759,8 +962,8 @@
     <div class="dialog-card">
       <div class="dialog-header">
         <div class="dialog-title-wrap">
-          <span class="dialog-icon">📖</span>
-          <h3 id="modal-title">Why We Flagged This & How to Fix It</h3>
+          <span class="dialog-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+          <h2 id="modal-title" style="font-size: 16px; font-weight: 700; margin: 0;">Why We Flagged This & How to Fix It</h2>
         </div>
         <button class="btn-close" id="btn-close-modal" aria-label="Close dialog">&times;</button>
       </div>
@@ -795,7 +998,7 @@
 
           <div class="modal-remedy-card">
             <div class="remedy-head">
-              <div class="remedy-label">💡 4. WHAT TO SEND TO THE PROVIDER (READY-TO-COPY FIX):</div>
+              <div class="remedy-label">4. WHAT TO SEND TO THE PROVIDER (READY-TO-COPY FIX):</div>
               <button class="btn btn-sm btn-primary" id="btn-copy-modal-remedy">
                 <span>Copy Counter-Proposal</span>
               </button>

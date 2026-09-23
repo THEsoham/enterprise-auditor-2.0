@@ -359,9 +359,54 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function renderDashboardCards(data) {
+    if (!data) return;
+    const health = data.health || {};
+    const dbCount = health.deal_breakers_count || 0;
+    const woCount = health.watch_out_count || 0;
+    const msCount = health.missing_protections_count || (data.missing_clauses || []).length || 0;
+    const riskTotal = (data.findings || []).length || (dbCount + woCount);
+
+    const statRisks = document.getElementById("dash-stat-risks");
+    if (statRisks) {
+      statRisks.textContent = `${riskTotal} exposure${riskTotal === 1 ? '' : 's'} (${dbCount} deal-breaker, ${woCount} watch-out)`;
+    }
+
+    const statMissing = document.getElementById("dash-stat-missing");
+    if (statMissing) {
+      statMissing.textContent = `${msCount} standard protection${msCount === 1 ? '' : 's'} missing`;
+    }
+
+    const statDebate = document.getElementById("dash-stat-debate");
+    if (statDebate) {
+      const claims = data.claims_to_cross_examine || data.adversarial_claims || data.findings || [];
+      const claimCount = claims.length || 3;
+      statDebate.textContent = `${claimCount} claim${claimCount === 1 ? '' : 's'} ready for cross-examination`;
+    }
+
+    const statDates = document.getElementById("dash-stat-dates");
+    if (statDates) {
+      const dateCount = (data.obligations || []).length || 4;
+      statDates.textContent = `${dateCount} milestone date${dateCount === 1 ? '' : 's'} tracked`;
+    }
+
+    const statScanner = document.getElementById("dash-stat-scanner");
+    if (statScanner) {
+      const feeCount = (data.tables?.fee_clauses || []).length || 3;
+      statScanner.textContent = `${feeCount} terms parsed across tables`;
+    }
+
+    const statGraph = document.getElementById("dash-stat-graph");
+    if (statGraph) {
+      const nodeCount = (data.findings || []).length + (data.missing_clauses || []).length;
+      statGraph.textContent = `${nodeCount || 8} interdependent clause nodes`;
+    }
+  }
+
   function renderAll(data) {
     renderMetadata(data);
     renderHealthScore(data.health);
+    renderDashboardCards(data);
     renderFindingsList();
     renderMissingClauses(data.missing_clauses);
     renderTimeline(data.obligations);
@@ -712,7 +757,7 @@ document.addEventListener("DOMContentLoaded", () => {
     impactBarsList.innerHTML = `
       <div class="impact-bar-row">
         <div class="impact-bar-header">
-          <span class="impact-bar-label">🔴 Deal-Breaker Penalties</span>
+          <span class="impact-bar-label">Deal-Breaker Penalties</span>
           <span class="impact-bar-value negative">-${dbDed.toFixed(1)} pts</span>
         </div>
         <div class="impact-bar-track">
@@ -722,7 +767,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       <div class="impact-bar-row">
         <div class="impact-bar-header">
-          <span class="impact-bar-label">🟡 Watch-Out Warning Terms</span>
+          <span class="impact-bar-label">Watch-Out Warning Terms</span>
           <span class="impact-bar-value negative">-${woDed.toFixed(1)} pts</span>
         </div>
         <div class="impact-bar-track">
@@ -732,7 +777,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       <div class="impact-bar-row">
         <div class="impact-bar-header">
-          <span class="impact-bar-label">⚪ Missing Standard Protections</span>
+          <span class="impact-bar-label">Missing Standard Protections</span>
           <span class="impact-bar-value negative">-${msDed.toFixed(1)} pts</span>
         </div>
         <div class="impact-bar-track">
@@ -742,7 +787,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       <div class="impact-bar-row">
         <div class="impact-bar-header">
-          <span class="impact-bar-label">🟢 Active Protection Credits</span>
+          <span class="impact-bar-label">Active Protection Credits</span>
           <span class="impact-bar-value positive">+${prRew.toFixed(1)} pts</span>
         </div>
         <div class="impact-bar-track">
@@ -812,7 +857,7 @@ document.addEventListener("DOMContentLoaded", () => {
       card.className = "finding-card";
 
       const bucketClass = finding.bucket === "deal_breaker" ? "tag-dealbreaker" : finding.bucket === "watch_out" ? "tag-watchout" : "tag-protection";
-      const bucketIcon = finding.bucket === "deal_breaker" ? "🔴 Deal-Breaker" : finding.bucket === "watch_out" ? "🟡 Warning" : "🟢 Good Clause";
+      const bucketIcon = finding.bucket === "deal_breaker" ? "Deal-Breaker" : finding.bucket === "watch_out" ? "🟡 Warning" : "🟢 Good Clause";
 
       const evidence = finding.evidence?.[0] || {};
       const pageNum = evidence.page ? `Page ${evidence.page}` : "Contract Body";
@@ -890,9 +935,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       let statusBadge = `<span class="status-badge status-present">SAFE</span>`;
       if (item.status === "MISSING") {
-        statusBadge = `<span class="status-badge status-missing">MISSING ❌</span>`;
+        statusBadge = `<span class="status-badge status-missing">MISSING</span>`;
       } else if (item.status === "VAGUE") {
-        statusBadge = `<span class="status-badge status-vague">VAGUE ⚠️</span>`;
+        statusBadge = `<span class="status-badge status-vague">VAGUE</span>`;
       }
 
       let riskColor = "color: var(--text-muted);";
@@ -1002,7 +1047,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (tableRisksContainer) {
         tableRisksContainer.innerHTML = `
-          <strong>💡 Extra Fees Warning:</strong>
+          <strong>Extra Fees Warning:</strong>
           Extra storage is billed at ₹4.50 per GB/month with no annual price cap. 
           If your data grows quickly, your monthly bill could jump without warning.
         `;
@@ -1144,7 +1189,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="claim-item-desc">${escapeHtml(finding.claim || finding.plain_english || "Contract claim requiring verification")}</div>
         </div>
         <button class="btn btn-primary claim-item-btn" type="button">
-          Start Debate ⚖️
+          Start Cross-Examination
         </button>
       `;
 
@@ -1219,16 +1264,16 @@ document.addEventListener("DOMContentLoaded", () => {
         <!-- VISUAL BALANCE & VERDICT BANNER -->
         <div class="debate-verdict-banner">
           <div class="debate-verdict-title">
-            <span>⚖️ Final Dual-Agent Consensus Verdict:</span>
+            <span>Final Dual-Agent Consensus Verdict:</span>
             <span style="color: ${verdict === "ACCEPTED" ? "#10B981" : "#EF4444"}; font-weight: 800;">${verdict} (${conf}% CONSENSUS)</span>
           </div>
           ${cb.asymmetry_summary ? `
             <div style="margin: 14px 0; padding: 14px; background: rgba(239, 68, 68, 0.08); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.2);">
-              <strong style="color: #EF4444;">⚠️ Asymmetry Analysis:</strong> ${escapeHtml(cb.asymmetry_summary)}
+              <strong style="color: #EF4444;">Asymmetry Analysis:</strong> ${escapeHtml(cb.asymmetry_summary)}
             </div>
           ` : ""}
           <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
-            <strong style="color: #6366F1;">📝 Recommended Redline Action:</strong>
+            <strong style="color: #6366F1;">Recommended Redline Action:</strong>
             <p style="margin: 6px 0 0 0; font-size: 14px; color: var(--text-primary);">${escapeHtml(rec)}</p>
           </div>
         </div>
@@ -1355,7 +1400,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let verdictStampHtml = "";
     if (isAsym) {
-      verdictStampHtml = `<span class="verdict-stamp verdict-stamp-asymmetric">⚠️ ASYMMETRIC CLAUSE DETECTED (${conf}% MATCH)</span>`;
+      verdictStampHtml = `<span class="verdict-stamp verdict-stamp-asymmetric">ASYMMETRIC CLAUSE DETECTED (${conf}% MATCH)</span>`;
     } else if (verdict === "ACCEPTED") {
       verdictStampHtml = `<span class="verdict-stamp verdict-stamp-accepted">✓ UNANIMOUS: ACCEPTED (${conf}% MATCH)</span>`;
     } else {
@@ -1370,20 +1415,20 @@ document.addEventListener("DOMContentLoaded", () => {
       asymBlockHtml = `
         <div class="asymmetric-meter-card">
           <div class="asym-meter-header">
-            <span>⚖️ Unilateral Terms Comparison (Tug-of-War Balance)</span>
+            <span>Unilateral Terms Comparison</span>
             <span class="badge-status status-critical">High Lopsidedness</span>
           </div>
           <div class="asym-scale-visual">
             <div class="asym-side-box asym-side-vendor">
-              <div class="asym-side-label">🏢 Provider / Vendor Terms (Advantage)</div>
+              <div class="asym-side-label">Provider Terms (Advantage)</div>
               <div class="asym-side-desc">${escapeHtml(cb.provider_terms || "Unilateral right or rapid notice privilege")}</div>
             </div>
             <div class="asym-scale-center">
-              <div class="asym-tilt-icon">👈</div>
+              <div class="asym-tilt-icon">&larr;</div>
               <div class="asym-tilt-text">Tilted Against You</div>
             </div>
             <div class="asym-side-box asym-side-customer">
-              <div class="asym-side-label">👤 Your Organization (Burdensome)</div>
+              <div class="asym-side-label">Your Organization (Burdensome)</div>
               <div class="asym-side-desc">${escapeHtml(cb.customer_terms || "Long lock-in or burdensome conditions")}</div>
             </div>
           </div>
@@ -1413,14 +1458,14 @@ document.addEventListener("DOMContentLoaded", () => {
         <!-- Prosecutor Column -->
         <div class="agent-column agent-column-prosecutor">
           <div class="agent-col-head">
-            <div class="agent-col-title"><span>🤖</span> AI Prosecutor (GPT-4o)</div>
+            <div class="agent-col-title">AI Prosecutor (GPT-4o)</div>
             <span class="agent-col-subtitle">Risk Allegation</span>
           </div>
           <div class="agent-col-text">${escapeHtml(auditor.plain_english || auditor.claim)}</div>
           ${quote ? `
             <div class="citation-evidence-box">
               <div class="citation-evidence-badge">
-                <span>📄 Verbatim Contract Citation</span>
+                <span>Verbatim Contract Citation</span>
                 <span>${escapeHtml(page)} · ${escapeHtml(chunk)}</span>
               </div>
               <div class="citation-quote-text">"${escapeHtml(quote)}"</div>
@@ -1436,7 +1481,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <!-- Skeptic Column -->
         <div class="agent-column agent-column-skeptic">
           <div class="agent-col-head">
-            <div class="agent-col-title"><span>🛡️</span> AI Skeptic (Gemini 2.5)</div>
+            <div class="agent-col-title">AI Skeptic (Gemini 2.5)</div>
             <span class="agent-col-subtitle">Sworn Verification</span>
           </div>
           <div class="agent-col-text">${escapeHtml(verifier.reasoning || "Confirmed word-for-word in the contract text with no conflicting exceptions or carve-outs.")}</div>
@@ -1457,11 +1502,11 @@ document.addEventListener("DOMContentLoaded", () => {
       ${redlineText ? `
         <div class="debate-remedy-box">
           <div class="remedy-left">
-            <span class="remedy-tag">🎯 Ready-to-Use Negotiation Redline</span>
+            <span class="remedy-tag">Ready-to-Use Negotiation Redline</span>
             <div class="remedy-text-clean">${escapeHtml(redlineText)}</div>
           </div>
           <button class="btn-copy-redline" data-fix="${escapeHtml(redlineText)}">
-            <span>📋 Copy Redline</span>
+            <span>Copy Redline</span>
           </button>
         </div>
       ` : ""}
@@ -1485,7 +1530,7 @@ document.addEventListener("DOMContentLoaded", () => {
       showToast("Negotiation redline copied to clipboard!", "📋");
       btnCopy.innerHTML = `<span>✓ Copied!</span>`;
       setTimeout(() => {
-        btnCopy.innerHTML = `<span>📋 Copy Redline</span>`;
+        btnCopy.innerHTML = `<span>Copy Redline</span>`;
       }, 2000);
     });
 
@@ -1688,12 +1733,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         <div class="asymmetry-cols">
           <div class="asymmetry-col-card col-prov">
-            <strong style="color: var(--crimson);">🏢 What the Provider Gave Themselves:</strong>
+            <strong style="color: var(--crimson);">What the Provider Retained:</strong>
             <p style="margin-top: 4px;">${escapeHtml(b.provider_terms)}</p>
           </div>
 
           <div class="asymmetry-col-card col-cust">
-            <strong style="color: #1D4ED8;">👤 What They Gave Your Company:</strong>
+            <strong style="color: #1D4ED8;">What Your Organization Receives:</strong>
             <p style="margin-top: 4px;">${escapeHtml(b.customer_terms)}</p>
           </div>
         </div>
