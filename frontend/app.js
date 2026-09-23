@@ -1050,8 +1050,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Ask courtroom custom query listener
-  const btnAskCourtroom = document.getElementById("btn-ask-courtroom");
-  const courtroomQueryInput = document.getElementById("courtroom-query-input");
 
   function triggerCustomDebate(queryText) {
     if (!queryText.trim()) return;
