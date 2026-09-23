@@ -2457,6 +2457,21 @@ section[id] {
   font-weight: 600;
   color: var(--text-muted);
   padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.claims-filter-pill:hover {
+  color: var(--text-main);
+}
+
+.claims-filter-pill.active {
+  background: #FFFFFF;
+  color: var(--text-main);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
 /* Rechecks Depth Pill Selector */
 .courtroom-rechecks-row {
   display: flex;
