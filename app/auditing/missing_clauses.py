@@ -1,6 +1,6 @@
 import re
 from typing import Literal
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 MissingStatus = Literal["PRESENT", "MISSING", "VAGUE"]

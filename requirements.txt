@@ -2,7 +2,6 @@ fastapi
 uvicorn
 python-multipart
 pydantic
-pydantic-settings
 python-dotenv
 pymupdf
 pdfplumber
@@ -10,9 +9,9 @@ chromadb
 networkx
 langgraph
 openai
-google-generativeai
 google-genai
 tenacity
 pytest
 rich
+
 

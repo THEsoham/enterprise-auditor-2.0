@@ -1,9 +1,7 @@
-import re
 from app.scoring.score_models import (
     RiskScore,
     BucketType,
     ClauseBalance,
-    EnrichedFinding,
 )
 
 

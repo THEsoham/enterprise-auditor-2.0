@@ -27,7 +27,7 @@ class AuditPipeline:
     grounded knowledge graph synthesis, and executive report generation.
     """
 
-    def __init__(self, max_debate_rounds: int = 3):
+    def __init__(self, max_debate_rounds: int = 7):
         self.table_extractor = TableExtractor()
         self.signature_analyzer = SignatureAnalyzer()
         self.retriever = Retriever()

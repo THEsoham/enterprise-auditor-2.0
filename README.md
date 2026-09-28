@@ -128,9 +128,9 @@ Open your browser at:
   python scripts/run_audit.py
   ```
 
-* **Test Document Upload & Audit:**
+* **Run Backend Benchmark Suite:**
   ```bash
-  python scripts/test_upload.py
+  python scripts/run_benchmark.py
   ```
 
 ---

@@ -1,6 +1,5 @@
 import re
 from pathlib import Path
-from typing import Optional
 import pdfplumber
 from pydantic import BaseModel, Field
 

@@ -1,6 +1,4 @@
 import networkx as nx
-from typing import Optional
-from app.graph.graph_models import GraphNode, GraphEdge, SerializedGraph
 
 
 class GraphBuilder:
@@ -138,7 +136,7 @@ class GraphBuilder:
     def build(
         self,
         findings: list[dict],
-        parties: Optional[dict[str, str]] = None,
+        parties: dict[str, str] | None = None,
     ) -> nx.MultiDiGraph:
         """
         Constructs the comprehensive knowledge graph including core contractual entities,

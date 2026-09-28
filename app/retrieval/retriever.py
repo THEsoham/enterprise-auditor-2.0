@@ -1,4 +1,3 @@
-import os
 from dotenv import load_dotenv
 
 from app.retrieval.bm25 import BM25Index

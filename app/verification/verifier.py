@@ -111,7 +111,7 @@ Return exactly this structure:
         content = None
         if not GeminiVerifier._gemini_unavailable:
             try:
-                from concurrent.futures import ThreadPoolExecutor, TimeoutError
+                from concurrent.futures import ThreadPoolExecutor
                 with ThreadPoolExecutor(max_workers=1) as executor:
                     future = executor.submit(
                         self.client.interactions.create,
