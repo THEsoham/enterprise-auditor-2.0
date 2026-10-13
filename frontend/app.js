@@ -906,6 +906,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Update outline sidebar active states
     document.querySelectorAll(".outline-item-btn").forEach((btn, idx) => {
       btn.classList.toggle("active", idx + 1 === pageNum);
+    });
   }
 
   btnDocviewPrev?.addEventListener("click", () => {
