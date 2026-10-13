@@ -38,10 +38,14 @@ class Retriever:
             n_results=n_results,
         )
 
-        documents = results.get("documents", [[]])[0]
-        metadatas = results.get("metadatas", [[]])[0]
-        distances = results.get("distances", [[]])[0]
-        ids = results.get("ids", [[]])[0]
+        raw_docs = results.get("documents") or []
+        documents = raw_docs[0] if len(raw_docs) > 0 and raw_docs[0] is not None else []
+        raw_meta = results.get("metadatas") or []
+        metadatas = raw_meta[0] if len(raw_meta) > 0 and raw_meta[0] is not None else []
+        raw_dist = results.get("distances") or []
+        distances = raw_dist[0] if len(raw_dist) > 0 and raw_dist[0] is not None else []
+        raw_ids = results.get("ids") or []
+        ids = raw_ids[0] if len(raw_ids) > 0 and raw_ids[0] is not None else []
 
         output = []
         for i in range(len(documents)):

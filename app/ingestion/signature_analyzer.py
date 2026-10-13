@@ -119,9 +119,11 @@ class SignatureAnalyzer:
         else:
             overall_status = "UNEXECUTED_DRAFT"
             headline = f"⚠️ SIGNATURE STATUS: NOT DETECTED (DRAFT) — Blank signature lines on Page {found_page_num}"
+            cust_str = parties_detected[0].party_name if len(parties_detected) > 0 else "Customer"
+            prov_str = parties_detected[1].party_name if len(parties_detected) > 1 else "Provider"
             visual_notes = (
                 f"Page {found_page_num} contains signature blocks with blank underline placeholders for "
-                f"Customer ({parties_detected[0].party_name}) and Provider ({parties_detected[1].party_name}). "
+                f"Customer ({cust_str}) and Provider ({prov_str}). "
                 "No visual signatures, digital certificates, or handwritten marks were detected."
             )
 

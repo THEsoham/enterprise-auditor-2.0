@@ -170,9 +170,11 @@ class GraphBuilder:
             )
 
             # Determine Clause / Section
+            ev_list = finding.get("evidence") or []
+            first_ev = ev_list[0] if len(ev_list) > 0 else {}
             sec_name = (
                 finding.get("section")
-                or (finding.get("evidence", [{}])[0].get("section"))
+                or first_ev.get("section")
                 or finding.get("category", "Contract Terms").replace("_", " ").title()
             )
             clause_slug = f"clause-{finding.get('category', f'sec-{idx}')}"
@@ -187,7 +189,6 @@ class GraphBuilder:
                 created_clause_nodes.add(clause_slug)
 
             # Link finding to clause
-            first_ev = finding.get("evidence", [{}])[0]
             graph.add_edge(
                 finding_id,
                 clause_slug,
@@ -254,9 +255,10 @@ class GraphBuilder:
                     graph.add_edge(gap_id, "doc-contract", relationship="OMITTED_FROM")
 
         # 7. Asymmetry Link (if termination or liability clauses exist)
-        if "clause-termination" in created_clause_nodes and len(created_clause_nodes) > 1:
-            other_clause = [c for c in created_clause_nodes if c != "clause-termination"][0]
-            graph.add_edge("clause-termination", other_clause, relationship="ASYMMETRIC_WITH")
+        if "clause-termination" in created_clause_nodes:
+            other_clauses = [c for c in created_clause_nodes if c != "clause-termination"]
+            if other_clauses:
+                graph.add_edge("clause-termination", other_clauses[0], relationship="ASYMMETRIC_WITH")
 
         return graph
 

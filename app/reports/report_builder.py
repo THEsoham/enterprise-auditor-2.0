@@ -43,12 +43,14 @@ class ReportBuilder:
         for finding in findings:
             cb = finding.get("clause_balance")
             if cb and cb.get("is_asymmetric"):
+                ev_items = finding.get("evidence") or []
+                first_page = ev_items[0].get("page") if len(ev_items) > 0 else None
                 clause_balance_items.append({
                     "title": finding.get("title", ""),
                     "provider_terms": cb.get("provider_terms", ""),
                     "customer_terms": cb.get("customer_terms", ""),
                     "asymmetry_summary": cb.get("asymmetry_summary", ""),
-                    "page": finding.get("evidence", [{}])[0].get("page"),
+                    "page": first_page,
                 })
 
         enriched_findings_list = []
