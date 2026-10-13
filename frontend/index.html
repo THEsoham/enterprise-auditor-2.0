@@ -78,7 +78,8 @@
 
           <!-- Central Primary CTA Group -->
           <div class="landing-hero-cta-group" style="display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap;">
-            <button class="btn-dark btn-hero-upload" id="btn-hero-upload-doc">
+            <input type="file" id="hero-direct-file-input" accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown" style="display: none;">
+            <button class="btn-dark btn-hero-upload" id="btn-hero-upload-doc" type="button">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="17 8 12 3 7 8"></polyline>
@@ -1314,10 +1315,10 @@
 
       <div class="dialog-body" style="text-align: center; padding: 36px 24px;">
 
-        <input type="file" id="modal-file-input" accept=".pdf,.docx,.txt,.md" style="position: absolute; left: -9999px; opacity: 0; width: 1px; height: 1px;" tabindex="-1">
+        <input type="file" id="modal-file-input" accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown" style="display: none;">
 
-        <div id="modal-drop-area"
-          style="border: 2px dashed #CBD5E1; border-radius: var(--radius-lg); padding: 36px 20px; cursor: pointer; transition: border-color 0.2s ease;">
+        <label for="modal-file-input" id="modal-drop-area"
+          style="display: block; border: 2px dashed #CBD5E1; border-radius: var(--radius-lg); padding: 36px 20px; cursor: pointer; transition: border-color 0.2s ease; background: #FAFAFA;">
           <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.8"
             style="color: var(--text-muted); margin-bottom: 8px;">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -1325,14 +1326,20 @@
             <line x1="12" y1="18" x2="12" y2="12" />
             <line x1="9" y1="15" x2="15" y2="15" />
           </svg>
-          <div style="font-size: 15px; font-weight: 700; color: var(--text-primary);">Drag and drop your contract PDF
-            here</div>
-          <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Supports PDF, DOCX, TXT, and Markdown
-            files.</p>
-          <button type="button" class="btn-dark" style="margin-top: 14px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;" id="btn-browse-modal">Select from Computer</button>
+          <div style="font-size: 15px; font-weight: 700; color: var(--text-primary);">Drag & drop or click to upload contract</div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Supports PDF, DOCX, TXT, and Markdown files (up to 50MB).</p>
+          <span class="btn-dark" style="margin-top: 14px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;" id="btn-browse-modal">Select from Computer</span>
+        </label>
+
+        <!-- Error Alert Container Inside Modal -->
+        <div id="modal-upload-error" style="display: none; background: #FEF2F2; border: 1px solid #FECACA; border-radius: var(--radius-md); padding: 14px 16px; margin-top: 18px; text-align: left;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+            <strong style="color: #991B1B; font-size: 13px;">Upload or Parsing Error</strong>
+            <button type="button" class="btn-close" id="btn-dismiss-upload-error" style="font-size: 16px; line-height: 1; color: #991B1B;">&times;</button>
+          </div>
+          <div id="modal-upload-error-msg" style="color: #7F1D1D; font-size: 12.5px; line-height: 1.45;"></div>
+          <button type="button" class="btn-dark btn-sm" id="btn-retry-upload" style="margin-top: 10px;">Select Another File</button>
         </div>
-
-
 
         <!-- Progress Indicator -->
         <div id="modal-upload-progress" style="display: none; margin-top: 24px; text-align: left;">
@@ -1509,7 +1516,7 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- App Controller Script -->
-  <script src="app.js?v=2.2"></script>
+  <script src="app.js?v=2.4"></script>
 </body>
 
 </html>

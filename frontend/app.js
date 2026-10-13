@@ -158,7 +158,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const paletteSearchInput = document.getElementById("palette-search-input");
   const paletteResultsList = document.getElementById("palette-results-list");
 
-  // Upload Modal
+  // Upload Modal & Direct File Input
   const modalUploadAudit = document.getElementById("modal-upload-audit");
   const btnCloseUploadModal = document.getElementById("btn-close-upload-modal");
   const modalFileInput = document.getElementById("modal-file-input");
@@ -167,6 +167,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalUploadProgress = document.getElementById("modal-upload-progress");
   const uploadStageText = document.getElementById("upload-stage-text");
   const uploadStageBar = document.getElementById("upload-stage-bar");
+  const modalUploadError = document.getElementById("modal-upload-error");
+  const modalUploadErrorMsg = document.getElementById("modal-upload-error-msg");
+  const btnDismissUploadError = document.getElementById("btn-dismiss-upload-error");
+  const btnRetryUpload = document.getElementById("btn-retry-upload");
+  const heroDirectFileInput = document.getElementById("hero-direct-file-input");
 
   // Asymmetry Modal
   const modalAsymmetry = document.getElementById("modal-asymmetry");
@@ -443,29 +448,31 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!data) return;
     auditData = data;
 
-    renderBanner(data);
-    renderOverviewKPIs(data);
-    renderTopFindingsTable(data);
-    renderOverviewKeyDates(data);
-    renderOverviewAiInsight(data);
-    renderFindingsScreen();
-    renderContractView(data);
-    renderMissingProtections(data.missing_clauses);
-    renderCourtroomArena(data.findings);
-    renderTimeline(data.obligations);
-    renderScanner(data.signature_status || data.signatures, data.tables);
-    renderPipelineStats(data);
-    renderExecutiveReport(data);
+    try { renderBanner(data); } catch (e) { console.warn("renderBanner warning:", e); }
+    try { renderOverviewKPIs(data); } catch (e) { console.warn("renderOverviewKPIs warning:", e); }
+    try { renderTopFindingsTable(data); } catch (e) { console.warn("renderTopFindingsTable warning:", e); }
+    try { renderOverviewKeyDates(data); } catch (e) { console.warn("renderOverviewKeyDates warning:", e); }
+    try { renderOverviewAiInsight(data); } catch (e) { console.warn("renderOverviewAiInsight warning:", e); }
+    try { renderFindingsScreen(); } catch (e) { console.warn("renderFindingsScreen warning:", e); }
+    try { renderContractView(data); } catch (e) { console.warn("renderContractView warning:", e); }
+    try { renderMissingProtections(data.missing_clauses); } catch (e) { console.warn("renderMissingProtections warning:", e); }
+    try { renderCourtroomArena(data.findings); } catch (e) { console.warn("renderCourtroomArena warning:", e); }
+    try { renderTimeline(data.obligations); } catch (e) { console.warn("renderTimeline warning:", e); }
+    try { renderScanner(data.signature_status || data.signatures, data.tables); } catch (e) { console.warn("renderScanner warning:", e); }
+    try { renderPipelineStats(data); } catch (e) { console.warn("renderPipelineStats warning:", e); }
+    try { renderExecutiveReport(data); } catch (e) { console.warn("renderExecutiveReport warning:", e); }
 
     // Update nav counter badges
-    const dbCount = data.health?.deal_breakers_count || (data.health?.deal_breakers || []).length || 0;
-    const woCount = data.health?.watch_out_count || (data.health?.watch_out || []).length || 0;
-    const msCount = data.health?.missing_protections_count || (data.missing_clauses || []).length || 0;
-    const dateCount = (data.obligations?.timeline_items || []).length || 0;
+    try {
+      const dbCount = data.health?.deal_breakers_count || (data.health?.deal_breakers || []).length || 0;
+      const woCount = data.health?.watch_out_count || (data.health?.watch_out || []).length || 0;
+      const msCount = data.health?.missing_protections_count || (data.missing_clauses || []).length || 0;
+      const dateCount = (data.obligations?.timeline_items || []).length || 0;
 
-    if (navCountRisks) navCountRisks.textContent = dbCount + woCount;
-    if (navCountMissing) navCountMissing.textContent = msCount;
-    if (navCountDates) navCountDates.textContent = dateCount;
+      if (navCountRisks) navCountRisks.textContent = dbCount + woCount;
+      if (navCountMissing) navCountMissing.textContent = msCount;
+      if (navCountDates) navCountDates.textContent = dateCount;
+    } catch (_) {}
   }
 
   // 1. Contract Header Banner
@@ -2610,44 +2617,58 @@ document.addEventListener("DOMContentLoaded", () => {
   // Upload Modal Controllers
   function openUploadModal() {
     if (!modalUploadAudit) return;
+    if (modalUploadError) modalUploadError.style.display = "none";
     if (modalUploadProgress) modalUploadProgress.style.display = "none";
     if (modalDropArea) modalDropArea.style.display = "block";
     if (uploadStageBar) uploadStageBar.style.width = "10%";
     if (uploadStageText) uploadStageText.textContent = "Ingesting document and extracting clauses...";
-    modalUploadAudit.showModal();
+    try {
+      if (!modalUploadAudit.open) modalUploadAudit.showModal();
+    } catch (_) {}
+  }
+
+  function showUploadError(msg) {
+    if (modalUploadProgress) modalUploadProgress.style.display = "none";
+    if (modalDropArea) modalDropArea.style.display = "block";
+    if (modalUploadError) {
+      modalUploadError.style.display = "block";
+      if (modalUploadErrorMsg) modalUploadErrorMsg.textContent = msg;
+    }
+    showToast("Upload failed: " + msg, "error");
   }
 
   btnHeaderNewAudit?.addEventListener("click", openUploadModal);
-  btnCloseUploadModal?.addEventListener("click", () => modalUploadAudit?.close());
+  btnCloseUploadModal?.addEventListener("click", () => {
+    if (modalUploadAudit) modalUploadAudit.close();
+  });
 
+  btnDismissUploadError?.addEventListener("click", () => {
+    if (modalUploadError) modalUploadError.style.display = "none";
+  });
+
+  btnRetryUpload?.addEventListener("click", () => {
+    if (modalUploadError) modalUploadError.style.display = "none";
+    if (modalFileInput) {
+      modalFileInput.value = "";
+      modalFileInput.click();
+    }
+  });
+
+  // Clicking browse button or drop area (fallback if label default is overridden)
   btnBrowseModal?.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+    // If it's a span or button, trigger the file input
     if (modalFileInput) {
       modalFileInput.value = "";
       modalFileInput.click();
-    }
-  });
-
-  // Allow clicking anywhere inside the drop area to open file picker
-  modalDropArea?.addEventListener("click", (e) => {
-    if (modalFileInput) {
-      modalFileInput.value = "";
-      modalFileInput.click();
-    }
-  });
-
-  btnBrowseModal?.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      if (modalFileInput) {
-        modalFileInput.value = "";
-        modalFileInput.click();
-      }
     }
   });
 
   modalFileInput?.addEventListener("change", (e) => {
+    const file = e.target.files?.[0];
+    if (file) executeUpload(file);
+  });
+
+  heroDirectFileInput?.addEventListener("change", (e) => {
     const file = e.target.files?.[0];
     if (file) executeUpload(file);
   });
@@ -2669,14 +2690,14 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Global window drag-and-drop: dropping a document anywhere opens the upload modal and runs the audit
-  window.addEventListener("dragover", (e) => {
-    e.preventDefault();
+  ["dragenter", "dragover"].forEach((evt) => {
+    window.addEventListener(evt, (e) => e.preventDefault());
   });
 
   window.addEventListener("drop", (e) => {
     e.preventDefault();
     const file = e.dataTransfer?.files?.[0];
-    if (file && (file.name.endsWith(".pdf") || file.name.endsWith(".docx") || file.name.endsWith(".txt") || file.name.endsWith(".md"))) {
+    if (file && /\.(pdf|docx|txt|md)$/i.test(file.name)) {
       openUploadModal();
       executeUpload(file);
     }
@@ -2684,12 +2705,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function executeUpload(file) {
     if (!file) return;
+
+    // Validate file extension
+    const validExts = [".pdf", ".docx", ".txt", ".md"];
+    const fileName = file.name || "contract";
+    const dotIdx = fileName.lastIndexOf(".");
+    const ext = dotIdx !== -1 ? fileName.slice(dotIdx).toLowerCase() : "";
+    if (!validExts.includes(ext)) {
+      openUploadModal();
+      showUploadError(`Unsupported file format "${ext || 'unknown'}". Supported formats: PDF, DOCX, TXT, MD.`);
+      return;
+    }
+
+    // Validate file size (max 50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      openUploadModal();
+      showUploadError(`File is too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Maximum allowed size is 50MB.`);
+      return;
+    }
+
+    openUploadModal();
+    if (modalUploadError) modalUploadError.style.display = "none";
     if (modalDropArea) modalDropArea.style.display = "none";
     if (modalUploadProgress) modalUploadProgress.style.display = "block";
 
     const stages = [
-      { text: "Ingesting document structure & mapping pages...", pct: "18%" },
-      { text: "Scanning tables & signature block authenticity...", pct: "36%" },
+      { text: `Ingesting "${fileName}" & mapping pages...`, pct: "18%" },
+      { text: "Scanning tables, counterparties & signature authenticity...", pct: "36%" },
       { text: "Constructing section-aware semantic chunks...", pct: "52%" },
       { text: "Populating BM25 and dense vector indexes...", pct: "68%" },
       { text: "AI Courtroom: Multi-agent debate cross-examining clauses...", pct: "84%" },
@@ -2735,23 +2777,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const data = await res.json();
 
-      if (data.report) {
+      if (data && data.report) {
         if (uploadStageBar) uploadStageBar.style.width = "100%";
         if (uploadStageText) uploadStageText.textContent = "Audit complete! Opening workspace...";
         await new Promise((r) => setTimeout(r, 600));
 
         renderAll(data.report);
-        modalUploadAudit.close();
+        try { modalUploadAudit.close(); } catch (_) {}
         showToast(`Audit complete for "${file.name}"!`, "success");
         enterAuditorApp("all");
+      } else {
+        throw new Error("Invalid response from auditor backend (no audit report returned).");
       }
     } catch (err) {
-      showToast("Upload error: " + err.message, "error");
+      clearInterval(timer);
+      showUploadError(err.message || "An unexpected error occurred during document audit.");
     } finally {
       clearInterval(timer);
-      if (modalDropArea) modalDropArea.style.display = "block";
-      if (modalUploadProgress) modalUploadProgress.style.display = "none";
       if (modalFileInput) modalFileInput.value = "";
+      if (heroDirectFileInput) heroDirectFileInput.value = "";
     }
   }
 
@@ -2870,9 +2914,19 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("landing-logo-btn")?.addEventListener("click", returnToLanding);
 
   // Upload buttons from Landing Page
+  const btnHeroUploadDoc = document.getElementById("btn-hero-upload-doc");
+  btnHeroUploadDoc?.addEventListener("click", () => {
+    // Direct file picker prompt for immediate interaction
+    if (heroDirectFileInput) {
+      heroDirectFileInput.value = "";
+      heroDirectFileInput.click();
+    } else {
+      openUploadModal();
+    }
+  });
+
   [
     document.getElementById("btn-landing-nav-upload"),
-    document.getElementById("btn-hero-upload-doc"),
     document.getElementById("btn-footer-upload")
   ].forEach((btn) => {
     btn?.addEventListener("click", () => {
