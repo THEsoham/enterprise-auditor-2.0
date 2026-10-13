@@ -31,7 +31,7 @@ class GeminiVerifier:
                 from google.genai import types
                 self.client = genai.Client(
                     api_key=api_key,
-                    http_options=types.HttpOptions(timeout=15000),
+                    http_options=types.HttpOptions(timeout=10),
                 )
             except Exception:
                 GeminiVerifier._gemini_unavailable = True
@@ -110,31 +110,15 @@ Return exactly this structure:
         content = None
         if not GeminiVerifier._gemini_unavailable and self.client:
             try:
-                from concurrent.futures import ThreadPoolExecutor
-                with ThreadPoolExecutor(max_workers=1) as executor:
-                    def _call_gemini():
-                        try:
-                            resp = self.client.models.generate_content(
-                                model=self.model,
-                                contents=prompt,
-                            )
-                            return resp.text
-                        except Exception:
-                            if hasattr(self.client, "interactions"):
-                                interaction = self.client.interactions.create(
-                                    model=self.model,
-                                    input=prompt,
-                                    store=False,
-                                )
-                                return getattr(interaction, "output_text", None)
-                            raise
-
-                    future = executor.submit(_call_gemini)
-                    content = future.result(timeout=15.0)
+                resp = self.client.models.generate_content(
+                    model=self.model,
+                    contents=prompt,
+                )
+                content = resp.text
             except Exception as e:
-                err_str = str(e).lower()
+                GeminiVerifier._gemini_unavailable = True
                 try:
-                    print(f"[!] Gemini verification note ({e}). Falling back to OpenAI Skeptic Verifier.")
+                    print(f"[!] Gemini verification unavailable ({e}). Switched to OpenAI Skeptic Verifier.")
                 except Exception:
                     pass
                 content = self._openai_verify_fallback(prompt)
@@ -198,6 +182,7 @@ Return exactly this structure:
                 ],
                 temperature=0.1,
                 response_format={"type": "json_object"},
+                timeout=20.0,
             )
             return response.choices[0].message.content or "{}"
         except Exception as fallback_err:

@@ -1314,7 +1314,7 @@
 
       <div class="dialog-body" style="text-align: center; padding: 36px 24px;">
 
-        <input type="file" id="modal-file-input" accept=".pdf,.docx,.txt,.md" style="position: absolute; opacity: 0; width: 0.1px; height: 0.1px; overflow: hidden; pointer-events: none;" tabindex="-1">
+        <input type="file" id="modal-file-input" accept=".pdf,.docx,.txt,.md" style="position: absolute; left: -9999px; opacity: 0; width: 1px; height: 1px;" tabindex="-1">
 
         <div id="modal-drop-area"
           style="border: 2px dashed #CBD5E1; border-radius: var(--radius-lg); padding: 36px 20px; cursor: pointer; transition: border-color 0.2s ease;">
@@ -1329,7 +1329,7 @@
             here</div>
           <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Supports PDF, DOCX, TXT, and Markdown
             files.</p>
-          <label for="modal-file-input" class="btn-dark" style="margin-top: 14px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none;" id="btn-browse-modal" role="button" tabindex="0">Select from Computer</label>
+          <button type="button" class="btn-dark" style="margin-top: 14px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;" id="btn-browse-modal">Select from Computer</button>
         </div>
 
 

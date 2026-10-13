@@ -2620,23 +2620,31 @@ document.addEventListener("DOMContentLoaded", () => {
   btnHeaderNewAudit?.addEventListener("click", openUploadModal);
   btnCloseUploadModal?.addEventListener("click", () => modalUploadAudit?.close());
 
+  btnBrowseModal?.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (modalFileInput) {
+      modalFileInput.value = "";
+      modalFileInput.click();
+    }
+  });
+
   // Allow clicking anywhere inside the drop area to open file picker
   modalDropArea?.addEventListener("click", (e) => {
-    // If the click was directly on or inside the browse label, let native label activation handle it
-    if (e.target.closest("#btn-browse-modal")) return;
-    modalFileInput?.click();
+    if (modalFileInput) {
+      modalFileInput.value = "";
+      modalFileInput.click();
+    }
   });
 
   btnBrowseModal?.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      modalFileInput?.click();
+      if (modalFileInput) {
+        modalFileInput.value = "";
+        modalFileInput.click();
+      }
     }
-  });
-
-  // Always reset input value when clicked so choosing the same file triggers "change" every time
-  modalFileInput?.addEventListener("click", () => {
-    modalFileInput.value = "";
   });
 
   modalFileInput?.addEventListener("change", (e) => {

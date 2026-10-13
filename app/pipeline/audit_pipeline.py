@@ -127,35 +127,49 @@ class AuditPipeline:
         risk_scores = []
         debate_histories = []
 
-        for probe in probes_to_run:
+        from concurrent.futures import ThreadPoolExecutor
+
+        def _execute_single_probe(probe):
             query_text = probe.query if isinstance(probe, AuditProbe) else probe.get("query", "")
             target_area = probe.target_area if isinstance(probe, AuditProbe) else probe.get("target_area", "")
             print(f"  -> Debating probe: {target_area or query_text[:50]}...")
 
             try:
-                result = self.debate.run(query=query_text)
+                engine = DebateEngine(max_rounds=self.debate.max_rounds)
+                result = engine.run(query=query_text)
                 finding = result.get("finding")
                 verification = result.get("verification")
 
                 if not finding or not verification:
-                    continue
+                    return None
 
                 verdict = str(verification.get("verdict", "")).upper()
                 if verdict in {"REJECTED", "UNSUPPORTED"}:
-                    continue
+                    return None
 
-                # Score finding and classify into Deal-Breaker / Watch Out / Protection
                 risk_score = self.risk_scorer.score(
                     finding=finding,
                     verification=verification,
                 )
 
-                findings.append(finding)
-                risk_scores.append(risk_score)
-                debate_histories.append(result.get("history", []))
+                return {
+                    "finding": finding,
+                    "risk_score": risk_score,
+                    "history": result.get("history", []),
+                }
             except Exception as probe_err:
                 print(f"  [WARN] Probe '{target_area}' skipped: {probe_err}")
-                continue
+                return None
+
+        max_workers = min(len(probes_to_run), 4) if probes_to_run else 1
+        with ThreadPoolExecutor(max_workers=max_workers) as pool:
+            probe_results = list(pool.map(_execute_single_probe, probes_to_run))
+
+        for pr in probe_results:
+            if pr:
+                findings.append(pr["finding"])
+                risk_scores.append(pr["risk_score"])
+                debate_histories.append(pr["history"])
 
         # 6. Scoring, Graph & Reports
         print("[9/9] Synthesizing Health Score, Knowledge Graph, and Audit Memo...")
