@@ -156,6 +156,9 @@ class AuditPipeline:
         nx_graph = self.graph_builder.build(
             findings=findings,
             parties=parties,
+            obligations=obligations_data,
+            missing_clauses=missing_clauses,
+            document_name=document_name,
         )
         serialized_graph = self.graph_builder.serialize(nx_graph)
 
@@ -171,6 +174,7 @@ class AuditPipeline:
             signature_status=signature_data,
             graph_data=serialized_graph,
             parties=parties,
+            pages=pages,
         )
 
         # Export report artifacts

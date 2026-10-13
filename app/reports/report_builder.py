@@ -28,6 +28,7 @@ class ReportBuilder:
         signature_status: Optional[dict] = None,
         graph_data: Optional[dict] = None,
         parties: Optional[dict] = None,
+        pages: Optional[list[dict]] = None,
     ) -> dict:
         debate_histories = debate_histories or []
         missing_clauses = missing_clauses or []
@@ -93,4 +94,6 @@ class ReportBuilder:
             "tables": tables,
             "signature_status": signature_status or {},
             "graph": graph_data or {},
+            "pages": pages or [],
+            "num_pages": len(pages) if pages else 0,
         }

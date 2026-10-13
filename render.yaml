@@ -20,7 +20,7 @@ services:
       - key: GEMINI_MODEL
         value: gemini-3.6-flash
       - key: USE_GEMINI
-        value: "false"
+        value: "true"
       - key: CHROMA_PERSIST_DIRECTORY
         value: data/indexes/chroma
       - key: DATA_DIRECTORY

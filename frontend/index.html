@@ -37,14 +37,12 @@
 
         <nav class="landing-nav-links">
           <a href="#landing-methodology" class="landing-nav-link">Methodology & Pipeline</a>
-          <a href="#landing-teaser" class="landing-nav-link">Evidence Verification</a>
-          <a href="#landing-samples" class="landing-nav-link">Flagged Risks</a>
-          <a href="#landing-trust" class="landing-nav-link">Security</a>
+          <a href="#landing-trust" class="landing-nav-link">Security & Privacy</a>
         </nav>
 
         <div class="landing-header-actions">
           <button class="btn-outline-legal" id="btn-landing-nav-upload">Upload Agreement</button>
-          <button class="btn-dark" id="btn-landing-nav-demo">See Live Demo →</button>
+          <button class="btn-dark" id="btn-landing-nav-workspace">Auditor Console →</button>
         </div>
       </div>
     </header>
@@ -78,8 +76,8 @@
             sign.
           </p>
 
-          <!-- Single Central Primary CTA -->
-          <div class="landing-hero-cta-group">
+          <!-- Central Primary CTA Group -->
+          <div class="landing-hero-cta-group" style="display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap;">
             <button class="btn-dark btn-hero-upload" id="btn-hero-upload-doc">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -88,18 +86,9 @@
               </svg>
               <span>Upload Contract (PDF, DOCX)</span>
             </button>
-          </div>
-
-          <!-- Preloaded Sample Audit Launch Line Directly Below -->
-          <div class="landing-sample-indicator" id="btn-hero-sample-pill" role="button" tabindex="0"
-            title="Click to open preloaded sample audit">
-            <span class="sample-dot"></span>
-            <span>Preloaded Sample Audit:</span>
-            <strong>Cloud Services Master Agreement</strong>
-            <span class="sample-tag">42 Pages</span>
-            <span class="sample-tag">24 Risk Findings</span>
-            <span class="sample-tag">Safety Score: 72/100</span>
-            <span class="sample-arrow">Launch Demo →</span>
+            <button class="btn-outline-legal" id="btn-hero-open-workspace" style="height: 44px; padding: 0 18px; font-weight: 600; font-size: 13.5px; border-radius: var(--radius-md);">
+              <span>Open Auditor Console →</span>
+            </button>
           </div>
 
           <!-- Subtle Scroll Down Prompt at Bottom of Hero Fold -->
@@ -249,139 +238,6 @@
         </div>
       </section>
 
-      <!-- ============================================================ -->
-      <!-- SECTION 2: EVIDENCE VERIFICATION INTERACTIVE TEASER         -->
-      <!-- ============================================================ -->
-      <section class="landing-teaser-section" id="landing-teaser">
-        <div class="teaser-card">
-          <div class="teaser-card-header">
-            <div class="teaser-header-left">
-              <span class="pill-severity pill-critical">DEAL-BREAKER DETECTED</span>
-              <span class="clause-ref-code">Section 14.2 • Page 18, Paragraph 3</span>
-            </div>
-            <div class="teaser-header-right">
-              <span class="badge-ai-verified hover-popover-trigger"
-                title="Corroborated across PDF coordinates with 94% lexical and semantic match.">
-                ✓ Corroborated 94%
-              </span>
-            </div>
-          </div>
-
-          <div class="teaser-body-split">
-            <!-- Verbatim Source Clause with Hover Pins -->
-            <div class="teaser-clause-box">
-              <div class="teaser-box-label">Verbatim Contract Clause (PDF Source)</div>
-              <p class="teaser-clause-text">
-                "14.2 Termination for Convenience: Provider may terminate this Agreement or any applicable Order Form
-                <span class="clause-high-exposure hover-detail-trigger" data-detail="exposure-asymmetry">at any time
-                  upon thirty (30) days' prior written notice</span>
-                to Customer without cause and
-                <span class="clause-high-exposure hover-detail-trigger" data-detail="exposure-refund">without liability
-                  or refund of any prepaid fees</span>.
-                Customer shall have no reciprocal right to terminate for convenience."
-              </p>
-
-              <!-- Floating Detail Popover for Clause (Revealed on hover) -->
-              <div class="clause-hover-tooltip" id="clause-hover-tooltip">
-                <div class="tooltip-header">
-                  <span class="tooltip-badge">HIGH EXPOSURE RATIONALE</span>
-                </div>
-                <div class="tooltip-body" id="clause-tooltip-body">
-                  Hover over the highlighted phrases above to inspect institutional risk exposure rationale.
-                </div>
-              </div>
-
-              <div class="teaser-interactive-hint">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="16" x2="12" y2="12"></line>
-                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                </svg>
-                <span>Hover over highlighted terms to view legal exposure analysis</span>
-              </div>
-            </div>
-
-            <!-- Counter-Proposal & Resolution Card -->
-            <div class="teaser-solution-box">
-              <div class="teaser-box-label">Suggested Institutional Counter-Proposal</div>
-              <p class="teaser-solution-text">
-                "Either party may terminate this Agreement upon ninety (90) days' prior written notice. In the event of
-                provider termination without cause, Provider shall immediately issue a pro-rata refund of any prepaid,
-                unamortized subscription fees within thirty (30) days."
-              </p>
-              <div class="teaser-action-bar">
-                <button class="btn-dark btn-sm" id="btn-teaser-view-full">
-                  Examine Finding in Audit Workspace →
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-
-      <!-- Live Teaser: Top Sample Findings -->
-      <section class="landing-samples-section" id="landing-samples">
-        <div class="section-head-centered">
-          <div class="section-eyebrow">PRELOADED AUDIT TEASER</div>
-          <h2 class="section-title">Key Risk Exposures Identified in Demo Contract</h2>
-          <p class="section-subtitle">
-            Click any flagged exposure below to immediately jump into that finding within the interactive audit console.
-          </p>
-        </div>
-
-        <div class="landing-teaser-findings-grid">
-          <!-- Finding 1 -->
-          <div class="landing-finding-item hover-lift-card" data-finding-type="deal_breaker" data-finding-id="db1">
-            <div class="finding-badge-row">
-              <span class="pill-severity pill-critical">DEAL-BREAKER</span>
-              <span class="clause-ref-code">Section 14.2</span>
-            </div>
-            <h4 class="landing-finding-title">Asymmetric Termination Rights</h4>
-            <p class="landing-finding-desc">
-              Provider reserves the right to terminate at will on 30 days' notice with zero refund, leaving customer
-              without service continuity or fee recourse.
-            </p>
-            <button class="btn-link-action btn-jump-finding" data-target-filter="deal_breaker">
-              Inspect in Live Demo →
-            </button>
-          </div>
-
-          <!-- Finding 2 -->
-          <div class="landing-finding-item hover-lift-card" data-finding-type="deal_breaker" data-finding-id="db2">
-            <div class="finding-badge-row">
-              <span class="pill-severity pill-critical">DEAL-BREAKER</span>
-              <span class="clause-ref-code">Section 11.1</span>
-            </div>
-            <h4 class="landing-finding-title">Disproportionate Liability Cap</h4>
-            <p class="landing-finding-desc">
-              Total provider liability is capped at fees paid in the prior 1 month, creating extreme under-insurance for
-              data breaches or confidentiality violations.
-            </p>
-            <button class="btn-link-action btn-jump-finding" data-target-filter="deal_breaker">
-              Inspect in Live Demo →
-            </button>
-          </div>
-
-          <!-- Finding 3 -->
-          <div class="landing-finding-item hover-lift-card" data-finding-type="watch_out" data-finding-id="wo1">
-            <div class="finding-badge-row">
-              <span class="pill-severity pill-amber">WATCH-OUT</span>
-              <span class="clause-ref-code">Section 3.2</span>
-            </div>
-            <h4 class="landing-finding-title">Automatic 24-Month Renewal Window</h4>
-            <p class="landing-finding-desc">
-              Agreement automatically renews for 2-year terms unless cancelled exactly 90 days before expiry, with
-              annual 8% automatic price escalators.
-            </p>
-            <button class="btn-link-action btn-jump-finding" data-target-filter="watch_out">
-              Inspect in Live Demo →
-            </button>
-          </div>
-        </div>
-      </section>
-
       <!-- Trust & Security Strip -->
       <section class="landing-trust-section" id="landing-trust">
         <div class="trust-grid">
@@ -412,7 +268,7 @@
           <p class="landing-footer-sub">Commercial contract risk auditing and negotiation intelligence console.</p>
         </div>
         <div class="landing-footer-links">
-          <button class="btn-dark btn-sm" id="btn-footer-demo">Launch Interactive Demo →</button>
+          <button class="btn-dark btn-sm" id="btn-footer-upload">Upload Contract →</button>
         </div>
       </div>
     </footer>
@@ -520,18 +376,18 @@
             </div>
 
             <div class="banner-text-group">
-              <h1 class="banner-contract-title" id="banner-contract-title">Cloud Services Agreement</h1>
+              <h1 class="banner-contract-title" id="banner-contract-title">Contract Risk Audit</h1>
               <div class="banner-parties-subtitle" id="banner-parties-subtitle">
-                Acme Corporation <span class="parties-x">×</span> Vertex Cloud Solutions
+                Awaiting Document Upload
               </div>
               <div class="banner-meta-strip" id="banner-meta-strip">
-                <span id="banner-date">Uploaded 23 Sep 2024</span>
+                <span id="banner-date">—</span>
                 <span class="dot-sep">•</span>
-                <span id="banner-pages">42 pages</span>
+                <span id="banner-pages">0 pages</span>
                 <span class="dot-sep">•</span>
-                <span id="banner-format">PDF</span>
+                <span id="banner-format">PDF / DOCX</span>
                 <span class="dot-sep">•</span>
-                <span id="banner-duration">Analyzed in 2m 14s</span>
+                <span id="banner-duration">Ready</span>
               </div>
             </div>
           </div>
@@ -542,7 +398,7 @@
                 <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
-                <span>Audit complete</span>
+                <span>Audit Console</span>
               </span>
               <button class="btn-outline-legal" id="btn-banner-view-original">View Document →</button>
             </div>
@@ -570,19 +426,19 @@
               </div>
 
               <div class="safety-score-body">
-                <div class="circular-gauge-wrap" title="Score gauge: 72/100 (Moderate contractual exposure)">
+                <div class="circular-gauge-wrap" title="Deterministic contract health score">
                   <svg class="circular-gauge-svg" viewBox="0 0 100 100">
                     <circle class="gauge-track" cx="50" cy="50" r="40"></circle>
                     <circle class="gauge-fill" id="gauge-fill-circle" cx="50" cy="50" r="40" stroke-dasharray="251.32"
-                      stroke-dashoffset="70"></circle>
+                      stroke-dashoffset="251.32"></circle>
                   </svg>
                   <div class="gauge-center-text">
-                    <div class="gauge-number" id="kpi-score-number">72</div>
+                    <div class="gauge-number" id="kpi-score-number">—</div>
                     <div class="gauge-max">/ 100</div>
                   </div>
                 </div>
                 <div class="score-assessment-text" id="kpi-score-assessment">
-                  <strong>Moderate risk.</strong> 3 critical issues require attention before signing.
+                  Upload a contract to view automated risk analysis.
                 </div>
               </div>
 
@@ -596,13 +452,13 @@
                 <div class="card-title-group">
                   <span>Findings Overview</span>
                 </div>
-                <span class="card-sub-count" id="kpi-total-findings-count">24 total findings</span>
+                <span class="card-sub-count" id="kpi-total-findings-count">0 total findings</span>
               </div>
 
               <div class="findings-overview-list">
                 <div class="findings-tier-row"
                   title="High exposure provisions (−15 pts each): Unlimited liability, unilateral termination">
-                  <span class="tier-count-circle tier-circle-red" id="tier-count-dealbreakers">3</span>
+                  <span class="tier-count-circle tier-circle-red" id="tier-count-dealbreakers">0</span>
                   <div class="tier-text-group">
                     <span class="tier-label">Deal-Breakers</span>
                     <span class="tier-desc">High contractual exposure</span>
@@ -611,7 +467,7 @@
 
                 <div class="findings-tier-row"
                   title="Unbalanced terms (−5 pts each): Hidden auto-renewals, short cure periods">
-                  <span class="tier-count-circle tier-circle-amber" id="tier-count-watchout">7</span>
+                  <span class="tier-count-circle tier-circle-amber" id="tier-count-watchout">0</span>
                   <div class="tier-text-group">
                     <span class="tier-label">Watch Out</span>
                     <span class="tier-desc">Require closer attention</span>
@@ -620,7 +476,7 @@
 
                 <div class="findings-tier-row"
                   title="Favourable protections: Mutual IP safeguards, standard audit rights">
-                  <span class="tier-count-circle tier-circle-green" id="tier-count-protections">12</span>
+                  <span class="tier-count-circle tier-circle-green" id="tier-count-protections">0</span>
                   <div class="tier-text-group">
                     <span class="tier-label">Protections</span>
                     <span class="tier-desc">Favourable terms for your organisation</span>
@@ -629,7 +485,7 @@
 
                 <div class="findings-tier-row"
                   title="Omitted institutional clauses (−4 pts each): Mutual NDA, data return guarantee">
-                  <span class="tier-count-circle tier-circle-slate" id="tier-count-missing">5</span>
+                  <span class="tier-count-circle tier-circle-slate" id="tier-count-missing">0</span>
                   <div class="tier-text-group">
                     <span class="tier-label">Missing Protections</span>
                     <span class="tier-desc">Common clauses not found</span>
@@ -653,7 +509,7 @@
                   <svg class="intel-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                   </svg>
-                  <span><strong class="intel-stat-num" id="intel-stat-pages">42</strong> Pages analyzed</span>
+                  <span><strong class="intel-stat-num" id="intel-stat-pages">0</strong> Pages analyzed</span>
                 </div>
 
                 <div class="intel-stat-item"
@@ -666,18 +522,18 @@
                     <line x1="3" y1="12" x2="3.01" y2="12" />
                     <line x1="3" y1="18" x2="3.01" y2="18" />
                   </svg>
-                  <span><strong class="intel-stat-num" id="intel-stat-sections">186</strong> Sections indexed</span>
+                  <span><strong class="intel-stat-num" id="intel-stat-sections">0</strong> Sections indexed</span>
                 </div>
 
                 <div class="intel-stat-item"
-                  title="Identified via GLiNER zero-shot legal entity extraction & regex patterns">
+                  title="Identified via legal entity extraction & regex patterns">
                   <svg class="intel-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                     <circle cx="9" cy="7" r="4" />
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
                     <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                   </svg>
-                  <span><strong class="intel-stat-num" id="intel-stat-entities">312</strong> Contractual entities
+                  <span><strong class="intel-stat-num" id="intel-stat-entities">0</strong> Contractual entities
                     extracted</span>
                 </div>
 
@@ -686,7 +542,7 @@
                     <circle cx="12" cy="12" r="10" />
                     <polyline points="12 6 12 12 14 14" />
                   </svg>
-                  <span><strong class="intel-stat-num" id="intel-stat-clauses">47</strong> Relevant clauses
+                  <span><strong class="intel-stat-num" id="intel-stat-clauses">0</strong> Relevant clauses
                     retrieved</span>
                 </div>
 
@@ -727,8 +583,8 @@
 
               <div class="doc-preview-widget">
                 <div class="doc-preview-paper-box" id="doc-preview-mini-page">
-                  <div class="doc-paper-header" id="mini-page-header">Cloud Services Agreement</div>
-                  <div class="doc-paper-sub">Acme Corporation — Vertex Cloud Solutions</div>
+                  <div class="doc-paper-header" id="mini-page-header">Contract Document</div>
+                  <div class="doc-paper-sub">No document loaded</div>
                   <div class="doc-paper-line" style="width: 90%;"></div>
                   <div class="doc-paper-line" style="width: 100%;"></div>
                   <div class="doc-paper-line" style="width: 75%;"></div>
@@ -740,7 +596,7 @@
 
                 <div class="sig-status-badge-wrap" id="card-sig-status-badge"
                   style="margin-top: 8px; font-size: 11.5px; padding: 6px 10px; border-radius: 4px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); color: #B45309; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
-                  <span style="font-weight: 600;" id="card-sig-status-text">⚠️ Unexecuted Draft (Page 5)</span>
+                  <span style="font-weight: 600;" id="card-sig-status-text">Pending Analysis</span>
                   <span style="font-size: 10.5px; text-decoration: underline; color: #92400E;">Inspect Signatures
                     ↗</span>
                 </div>
@@ -1298,7 +1154,7 @@
               <div class="memo-title-block">
                 <h1>Contract Audit Memo</h1>
                 <div style="font-size: 13px; color: var(--text-muted);" id="memo-meta-line">
-                  Prepared for Executive Review • Northstar Analytics
+                  Prepared for Executive Legal &amp; Commercial Review
                 </div>
               </div>
               <div style="display: flex; gap: 8px;">
@@ -1476,10 +1332,7 @@
           <button class="btn-dark" style="margin-top: 14px;" id="btn-browse-modal">Select from Computer</button>
         </div>
 
-        <div style="margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 12px;">
-          <span style="font-size: 12px; color: var(--text-dim);">— OR —</span>
-          <button class="btn-outline-legal" id="btn-modal-load-sample">Load Demo Contract (Cloud Agreement)</button>
-        </div>
+
 
         <!-- Progress Indicator -->
         <div id="modal-upload-progress" style="display: none; margin-top: 24px; text-align: left;">
@@ -1613,12 +1466,11 @@
       <div class="dialog-body" style="display: flex; flex-direction: column; gap: 16px;">
         <div class="sig-status-card" id="sig-modal-status-box"
           style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-md); padding: 14px; display: flex; gap: 12px; align-items: center;">
-          <div style="font-size: 24px;">⚠️</div>
+          <div style="font-size: 24px;">⚖️</div>
           <div>
-            <div style="font-weight: 700; font-size: 14px; color: #B45309;" id="sig-modal-headline">UNEXECUTED DRAFT
+            <div style="font-weight: 700; font-size: 14px; color: #B45309;" id="sig-modal-headline">EXECUTION STATUS
             </div>
-            <div style="font-size: 12.5px; color: #78350F; margin-top: 2px;" id="sig-modal-subnotes">Blank signature
-              blocks identified on Page 5. No digital certificates detected.</div>
+            <div style="font-size: 12.5px; color: #78350F; margin-top: 2px;" id="sig-modal-subnotes">Execution and certificate inspection pending document audit.</div>
           </div>
         </div>
 
@@ -1628,20 +1480,16 @@
             <div
               style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px;">
               Provider Party</div>
-            <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);" id="sig-modal-prov-name">Vertex
-              Cloud Solutions</div>
-            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Status: Signature line blank
-            </div>
+            <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);" id="sig-modal-prov-name">—</div>
+            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Status: Pending audit</div>
           </div>
           <div
             style="background: #F8FAFC; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px;">
             <div
               style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px;">
               Customer Party</div>
-            <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);" id="sig-modal-cust-name">Acme
-              Corporation</div>
-            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Status: Signature line blank
-            </div>
+            <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);" id="sig-modal-cust-name">—</div>
+            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Status: Pending audit</div>
           </div>
         </div>
 

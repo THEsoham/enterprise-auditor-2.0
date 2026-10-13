@@ -164,7 +164,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalFileInput = document.getElementById("modal-file-input");
   const modalDropArea = document.getElementById("modal-drop-area");
   const btnBrowseModal = document.getElementById("btn-browse-modal");
-  const btnModalLoadSample = document.getElementById("btn-modal-load-sample");
   const modalUploadProgress = document.getElementById("modal-upload-progress");
   const uploadStageText = document.getElementById("upload-stage-text");
   const uploadStageBar = document.getElementById("upload-stage-bar");
@@ -462,7 +461,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const dbCount = data.health?.deal_breakers_count || (data.health?.deal_breakers || []).length || 0;
     const woCount = data.health?.watch_out_count || (data.health?.watch_out || []).length || 0;
     const msCount = data.health?.missing_protections_count || (data.missing_clauses || []).length || 0;
-    const dateCount = (data.obligations?.timeline_items || []).length || 4;
+    const dateCount = (data.obligations?.timeline_items || []).length || 0;
 
     if (navCountRisks) navCountRisks.textContent = dbCount + woCount;
     if (navCountMissing) navCountMissing.textContent = msCount;
@@ -472,28 +471,37 @@ document.addEventListener("DOMContentLoaded", () => {
   // 1. Contract Header Banner
   function renderBanner(data) {
     if (bannerContractTitle) {
-      bannerContractTitle.textContent = data.document_name ? formatDocumentTitle(data.document_name) : "Cloud Services Agreement";
+      bannerContractTitle.textContent = data.document_name ? formatDocumentTitle(data.document_name) : "Audited Agreement";
     }
 
     if (bannerPartiesSubtitle) {
-      const cust = data.parties?.customer || "Acme Corporation";
-      const prov = data.parties?.provider || "Vertex Cloud Solutions";
-      bannerPartiesSubtitle.innerHTML = `${escapeHtml(cust)} <span class="parties-x">×</span> ${escapeHtml(prov)}`;
+      const cust = data.parties?.customer;
+      const prov = data.parties?.provider;
+      if (cust && prov) {
+        bannerPartiesSubtitle.innerHTML = `${escapeHtml(cust)} <span class="parties-x">×</span> ${escapeHtml(prov)}`;
+      } else if (cust || prov) {
+        bannerPartiesSubtitle.textContent = cust || prov;
+      } else {
+        bannerPartiesSubtitle.textContent = "Parties: Unspecified in Agreement";
+      }
     }
 
     if (bannerPages) {
-      const p = data.num_pages || 42;
-      bannerPages.textContent = `${p} pages`;
+      const p = data.num_pages || (data.pages ? data.pages.length : 0);
+      bannerPages.textContent = p > 0 ? `${p} ${p === 1 ? "page" : "pages"}` : "Document Processed";
     }
 
     if (miniPageHeader) {
-      miniPageHeader.textContent = data.document_name ? formatDocumentTitle(data.document_name) : "Cloud Services Agreement";
+      miniPageHeader.textContent = data.document_name ? formatDocumentTitle(data.document_name) : "Audited Agreement";
     }
   }
 
   function formatDocumentTitle(filename) {
     return filename
       .replace(/\.pdf$/i, "")
+      .replace(/\.docx$/i, "")
+      .replace(/\.txt$/i, "")
+      .replace(/\.md$/i, "")
       .replace(/_/g, " ")
       .replace(/-/g, " ")
       .split(" ")
@@ -504,11 +512,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // 2. Overview 4-KPI Metric Cards
   function renderOverviewKPIs(data) {
     const health = data.health || {};
-    const score = typeof health.health_score === "number" ? Math.round(health.health_score) : 72;
-    const db = health.deal_breakers_count ?? (health.deal_breakers?.length || 3);
-    const wo = health.watch_out_count ?? (health.watch_out?.length || 7);
-    const pr = health.protections_count ?? (health.protections?.length || 12);
-    const ms = health.missing_protections_count ?? (data.missing_clauses?.length || 5);
+    const score = typeof health.health_score === "number" ? Math.round(health.health_score) : 100;
+    const db = health.deal_breakers_count ?? (health.deal_breakers?.length || 0);
+    const wo = health.watch_out_count ?? (health.watch_out?.length || 0);
+    const pr = health.protections_count ?? (health.protections?.length || 0);
+    const ms = health.missing_protections_count ?? (data.missing_clauses?.length || 0);
     const total = db + wo + pr + ms;
 
     // Score Circle & Assessment Text
@@ -543,10 +551,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (tierCountMissing) tierCountMissing.textContent = ms;
 
     // Intelligence Metrics
-    if (intelStatPages) intelStatPages.textContent = data.num_pages || 42;
-    if (intelStatSections) intelStatSections.textContent = data.num_sections || 186;
-    if (intelStatEntities) intelStatEntities.textContent = (data.graph?.nodes?.length * 18) || 312;
-    if (intelStatClauses) intelStatClauses.textContent = (data.findings?.length * 4) || 47;
+    if (intelStatPages) intelStatPages.textContent = data.num_pages || (data.pages?.length || 1);
+    if (intelStatSections) intelStatSections.textContent = data.num_sections || (data.findings?.length || 0);
+    if (intelStatEntities) intelStatEntities.textContent = data.graph?.nodes?.length || 0;
+    if (intelStatClauses) intelStatClauses.textContent = data.findings?.length || 0;
   }
 
   // 3. Top Findings Table (Overview Lower Left)
@@ -810,28 +818,42 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderContractView(data) {
     if (!docVerbatimContent || !contractSectionsList) return;
 
-    const sections = [
-      { id: "sec-1", title: "1. Provision of Cloud Services & Service Levels", page: 1 },
-      { id: "sec-2", title: "2. Customer Data Ownership, Backup & Privacy", page: 2 },
-      { id: "sec-3", title: "3. Termination for Convenience & Parity", page: 3 },
-      { id: "sec-4", title: "4. Aggregate Liability Cap & Consequential Damages", page: 4 },
-      { id: "sec-5", title: "5. Intellectual Property & Marketing Use of Logo", page: 5 }
-    ];
+    const pages = data?.pages || [];
+    totalDocPages = Math.max(pages.length, data?.num_pages || 1);
 
     contractSectionsList.innerHTML = "";
-    sections.forEach((sec, i) => {
+    if (pages.length > 0) {
+      pages.forEach((p, i) => {
+        const pageNum = p.page_number || (i + 1);
+        const lines = (p.text || "").split("\n").map(l => l.trim()).filter(l => l.length > 3);
+        const firstLine = lines[0] || `Section / Page ${pageNum}`;
+        const titleSnippet = firstLine.length > 40 ? firstLine.slice(0, 38) + "..." : firstLine;
+
+        const btn = document.createElement("button");
+        btn.className = `outline-item-btn ${pageNum === currentDocPage ? "active" : ""}`;
+        btn.innerHTML = `
+          <span>${escapeHtml(titleSnippet)}</span>
+          <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-dim);">p. ${pageNum}</span>
+        `;
+        btn.addEventListener("click", () => {
+          currentDocPage = pageNum;
+          renderContractPage(currentDocPage);
+        });
+        contractSectionsList.appendChild(btn);
+      });
+    } else {
       const btn = document.createElement("button");
-      btn.className = `outline-item-btn ${i + 1 === currentDocPage ? "active" : ""}`;
+      btn.className = "outline-item-btn active";
       btn.innerHTML = `
-        <span>${escapeHtml(sec.title)}</span>
-        <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-dim);">p. ${sec.page}</span>
+        <span>${escapeHtml(data?.document_name || "Document Text")}</span>
+        <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-dim);">p. 1</span>
       `;
       btn.addEventListener("click", () => {
-        currentDocPage = sec.page;
-        renderContractPage(currentDocPage);
+        currentDocPage = 1;
+        renderContractPage(1);
       });
       contractSectionsList.appendChild(btn);
-    });
+    }
 
     renderContractPage(currentDocPage);
   }
@@ -841,22 +863,42 @@ document.addEventListener("DOMContentLoaded", () => {
     if (docviewPageTitle) docviewPageTitle.textContent = `Page ${pageNum} of ${totalDocPages}`;
     if (previewPageCounter) previewPageCounter.textContent = `Page ${pageNum} of ${totalDocPages}`;
 
-    // Sample contractual verbatim clauses by page
-    const pageTexts = {
-      1: `MASTER CLOUD SERVICES AGREEMENT\n\nThis Cloud Services Agreement ("Agreement") is entered into by and between Meridian Cloud Systems Pvt. Ltd. ("Provider") and Northstar Analytics Pvt. Ltd. ("Customer").\n\n1. PROVISION OF SERVICES\n1.1 Provider shall provide the Cloud Services in accordance with the Documentation and the Service Level Agreement set forth in Exhibit A. Provider reserves the right to modify the features and functions of the Cloud Services from time to time.\n\n1.2 Customer acknowledges that maintenance windows may cause intermittent disruptions. Service credits constitute Customer’s sole and exclusive remedy for any unavailability or failure of the Services.`,
-      2: `2. CUSTOMER DATA & SECURITY\n2.1 Customer retains all right, title, and interest in Customer Data. Provider shall implement reasonable administrative and technical safeguards designed to protect Customer Data.\n\n2.2 Provider remains responsible for the acts and omissions of its subcontractors to the same extent as if those acts or omissions were performed by Provider.\n\n2.3 <span class="doc-highlight-risk" title="Click to view finding: 180-Day Data Retention">Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems</span>, provided such copies remain protected and are not restored except for disaster recovery purposes.`,
-      3: `3. TERM AND TERMINATION\n3.1 The Initial Term shall commence on the Effective Date and continue for twenty-four (24) months. Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew.\n\n3.2 <span class="doc-highlight-risk" title="Click to view finding: Asymmetric Termination">Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer. Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice.</span>`,
-      4: `4. LIMITATION OF LIABILITY\n4.1 EXCEPT FOR PAYMENT OBLIGATIONS OR INDEMNIFICATION, NEITHER PARTY SHALL BE LIABLE FOR INDIRECT, INCIDENTAL, CONSEQUENTIAL, OR SPECIAL DAMAGES.\n\n4.2 <span class="doc-highlight-risk" title="Click to view finding: 3-Month Liability Cap">Each party’s aggregate liability arising out of or relating to this Agreement shall not exceed the fees paid or payable by Customer to Provider during the three (3) months preceding the event giving rise to the claim.</span>`,
-      5: `5. GENERAL PROVISIONS\n5.1 Governing Law. This Agreement shall be governed by and construed in accordance with the laws of Delaware.\n\n5.2 Marketing Rights. Provider may identify Customer by name and logo in marketing materials and on its website without obtaining additional approval from Customer.\n\nIN WITNESS WHEREOF, the parties have executed this Agreement as of the date first set forth above.\n\nMERIDIAN CLOUD SYSTEMS PVT. LTD.          NORTHSTAR ANALYTICS PVT. LTD.\nBy: ______________________________         By: ______________________________\nName:                                      Name:\nTitle:                                     Title:`
-    };
+    const pages = auditData?.pages || [];
+    const targetPage = pages.find((p) => p.page_number === pageNum) || pages[pageNum - 1];
 
-    docVerbatimContent.innerHTML = pageTexts[pageNum] || pageTexts[1];
+    if (!targetPage || !targetPage.text) {
+      docVerbatimContent.innerHTML = `<div style="padding: 40px 20px; text-align: center; color: var(--text-muted); font-size: 13.5px;">No extracted text available for Page ${pageNum}. Please upload a document to view verbatim clauses.</div>`;
+      return;
+    }
+
+    let pageHtml = escapeHtml(targetPage.text);
+
+    // Highlight any findings quotes found on this page
+    const pageFindings = (auditData?.findings || []).filter(
+      (f) => f.page_number === pageNum || (!f.page_number && pageNum === 1)
+    );
+
+    pageFindings.forEach((f) => {
+      const quote = (f.quote || "").trim();
+      if (quote && quote.length > 8) {
+        const escapedQuote = escapeHtml(quote);
+        if (pageHtml.includes(escapedQuote)) {
+          const highlighted = `<span class="doc-highlight-risk" data-finding-id="${escapeHtml(f.id || "")}" title="Finding: ${escapeHtml(f.title || f.claim || "")}">${escapedQuote}</span>`;
+          pageHtml = pageHtml.replaceAll(escapedQuote, highlighted);
+        }
+      }
+    });
+
+    docVerbatimContent.innerHTML = `<pre style="white-space: pre-wrap; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.65; margin: 0; color: #1E293B;">${pageHtml}</pre>`;
 
     docVerbatimContent.querySelectorAll(".doc-highlight-risk").forEach((el) => {
       el.addEventListener("click", () => {
-        showToast("Verbatim evidence selected: Cross-referencing finding coordinates", "info");
-        if (auditData?.health?.deal_breakers?.[0]) {
-          openEvidenceTraceModal(auditData.health.deal_breakers[0], "§3.2", pageNum, 91);
+        const fid = el.getAttribute("data-finding-id");
+        const found = (auditData?.findings || []).find((f) => f.id === fid) || auditData?.health?.deal_breakers?.[0];
+        if (found) {
+          openEvidenceTraceModal(found, found.clause_reference || `Page ${pageNum}`, pageNum, Math.round((found.confidence || 0.95) * 100));
+        } else {
+          showToast("Verbatim evidence selected: Finding cross-referenced", "info");
         }
       });
     });
@@ -864,7 +906,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Update outline sidebar active states
     document.querySelectorAll(".outline-item-btn").forEach((btn, idx) => {
       btn.classList.toggle("active", idx + 1 === pageNum);
-    });
   }
 
   btnDocviewPrev?.addEventListener("click", () => {
@@ -1568,8 +1609,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (signatures) {
       const isExecuted = signatures.execution_status === "EXECUTED";
+      const sigPage = signatures.page ? ` (Page ${signatures.page})` : "";
       if (cardSigStatusText) {
-        cardSigStatusText.textContent = isExecuted ? "✓ Executed Contract" : "⚠️ Unexecuted Draft (Page 5)";
+        cardSigStatusText.textContent = isExecuted ? "✓ Executed Contract" : `⚠️ Unexecuted Draft${sigPage}`;
       }
       if (sigModalHeadline) {
         sigModalHeadline.textContent = isExecuted ? "EXECUTED CONTRACT" : "UNEXECUTED DRAFT";
@@ -1578,8 +1620,8 @@ document.addEventListener("DOMContentLoaded", () => {
         sigModalSubnotes.textContent = signatures.subnotes;
       }
       if (auditData?.parties) {
-        if (sigModalProvName) sigModalProvName.textContent = auditData.parties.provider || "Vertex Cloud Solutions";
-        if (sigModalCustName) sigModalCustName.textContent = auditData.parties.customer || "Acme Corporation";
+        if (sigModalProvName) sigModalProvName.textContent = auditData.parties.provider || "—";
+        if (sigModalCustName) sigModalCustName.textContent = auditData.parties.customer || "—";
       }
       if (scannerSigStatus) {
         scannerSigStatus.textContent = isExecuted ? "EXECUTED CONTRACT" : "UNEXECUTED DRAFT";
@@ -1750,16 +1792,21 @@ document.addEventListener("DOMContentLoaded", () => {
             color = "#DC2626";
             radius = 18;
             badgeText = "RISK FINDING";
-          } else if (rn.node_type === "asset") {
+          } else if (rn.node_type === "missing_safeguard") {
+            type = "risk";
+            color = "#D97706";
+            radius = 16;
+            badgeText = "MISSING SAFEGUARD";
+          } else if (rn.node_type === "asset" || rn.node_type === "contract") {
             type = "asset";
-            color = "#0284C7";
-            radius = 15;
-            badgeText = "GOVERNED ASSET";
-          } else if (rn.node_type === "term_metric" || rn.node_type === "concept") {
+            color = rn.node_type === "contract" ? "#4F46E5" : "#0284C7";
+            radius = rn.node_type === "contract" ? 20 : 16;
+            badgeText = rn.node_type === "contract" ? "CONTRACT" : "GOVERNED ASSET";
+          } else if (rn.node_type === "term_metric" || rn.node_type === "concept" || rn.node_type === "obligation") {
             type = "asset";
             color = "#0891B2";
             radius = 14;
-            badgeText = "METRIC";
+            badgeText = "TERM / OBLIGATION";
           }
 
           const node = {
@@ -1791,45 +1838,6 @@ document.addEventListener("DOMContentLoaded", () => {
               page: rl.page_number
             });
           }
-        });
-      }
-
-      // Rich fallback if empty
-      if (nodes.length < 4) {
-        const custName = contractData?.parties?.customer || "Northstar Analytics Pvt. Ltd.";
-        const provName = contractData?.parties?.provider || "Meridian Cloud Systems Pvt. Ltd.";
-
-        nodes = [
-          { id: "party-customer", label: custName, type: "party", color: "#059669", radius: 22, badgeText: "PARTY", properties: { role: "Customer / Enterprise Buyer" }, connectedNodeIds: new Set() },
-          { id: "party-provider", label: provName, type: "party", color: "#059669", radius: 22, badgeText: "PARTY", properties: { role: "Provider / Cloud Vendor" }, connectedNodeIds: new Set() },
-          { id: "risk-liability", label: "§9 (Liability Cap: 3-Mo Fees)", type: "risk", color: "#DC2626", radius: 18, badgeText: "RISK FINDING", properties: { quote: "aggregate liability shall not exceed fees paid in the three months preceding event", section: "9. LIMITATION OF LIABILITY", page_number: 3 }, connectedNodeIds: new Set() },
-          { id: "risk-termination", label: "§10 (Unilateral Termination)", type: "risk", color: "#DC2626", radius: 18, badgeText: "RISK FINDING", properties: { quote: "Provider may terminate upon 15 days; Customer locked for 12 months with 60 days notice", section: "10. TERMINATION", page_number: 3 }, connectedNodeIds: new Set() },
-          { id: "risk-backups", label: "§4 (180-Day Data Retention)", type: "risk", color: "#DC2626", radius: 17, badgeText: "RISK FINDING", properties: { quote: "Provider may retain backup copies of Customer Data for up to 180 days after deletion", section: "4. DATA PROCESSING", page_number: 2 }, connectedNodeIds: new Set() },
-          { id: "clause-sla", label: "§2 (99.5% Service Level)", type: "clause", color: "#4F46E5", radius: 16, badgeText: "CLAUSE", properties: { quote: "maintain 99.5% monthly availability standard", section: "2. SERVICES", page_number: 1 }, connectedNodeIds: new Set() },
-          { id: "clause-audit", label: "§18 (Annual Security Audit)", type: "clause", color: "#4F46E5", radius: 16, badgeText: "CLAUSE", properties: { quote: "Customer may audit once per year with 20 days prior notice", section: "18. AUDIT RIGHTS", page_number: 5 }, connectedNodeIds: new Set() },
-          { id: "asset-data", label: "Customer Data & Confidential Assets", type: "asset", color: "#0284C7", radius: 15, badgeText: "GOVERNED ASSET", properties: { quote: "Customer retains all right, title, and interest in Customer Data", section: "6. IP", page_number: 2 }, connectedNodeIds: new Set() },
-          { id: "asset-logo", label: "Customer Brand & Logo Rights", type: "asset", color: "#0284C7", radius: 15, badgeText: "GOVERNED ASSET", properties: { quote: "Provider may use Customer name and logo without prior written consent", section: "19. PUBLICITY", page_number: 5 }, connectedNodeIds: new Set() }
-        ];
-
-        const nodeMap = new Map(nodes.map((n) => [n.id, n]));
-        const rawEdgeDefs = [
-          { s: "party-customer", t: "risk-liability", l: "exposed to cap" },
-          { s: "party-provider", t: "risk-liability", l: "liability capped at" },
-          { s: "party-customer", t: "risk-termination", l: "restricted by 60d" },
-          { s: "party-provider", t: "risk-termination", l: "unilateral exit 15d" },
-          { s: "party-customer", t: "asset-data", l: "owns data" },
-          { s: "party-provider", t: "risk-backups", l: "retains backups 180d" },
-          { s: "party-provider", t: "clause-sla", l: "commits 99.5% uptime" },
-          { s: "party-customer", t: "clause-audit", l: "audits compliance" },
-          { s: "party-provider", t: "asset-logo", l: "uses logo unilaterally" }
-        ];
-
-        edges = rawEdgeDefs.map((def) => {
-          const s = nodeMap.get(def.s);
-          const t = nodeMap.get(def.t);
-          s.connectedNodeIds.add(t.id);
-          t.connectedNodeIds.add(s.id);
-          return { source: s, target: t, label: def.l, quote: "" };
         });
       }
 
@@ -1946,6 +1954,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
       ctx.clearRect(0, 0, w, h);
       this.drawBackgroundGrid(ctx, w, h);
+
+      if (this.nodes.length === 0) {
+        ctx.save();
+        ctx.fillStyle = "#64748B";
+        ctx.font = "14px Inter, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("No relationship entities to display. Upload a contract to view dynamic relationship map.", w / 2, h / 2);
+        ctx.restore();
+        return;
+      }
 
       ctx.save();
       ctx.translate(this.panX, this.panY);
@@ -2315,7 +2333,9 @@ document.addEventListener("DOMContentLoaded", () => {
           actionBtn.textContent = "Filter Timeline by Party →";
           actionBtn.onclick = () => {
             switchScreen("screen-timeline", "tab-timeline");
-            filterTimelineByParty(node.label.toLowerCase().includes("meridian") ? "provider" : "customer");
+            const provName = (auditData?.parties?.provider || "").toLowerCase();
+            const isProv = provName ? node.label.toLowerCase().includes(provName) : (node.properties?.role?.toLowerCase()?.includes("provider") || false);
+            filterTimelineByParty(isProv ? "provider" : "customer");
           };
         } else {
           actionBtn.textContent = "View Document Context →";
@@ -2364,7 +2384,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // 13. Pipeline Stats
   function renderPipelineStats(data) {
     if (pipeValChunks) {
-      const count = data.num_sections || (data.findings?.length * 8) || 186;
+      const count = data.num_sections || (data.findings ? data.findings.length : 0);
       pipeValChunks.textContent = `${count} Chunks`;
     }
   }
@@ -2373,15 +2393,20 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderExecutiveReport(data) {
     if (!executiveMemoRendered) return;
 
-    const cust = data.parties?.customer || "Customer";
-    const prov = data.parties?.provider || "Provider";
-    const score = data.health?.health_score || 72;
-    const dbCount = (data.health?.deal_breakers || []).length || 2;
-    const woCount = (data.health?.watch_out || []).length || 4;
+    const cust = data.parties?.customer || "First Party";
+    const prov = data.parties?.provider || "Counterparty";
+    const score = typeof data.health?.health_score === "number" ? Math.round(data.health.health_score) : 100;
+    const dbCount = (data.health?.deal_breakers || []).length;
+    const woCount = (data.health?.watch_out || []).length;
+
+    const memoMetaLine = document.getElementById("memo-meta-line");
+    if (memoMetaLine) {
+      memoMetaLine.textContent = `Prepared for Executive Review • ${cust !== "First Party" ? cust : (data.document_name || "Contract Audit")}`;
+    }
 
     const html = `
       <h2>1. Executive Summary & Verdict</h2>
-      <p>This audit evaluates the commercial contract <strong>${escapeHtml(data.document_name || "Cloud Services Agreement")}</strong> executed between <strong>${escapeHtml(cust)}</strong> and <strong>${escapeHtml(prov)}</strong>.</p>
+      <p>This audit evaluates the commercial contract <strong>${escapeHtml(data.document_name || "Commercial Agreement")}</strong> executed between <strong>${escapeHtml(cust)}</strong> and <strong>${escapeHtml(prov)}</strong>.</p>
       <blockquote>
         <strong>Final Contract Safety Score: ${score}/100</strong> — ${score < 65 ? "High Risk Profile" : "Moderate Risk Profile"}. Detected ${dbCount} deal-breaker terms and ${woCount} watch-out warning items requiring contractual alignment prior to execution.
       </blockquote>
@@ -2470,7 +2495,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (modalTraceTitle) modalTraceTitle.textContent = finding.title || finding.claim;
     if (modalTraceClause) modalTraceClause.textContent = clauseStr || "Clause Reference";
-    if (modalTraceVerified) modalTraceVerified.textContent = `✓ Verified ${confPct || 91}%`;
+    const verifiedPct = confPct || (finding.confidence ? Math.round(finding.confidence * 100) : 95);
+    if (modalTraceVerified) modalTraceVerified.textContent = `✓ Verified ${verifiedPct}%`;
     if (modalTracePlain) modalTracePlain.textContent = finding.plain_english || finding.claim || "";
     if (modalTraceWhy) modalTraceWhy.textContent = finding.why_flagged || "This provision creates significant legal or financial exposure.";
 
@@ -2481,7 +2507,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (modalTraceRemedy) modalTraceRemedy.textContent = remedy;
 
     if (traceStep1Desc) {
-      traceStep1Desc.textContent = `Extracted from PDF coordinates (Page ${ev.page || pageStr || 3}, Chunk ${ev.chunk_id || "indexed"}).`;
+      const pageLabel = ev.page ? `Page ${ev.page}` : (pageStr ? `Page ${pageStr}` : "Document Clause");
+      traceStep1Desc.textContent = `Extracted from document coordinates (${pageLabel}, Chunk ${ev.chunk_id || "indexed"}).`;
     }
 
     btnCopyModalTraceRemedy.onclick = () => {
@@ -2593,10 +2620,8 @@ document.addEventListener("DOMContentLoaded", () => {
   btnCloseUploadModal?.addEventListener("click", () => modalUploadAudit?.close());
 
   // Allow clicking anywhere inside the drop area to open file picker
-  modalDropArea?.addEventListener("click", (e) => {
-    if (e.target !== btnModalLoadSample && !btnModalLoadSample?.contains(e.target)) {
-      modalFileInput?.click();
-    }
+  modalDropArea?.addEventListener("click", () => {
+    modalFileInput?.click();
   });
 
   btnBrowseModal?.addEventListener("click", (e) => {
@@ -2636,28 +2661,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (file && (file.name.endsWith(".pdf") || file.name.endsWith(".docx") || file.name.endsWith(".txt") || file.name.endsWith(".md"))) {
       openUploadModal();
       executeUpload(file);
-    }
-  });
-
-  btnModalLoadSample?.addEventListener("click", async () => {
-    if (modalDropArea) modalDropArea.style.display = "none";
-    if (modalUploadProgress) modalUploadProgress.style.display = "block";
-    if (uploadStageText) uploadStageText.textContent = "Loading pre-computed sample contract audit...";
-    if (uploadStageBar) uploadStageBar.style.width = "75%";
-
-    try {
-      const res = await fetch("/api/sample/demo");
-      if (!res.ok) throw new Error("Could not load sample contract demo.");
-      const data = await res.json();
-      renderAll(data.report || data);
-      modalUploadAudit.close();
-      showToast("Demo contract loaded successfully!", "success");
-      enterAuditorApp("all");
-    } catch (err) {
-      showToast("Error loading demo: " + err.message, "warning");
-    } finally {
-      if (modalDropArea) modalDropArea.style.display = "block";
-      if (modalUploadProgress) modalUploadProgress.style.display = "none";
     }
   });
 
@@ -2740,13 +2743,19 @@ document.addEventListener("DOMContentLoaded", () => {
     modalAsymBody.innerHTML = "";
 
     const items = auditData.clause_balance || [];
+    if (items.length === 0) {
+      modalAsymBody.innerHTML = `<div style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 13.5px;">No unilateral terms flagged in this agreement. Terms appear balanced.</div>`;
+      modalAsymmetry.showModal();
+      return;
+    }
+
     items.forEach((b) => {
       const div = document.createElement("div");
       div.style.cssText = "margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border-light);";
       div.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <h4 style="font-size: 14px; font-weight: 700; color: var(--text-primary);">${escapeHtml(b.title)}</h4>
-          <span class="clause-ref-code">Page ${b.page || 3}</span>
+          <span class="clause-ref-code">${b.page ? `Page ${b.page}` : "Clause Matrix"}</span>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
           <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: var(--radius-sm); padding: 10px;">
@@ -2803,9 +2812,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (landingView) landingView.style.display = "none";
     if (appShell) {
       appShell.style.display = "flex";
-      // Load demo data only upon explicit user click
       if (!auditData) {
-        await loadDemoReport();
+        openUploadModal();
+        showToast("Please upload a contract (PDF, DOCX, TXT) to begin auditing.", "info");
       }
       if (filter !== "all") {
         activeFindingsFilter = filter;
@@ -2829,21 +2838,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // CTAs to Enter the Auditor Workspace (Only processes AFTER click)
   [
+    document.getElementById("btn-landing-nav-workspace"),
+    document.getElementById("btn-hero-open-workspace"),
     document.getElementById("btn-landing-nav-demo"),
-    document.getElementById("btn-hero-launch-demo"),
-    document.getElementById("btn-footer-demo"),
-    document.getElementById("btn-teaser-view-full"),
-    document.getElementById("btn-hero-sample-pill")
+    document.getElementById("btn-hero-launch-demo")
   ].forEach((btn) => {
     btn?.addEventListener("click", () => enterAuditorApp("all"));
-  });
-
-  // Teaser findings direct jump buttons
-  document.querySelectorAll(".btn-jump-finding").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const targetFilter = btn.getAttribute("data-target-filter") || "all";
-      enterAuditorApp(targetFilter);
-    });
   });
 
   // Topbar and Brand return buttons
@@ -2854,7 +2854,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Upload buttons from Landing Page
   [
     document.getElementById("btn-landing-nav-upload"),
-    document.getElementById("btn-hero-upload-doc")
+    document.getElementById("btn-hero-upload-doc"),
+    document.getElementById("btn-footer-upload")
   ].forEach((btn) => {
     btn?.addEventListener("click", () => {
       openUploadModal();
@@ -2887,23 +2888,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // =========================================================================
-  // DEMO DATA LOADER (ONLY INVOKED ON EXPLICIT USER INTERACTION)
-  // =========================================================================
-  async function loadDemoReport() {
-    try {
-      showToast("Loading contract audit demo...", "info");
-      const demoRes = await fetch("/api/sample/demo");
-      if (demoRes.ok) {
-        const demoData = await demoRes.json();
-        renderAll(demoData.report || demoData);
-        showToast("Demo contract audit loaded successfully!", "success");
-      }
-    } catch (err) {
-      console.log("Waiting for contract upload or demo initialization.");
-      showToast("Could not load sample contract demo", "warning");
-    }
-  }
+
 
   function escapeHtml(str) {
     if (!str) return "";
@@ -2916,5 +2901,5 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // NOTE: Clean standby mode. We do NOT run initApp() automatically on startup.
-  // The backend and frontend wait until the user clicks to launch the demo or uploads a document.
+  // The system waits until the user uploads a contract document or opens the auditor console.
 });

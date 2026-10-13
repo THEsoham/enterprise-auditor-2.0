@@ -12,9 +12,8 @@ load_dotenv()
 
 class GeminiVerifier:
 
-    # Gemini Free Tier is limited to 20 requests/day which hits 429 quota exhaustion.
-    # Set to True by default to route to high-speed OpenAI Skeptic Verifier unless USE_GEMINI=true is set.
-    _gemini_unavailable: bool = os.getenv("USE_GEMINI", "false").lower() != "true"
+    # Enable Gemini Skeptic Verifier by default or when USE_GEMINI=true.
+    _gemini_unavailable: bool = os.getenv("USE_GEMINI", "true").lower() != "true"
 
     def __init__(
         self,
@@ -32,7 +31,7 @@ class GeminiVerifier:
                 from google.genai import types
                 self.client = genai.Client(
                     api_key=api_key,
-                    http_options=types.HttpOptions(timeout=4000),
+                    http_options=types.HttpOptions(timeout=15000),
                 )
             except Exception:
                 GeminiVerifier._gemini_unavailable = True
@@ -109,22 +108,35 @@ Return exactly this structure:
 """
 
         content = None
-        if not GeminiVerifier._gemini_unavailable:
+        if not GeminiVerifier._gemini_unavailable and self.client:
             try:
                 from concurrent.futures import ThreadPoolExecutor
                 with ThreadPoolExecutor(max_workers=1) as executor:
-                    future = executor.submit(
-                        self.client.interactions.create,
-                        model=self.model,
-                        input=prompt,
-                        store=False,
-                    )
-                    interaction = future.result(timeout=4.0)
-                    content = getattr(interaction, "output_text", None)
+                    def _call_gemini():
+                        try:
+                            resp = self.client.models.generate_content(
+                                model=self.model,
+                                contents=prompt,
+                            )
+                            return resp.text
+                        except Exception:
+                            if hasattr(self.client, "interactions"):
+                                interaction = self.client.interactions.create(
+                                    model=self.model,
+                                    input=prompt,
+                                    store=False,
+                                )
+                                return getattr(interaction, "output_text", None)
+                            raise
+
+                    future = executor.submit(_call_gemini)
+                    content = future.result(timeout=15.0)
             except Exception as e:
                 err_str = str(e).lower()
-                GeminiVerifier._gemini_unavailable = True
-                print(f"⚠️  Gemini verification unavailable ({e}). Switching to high-speed OpenAI Skeptic Verifier for all probes.")
+                try:
+                    print(f"[!] Gemini verification note ({e}). Falling back to OpenAI Skeptic Verifier.")
+                except Exception:
+                    pass
                 content = self._openai_verify_fallback(prompt)
         else:
             content = self._openai_verify_fallback(prompt)
