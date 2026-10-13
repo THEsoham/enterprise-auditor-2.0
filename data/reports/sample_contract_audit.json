@@ -16,10 +16,10 @@
       {
         "title": "Asymmetric Termination Rights",
         "category": "contractual risk",
-        "claim": "The Provider has more favorable convenience termination rights compared to the Customer.",
-        "plain_english": "The Provider has more favorable convenience termination rights compared to the Customer.",
-        "why_flagged": "The Provider can terminate the agreement for convenience at any time with only 15 days' notice, while the Customer can only terminate for convenience after 12 months and must provide 60 days' notice. This creates an imbalance in termination rights.",
-        "suggested_negotiation": "Consider aligning the termination rights and notice periods for both parties to ensure fairness and balance in the agreement.",
+        "claim": "The Provider has the right to terminate for convenience with 15 days' notice, while the Customer can only terminate for convenience after 12 months with 60 days' notice.",
+        "plain_english": "The Provider can walk away from the contract at any time with only 15 days' notice, giving your business very little time to find an alternative vendor or migrate your data.",
+        "why_flagged": "1. Provider has a unilateral convenience termination right.\n2. 15-day notice period is unusually short for enterprise software services.\n3. Customer's convenience termination right is locked for 12 months with a 60-day notice.",
+        "suggested_negotiation": "Customer proposes modifying Section 10.3 to require at least 60 days' written notice for convenience termination, and granting Customer reciprocal convenience termination rights with the same notice.",
         "clause_balance": {
           "is_asymmetric": true,
           "provider_terms": "Can terminate for convenience at any time upon 15 days' notice.",
@@ -40,7 +40,7 @@
         ],
         "severity": "medium",
         "bucket": "deal_breaker",
-        "confidence": 1.0
+        "confidence": 0.9
       }
     ],
     "watch_out": [],
@@ -70,17 +70,17 @@
       "category": "contractual risk",
       "severity": "medium",
       "bucket": "deal_breaker",
-      "claim": "The Provider has more favorable convenience termination rights compared to the Customer.",
-      "plain_english": "The Provider has more favorable convenience termination rights compared to the Customer.",
-      "why_flagged": "The Provider can terminate the agreement for convenience at any time with only 15 days' notice, while the Customer can only terminate for convenience after 12 months and must provide 60 days' notice. This creates an imbalance in termination rights.",
-      "suggested_negotiation": "Consider aligning the termination rights and notice periods for both parties to ensure fairness and balance in the agreement.",
+      "claim": "The Provider has the right to terminate for convenience with 15 days' notice, while the Customer can only terminate for convenience after 12 months with 60 days' notice.",
+      "plain_english": "The Provider can walk away from the contract at any time with only 15 days' notice, giving your business very little time to find an alternative vendor or migrate your data.",
+      "why_flagged": "1. Provider has a unilateral convenience termination right.\n2. 15-day notice period is unusually short for enterprise software services.\n3. Customer's convenience termination right is locked for 12 months with a 60-day notice.",
+      "suggested_negotiation": "Customer proposes modifying Section 10.3 to require at least 60 days' written notice for convenience termination, and granting Customer reciprocal convenience termination rights with the same notice.",
       "clause_balance": {
         "is_asymmetric": true,
         "provider_terms": "Can terminate for convenience at any time upon 15 days' notice.",
         "customer_terms": "Can terminate for convenience only after 12 months and upon 60 days' notice.",
         "asymmetry_summary": "Severe asymmetry: Provider can exit after 15 days; Customer is locked in for 12 months with 60-day notice."
       },
-      "confidence": 1.0,
+      "confidence": 0.9,
       "evidence": [
         {
           "chunk_id": "chunk-0012",
@@ -95,10 +95,10 @@
       ],
       "risk_score": {
         "severity_score": 0.5,
-        "confidence_score": 1.0,
+        "confidence_score": 0.9,
         "verification_score": 1.0,
         "evidence_score": 0.6666666666666666,
-        "final_score": 80.0,
+        "final_score": 76.0,
         "risk_level": "critical",
         "bucket": "deal_breaker"
       },
@@ -109,7 +109,7 @@
             "title": "Asymmetric Termination Rights",
             "category": "contractual risk",
             "severity": "medium",
-            "claim": "The Provider has more favorable convenience termination rights compared to the Customer.",
+            "claim": "The Provider has the right to terminate for convenience with 15 days' notice, while the Customer can only terminate for convenience after 12 months with 60 days' notice.",
             "evidence": [
               {
                 "chunk_id": "chunk-0012",
@@ -122,13 +122,13 @@
                 "quote": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice."
               }
             ],
-            "reasoning": "The Provider can terminate the agreement for convenience at any time with only 15 days' notice, while the Customer can only terminate for convenience after 12 months and must provide 60 days' notice. This creates an imbalance in termination rights.",
+            "reasoning": "The differing notice periods and conditions for termination for convenience create an imbalance in the rights of the parties, potentially disadvantaging the Customer.",
             "recommendation": "Consider aligning the termination rights and notice periods for both parties to ensure fairness and balance in the agreement.",
-            "confidence": 1.0,
+            "confidence": 0.9,
             "bucket": "deal_breaker",
-            "plain_english": "The Provider has more favorable convenience termination rights compared to the Customer.",
-            "why_flagged": "The Provider can terminate the agreement for convenience at any time with only 15 days' notice, while the Customer can only terminate for convenience after 12 months and must provide 60 days' notice. This creates an imbalance in termination rights.",
-            "suggested_negotiation": "Consider aligning the termination rights and notice periods for both parties to ensure fairness and balance in the agreement.",
+            "plain_english": "The Provider can walk away from the contract at any time with only 15 days' notice, giving your business very little time to find an alternative vendor or migrate your data.",
+            "why_flagged": "1. Provider has a unilateral convenience termination right.\n2. 15-day notice period is unusually short for enterprise software services.\n3. Customer's convenience termination right is locked for 12 months with a 60-day notice.",
+            "suggested_negotiation": "Customer proposes modifying Section 10.3 to require at least 60 days' written notice for convenience termination, and granting Customer reciprocal convenience termination rights with the same notice.",
             "clause_balance": {
               "is_asymmetric": true,
               "provider_terms": "Can terminate for convenience at any time upon 15 days' notice.",
@@ -139,7 +139,7 @@
           "verification": {
             "status": "verified",
             "verdict": "ACCEPTED",
-            "reasoning": "The Auditor's finding is supported by the contract evidence, which clearly states that the Provider can terminate the agreement for convenience with only 15 days' notice, while the Customer must wait 12 months and provide 60 days' notice. This demonstrates an imbalance in termination rights as claimed.",
+            "reasoning": "The Auditor's finding is supported by the contract evidence, which clearly states the differing termination rights and notice periods for the Provider and Customer. The quotes provided by the Auditor match the contract text exactly, and the page numbers and chunk IDs are correct.",
             "supporting_evidence": [
               {
                 "chunk_id": "chunk-0012",
@@ -153,7 +153,7 @@
               }
             ],
             "contradictions": [],
-            "confidence": 1.0
+            "confidence": 0.9
           }
         }
       ]
@@ -680,7 +680,8 @@
           "node_type": "party",
           "label": "Northstar Analytics Pvt. Ltd. (Customer)",
           "properties": {
-            "role": "Customer"
+            "role": "Customer / Enterprise Buyer",
+            "name": "Northstar Analytics Pvt. Ltd."
           }
         }
       },
@@ -692,168 +693,254 @@
           "node_type": "party",
           "label": "Meridian Cloud Systems Pvt. Ltd. (Provider)",
           "properties": {
-            "role": "Provider"
+            "role": "Provider / Cloud Vendor",
+            "name": "Meridian Cloud Systems Pvt. Ltd."
+          }
+        }
+      },
+      {
+        "id": "doc-contract",
+        "label": "sample_contract.pdf",
+        "node_type": "contract",
+        "properties": {
+          "node_type": "contract",
+          "label": "sample_contract.pdf",
+          "properties": {
+            "document_name": "sample_contract.pdf",
+            "status": "Audited"
           }
         }
       },
       {
         "id": "asset-customer-data",
-        "label": "Customer Data",
+        "label": "Customer Data & Confidential Assets",
         "node_type": "asset",
         "properties": {
           "node_type": "asset",
-          "label": "Customer Data",
+          "label": "Customer Data & Confidential Assets",
           "properties": {
             "nature": "Confidential / IP"
           }
         }
       },
       {
-        "id": "asset-customer-logo",
-        "label": "Customer Logo & Name",
+        "id": "asset-services",
+        "label": "Cloud & Hosted Services",
         "node_type": "asset",
         "properties": {
           "node_type": "asset",
-          "label": "Customer Logo & Name",
+          "label": "Cloud & Hosted Services",
           "properties": {
-            "nature": "Brand Identity"
+            "nature": "Service Infrastructure"
           }
         }
       },
       {
-        "id": "asset-services",
-        "label": "Cloud Analytics Services",
+        "id": "asset-ip-rights",
+        "label": "Intellectual Property & Brand Rights",
         "node_type": "asset",
         "properties": {
           "node_type": "asset",
-          "label": "Cloud Analytics Services",
+          "label": "Intellectual Property & Brand Rights",
           "properties": {
-            "nature": "Hosted Service"
+            "nature": "IP & Trademark"
           }
         }
       },
       {
         "id": "concept-invoices",
-        "label": "Monthly Invoices",
-        "node_type": "concept",
+        "label": "Invoices & Payment Consideration",
+        "node_type": "asset",
         "properties": {
-          "node_type": "concept",
-          "label": "Monthly Invoices",
+          "node_type": "asset",
+          "label": "Invoices & Payment Consideration",
           "properties": {
-            "nature": "Payment"
+            "nature": "Commercial Consideration"
           }
         }
       },
       {
-        "id": "term-15-days",
-        "label": "15 Days Notice",
+        "id": "term-time-24h",
+        "label": "24 Hours",
         "node_type": "term_metric",
         "properties": {
           "node_type": "term_metric",
-          "label": "15 Days Notice",
+          "label": "24 Hours",
           "properties": {
-            "type": "Notice Period"
+            "action": "Advance notification required for scheduled maintenance",
+            "days": 1.0,
+            "section": "2. SERVICES AND SERVICE LEVELS",
+            "page": 1
           }
         }
       },
       {
-        "id": "term-60-days",
-        "label": "60 Days Notice (Year 2+)",
+        "id": "term-time-15d-suspension",
+        "label": "15 Days",
         "node_type": "term_metric",
         "properties": {
           "node_type": "term_metric",
-          "label": "60 Days Notice (Year 2+)",
+          "label": "15 Days",
           "properties": {
-            "type": "Notice Period"
+            "action": "Right to suspend service for invoices overdue by more than 15 days (with 7 days notice)",
+            "days": 15.0,
+            "section": "3. FEES AND PAYMENT",
+            "page": 1
           }
         }
       },
       {
-        "id": "term-180-days",
-        "label": "180 Days Backup Retention",
+        "id": "term-time-15d-termination",
+        "label": "15 Days",
         "node_type": "term_metric",
         "properties": {
           "node_type": "term_metric",
-          "label": "180 Days Backup Retention",
+          "label": "15 Days",
           "properties": {
-            "type": "Data Retention"
+            "action": "Can terminate agreement for convenience at any time upon 15 days' written notice",
+            "days": 15.0,
+            "section": "10. TERMINATION",
+            "page": 3
           }
         }
       },
       {
-        "id": "term-3-months",
-        "label": "3 Months Fees Liability Cap",
+        "id": "term-time-20d-audit",
+        "label": "20 Business Days (~28 Days)",
         "node_type": "term_metric",
         "properties": {
           "node_type": "term_metric",
-          "label": "3 Months Fees Liability Cap",
+          "label": "20 Business Days (~28 Days)",
           "properties": {
-            "type": "Liability Cap"
+            "action": "Prior written notice required to audit Provider's security compliance",
+            "days": 28.0,
+            "section": "18. AUDIT RIGHTS",
+            "page": 5
           }
         }
       },
       {
-        "id": "term-99.5-uptime",
-        "label": "99.5% Availability SLA",
+        "id": "term-time-30d-invoice",
+        "label": "30 Days",
         "node_type": "term_metric",
         "properties": {
           "node_type": "term_metric",
-          "label": "99.5% Availability SLA",
+          "label": "30 Days",
           "properties": {
-            "type": "SLA"
+            "action": "Invoice payment due window from date of receipt",
+            "days": 30.0,
+            "section": "3. FEES AND PAYMENT",
+            "page": 1
           }
         }
       },
       {
-        "id": "term-30-days",
-        "label": "30 Days Payment / Cure",
+        "id": "term-time-30d-cure",
+        "label": "30 Days",
         "node_type": "term_metric",
         "properties": {
           "node_type": "term_metric",
-          "label": "30 Days Payment / Cure",
+          "label": "30 Days",
           "properties": {
-            "type": "Deadline"
+            "action": "Written cure period following notice of material breach before termination takes effect",
+            "days": 30.0,
+            "section": "10. TERMINATION",
+            "page": 3
           }
         }
       },
       {
-        "id": "term-90-days",
-        "label": "90 Days Non-Renewal Notice",
+        "id": "term-time-30d-dispute",
+        "label": "30 Days",
         "node_type": "term_metric",
         "properties": {
           "node_type": "term_metric",
-          "label": "90 Days Non-Renewal Notice",
+          "label": "30 Days",
           "properties": {
-            "type": "Notice Period"
+            "action": "Mandatory executive negotiation window before dispute can be referred to arbitration",
+            "days": 30.0,
+            "section": "12. GOVERNING LAW AND DISPUTES",
+            "page": 3
           }
         }
       },
       {
-        "id": "clause-10.3",
-        "label": "Section 10.3 (Provider Exit)",
-        "node_type": "clause",
+        "id": "term-time-60d-cust-termination",
+        "label": "60 Days",
+        "node_type": "term_metric",
         "properties": {
-          "node_type": "clause",
-          "label": "Section 10.3 (Provider Exit)",
+          "node_type": "term_metric",
+          "label": "60 Days",
           "properties": {
-            "section": "10. TERMINATION"
+            "action": "Convenience termination notice period (only exercisable after the first 12 months)",
+            "days": 60.0,
+            "section": "10. TERMINATION",
+            "page": 3
           }
         }
       },
       {
-        "id": "clause-10.4",
-        "label": "Section 10.4 (Customer Exit)",
-        "node_type": "clause",
+        "id": "term-time-90d-renewal",
+        "label": "90 Days",
+        "node_type": "term_metric",
         "properties": {
-          "node_type": "clause",
-          "label": "Section 10.4 (Customer Exit)",
+          "node_type": "term_metric",
+          "label": "90 Days",
           "properties": {
-            "section": "10. TERMINATION"
+            "action": "Written non-renewal notice required to prevent automatic 12-month extension",
+            "days": 90.0,
+            "section": "14. TERM AND RENEWAL",
+            "page": 5
           }
         }
       },
       {
-        "id": "finding-0001",
+        "id": "term-time-180d-backup",
+        "label": "180 Days",
+        "node_type": "term_metric",
+        "properties": {
+          "node_type": "term_metric",
+          "label": "180 Days",
+          "properties": {
+            "action": "Maximum retention period for Customer Data in disaster-recovery backups after deletion",
+            "days": 180.0,
+            "section": "4. DATA PROCESSING AND SECURITY",
+            "page": 1
+          }
+        }
+      },
+      {
+        "id": "term-time-24m-term",
+        "label": "24 Months",
+        "node_type": "term_metric",
+        "properties": {
+          "node_type": "term_metric",
+          "label": "24 Months",
+          "properties": {
+            "action": "Initial contract term duration from the Agreement Date",
+            "days": 730.0,
+            "section": "14. TERM AND RENEWAL",
+            "page": 5
+          }
+        }
+      },
+      {
+        "id": "term-time-24m-nonsolicit",
+        "label": "24 Months (Post-Term)",
+        "node_type": "term_metric",
+        "properties": {
+          "node_type": "term_metric",
+          "label": "24 Months (Post-Term)",
+          "properties": {
+            "action": "Employee non-solicitation restriction continues for 24 months post contract expiration",
+            "days": 730.0,
+            "section": "11. NON-SOLICITATION",
+            "page": 3
+          }
+        }
+      },
+      {
+        "id": "finding-001",
         "label": "Asymmetric Termination Rights",
         "node_type": "risk_finding",
         "properties": {
@@ -862,7 +949,20 @@
           "severity": "medium",
           "bucket": "deal_breaker",
           "category": "contractual risk",
-          "claim": "The Provider has more favorable convenience termination rights compared to the Customer."
+          "claim": "The Provider has the right to terminate for convenience with 15 days' notice, while the Customer can only terminate for convenience after 12 months with 60 days' notice.",
+          "plain_english": "The Provider can walk away from the contract at any time with only 15 days' notice, giving your business very little time to find an alternative vendor or migrate your data."
+        }
+      },
+      {
+        "id": "clause-contractual risk",
+        "label": "Clause: Contractual Risk",
+        "node_type": "clause",
+        "properties": {
+          "node_type": "clause",
+          "label": "Clause: Contractual Risk",
+          "properties": {
+            "section": "Contractual Risk"
+          }
         }
       },
       {
@@ -875,17 +975,140 @@
           "page_number": 3,
           "quote": "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer."
         }
+      },
+      {
+        "id": "gap-disaster-recovery-sla",
+        "label": "Missing: Disaster Recovery SLA & RTO/RPO",
+        "node_type": "missing_protection",
+        "properties": {
+          "node_type": "missing_protection",
+          "label": "Missing: Disaster Recovery SLA & RTO/RPO",
+          "properties": {
+            "check_id": "disaster-recovery-sla",
+            "title": "Disaster Recovery SLA & RTO/RPO",
+            "category": "business_continuity",
+            "status": "MISSING",
+            "risk_level": "high",
+            "why_it_matters": "The contract does not define explicit Recovery Time Objectives (RTO) or Recovery Point Objectives (RPO). If Provider suffers a catastrophic datacenter outage, there is no contractual commitment for when service or data will be restored.",
+            "recommended_clause": "Provider shall maintain a business continuity and disaster recovery plan with a Recovery Time Objective (RTO) of not more than 4 hours and a Recovery Point Objective (RPO) of not more than 1 hour.",
+            "evidence_snippet": "No disaster recovery SLA or RTO/RPO targets found."
+          }
+        }
+      },
+      {
+        "id": "gap-data-return-destruction-certification",
+        "label": "Missing: Affirmative Data Deletion & Certification",
+        "node_type": "missing_protection",
+        "properties": {
+          "node_type": "missing_protection",
+          "label": "Missing: Affirmative Data Deletion & Certification",
+          "properties": {
+            "check_id": "data-return-destruction-certification",
+            "title": "Affirmative Data Deletion & Certification",
+            "category": "data_security",
+            "status": "MISSING",
+            "risk_level": "high",
+            "why_it_matters": "The agreement permits Provider to retain backups for up to 180 days, but lacks an affirmative obligation for Provider to return all Customer Data upon expiration and certify permanent destruction in writing.",
+            "recommended_clause": "Within thirty (30) days of termination, Provider shall, at Customer's election, return or permanently and securely destroy all Customer Data, and deliver written certification of compliance signed by an officer of Provider.",
+            "evidence_snippet": "Permits 180-day backup retention, but lacks affirmative destruction certification."
+          }
+        }
+      },
+      {
+        "id": "gap-subcontractor-advance-notice",
+        "label": "Missing: Advance Notice of New Subprocessors",
+        "node_type": "missing_protection",
+        "properties": {
+          "node_type": "missing_protection",
+          "label": "Missing: Advance Notice of New Subprocessors",
+          "properties": {
+            "check_id": "subcontractor-advance-notice",
+            "title": "Advance Notice of New Subprocessors",
+            "category": "data_security",
+            "status": "MISSING",
+            "risk_level": "medium",
+            "why_it_matters": "Section 4.2 allows Provider to use subcontractors without prior notification or opportunity for Customer to object, which may violate Customer compliance standards or data residency policies.",
+            "recommended_clause": "Provider shall provide Customer with at least thirty (30) days' prior written notice before engaging any new subcontractor to process Customer Data, and Customer may object on reasonable security or compliance grounds.",
+            "evidence_snippet": "Section 4.2 permits subcontractors without advance notice or objection rights."
+          }
+        }
+      },
+      {
+        "id": "gap-force-majeure-termination",
+        "label": "Missing: Termination Right for Extended Force Majeure",
+        "node_type": "missing_protection",
+        "properties": {
+          "node_type": "missing_protection",
+          "label": "Missing: Termination Right for Extended Force Majeure",
+          "properties": {
+            "check_id": "force-majeure-termination",
+            "title": "Termination Right for Extended Force Majeure",
+            "category": "termination",
+            "status": "MISSING",
+            "risk_level": "medium",
+            "why_it_matters": "Section 15 suspends liability during Force Majeure events, but gives Customer no right to terminate the contract if the outage or failure lasts for an extended period (e.g., longer than 30 consecutive days).",
+            "recommended_clause": "If a Force Majeure event prevents performance of the Services for more than thirty (30) consecutive days, Customer may terminate this Agreement immediately upon written notice without penalty.",
+            "evidence_snippet": "Section 15 suspends performance but provides no exit right for extended outages."
+          }
+        }
+      },
+      {
+        "id": "gap-customer-convenience-termination-parity",
+        "label": "Missing: Customer Convenience Termination Parity",
+        "node_type": "missing_protection",
+        "properties": {
+          "node_type": "missing_protection",
+          "label": "Missing: Customer Convenience Termination Parity",
+          "properties": {
+            "check_id": "customer-convenience-termination-parity",
+            "title": "Customer Convenience Termination Parity",
+            "category": "termination",
+            "status": "MISSING",
+            "risk_level": "high",
+            "why_it_matters": "Provider can terminate for convenience at any time upon 15 days' notice, but Customer is barred from terminating during the first 12 months and must provide 60 days' notice thereafter.",
+            "recommended_clause": "Either Party may terminate this Agreement for convenience at any time upon sixty (60) days' prior written notice.",
+            "evidence_snippet": "Section 10.4 locks Customer for 12 months with 60-day notice, while Section 10.3 allows Provider 15-day exit."
+          }
+        }
+      },
+      {
+        "id": "gap-cyber-insurance-requirements",
+        "label": "Missing: Cyber Liability & E&O Insurance Commitments",
+        "node_type": "missing_protection",
+        "properties": {
+          "node_type": "missing_protection",
+          "label": "Missing: Cyber Liability & E&O Insurance Commitments",
+          "properties": {
+            "check_id": "cyber-insurance-requirements",
+            "title": "Cyber Liability & E&O Insurance Commitments",
+            "category": "risk_management",
+            "status": "MISSING",
+            "risk_level": "medium",
+            "why_it_matters": "The agreement contains no requirement for Provider to maintain Technology Errors & Omissions or Cyber Liability insurance to backstop its indemnification and security commitments.",
+            "recommended_clause": "Provider shall maintain commercial general liability insurance, technology errors & omissions, and cyber liability insurance with policy limits of not less than $5,000,000 per occurrence during the Term.",
+            "evidence_snippet": "No insurance maintenance requirements found."
+          }
+        }
       }
     ],
     "links": [
       {
         "source": "party-customer",
-        "target": "term-60-days",
-        "relationship": "TERMINATES_CONVENIENCE",
-        "page_number": 3,
+        "target": "doc-contract",
+        "relationship": "PARTY_TO_AGREEMENT",
+        "page_number": null,
         "chunk_id": null,
-        "section": "10. TERMINATION",
-        "quote": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days' written notice."
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "party-customer",
+        "target": "asset-customer-data",
+        "relationship": "RETAINS_OWNERSHIP",
+        "page_number": 1,
+        "chunk_id": null,
+        "section": null,
+        "quote": "Customer retains all right, title, and interest in Customer Data."
       },
       {
         "source": "party-customer",
@@ -898,7 +1121,7 @@
       },
       {
         "source": "party-customer",
-        "target": "party-provider",
+        "target": "term-time-20d-audit",
         "relationship": "MAY_AUDIT",
         "page_number": 5,
         "chunk_id": null,
@@ -907,25 +1130,169 @@
       },
       {
         "source": "party-customer",
-        "target": "term-3-months",
-        "relationship": "LIABILITY_CAPPED_AT",
-        "page_number": 3,
+        "target": "term-time-30d-invoice",
+        "relationship": "OBLIGATED_TO",
+        "page_number": 1,
         "chunk_id": null,
-        "section": "9. LIMITATION OF LIABILITY",
-        "quote": "shall not exceed the fees paid or payable by Customer to Provider during the three months preceding the event"
+        "section": "3. FEES AND PAYMENT",
+        "quote": "Invoices are payable within 30 days of receipt."
       },
       {
         "source": "party-customer",
-        "target": "asset-customer-data",
-        "relationship": "RETAINS_OWNERSHIP",
-        "page_number": 2,
+        "target": "term-time-30d-cure",
+        "relationship": "OBLIGATED_TO",
+        "page_number": 3,
         "chunk_id": null,
-        "section": "6. INTELLECTUAL PROPERTY",
-        "quote": "Customer retains all right, title, and interest in Customer Data."
+        "section": "10. TERMINATION",
+        "quote": "if the breach remains uncured for 30 days after written notice describing the breach."
+      },
+      {
+        "source": "party-customer",
+        "target": "term-time-30d-dispute",
+        "relationship": "OBLIGATED_TO",
+        "page_number": 3,
+        "chunk_id": null,
+        "section": "12. GOVERNING LAW AND DISPUTES",
+        "quote": "If a dispute is not resolved within 30 days, it shall be finally resolved by arbitration in Bengaluru"
+      },
+      {
+        "source": "party-customer",
+        "target": "term-time-60d-cust-termination",
+        "relationship": "OBLIGATED_TO",
+        "page_number": 3,
+        "chunk_id": null,
+        "section": "10. TERMINATION",
+        "quote": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days' written notice."
+      },
+      {
+        "source": "party-customer",
+        "target": "term-time-90d-renewal",
+        "relationship": "OBLIGATED_TO",
+        "page_number": 5,
+        "chunk_id": null,
+        "section": "14. TERM AND RENEWAL",
+        "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew"
+      },
+      {
+        "source": "party-customer",
+        "target": "term-time-24m-term",
+        "relationship": "OBLIGATED_TO",
+        "page_number": 5,
+        "chunk_id": null,
+        "section": "14. TERM AND RENEWAL",
+        "quote": "The initial Term begins on the Agreement Date and continues for 24 months."
+      },
+      {
+        "source": "party-customer",
+        "target": "term-time-24m-nonsolicit",
+        "relationship": "OBLIGATED_TO",
+        "page_number": 3,
+        "chunk_id": null,
+        "section": "11. NON-SOLICITATION",
+        "quote": "During the Term and for 24 months thereafter, Customer shall not directly or indirectly solicit for employment any employee of Provider"
+      },
+      {
+        "source": "party-customer",
+        "target": "finding-001",
+        "relationship": "EXPOSED_TO_RISK",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "party-customer",
+        "target": "gap-disaster-recovery-sla",
+        "relationship": "MISSING_SAFEGUARD",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "party-customer",
+        "target": "gap-data-return-destruction-certification",
+        "relationship": "MISSING_SAFEGUARD",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "party-customer",
+        "target": "gap-subcontractor-advance-notice",
+        "relationship": "MISSING_SAFEGUARD",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "party-customer",
+        "target": "gap-force-majeure-termination",
+        "relationship": "MISSING_SAFEGUARD",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "party-customer",
+        "target": "gap-customer-convenience-termination-parity",
+        "relationship": "MISSING_SAFEGUARD",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "party-customer",
+        "target": "gap-cyber-insurance-requirements",
+        "relationship": "MISSING_SAFEGUARD",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
       },
       {
         "source": "party-provider",
-        "target": "term-15-days",
+        "target": "doc-contract",
+        "relationship": "PARTY_TO_AGREEMENT",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "party-provider",
+        "target": "asset-services",
+        "relationship": "COMMITS_SERVICE",
+        "page_number": 1,
+        "chunk_id": null,
+        "section": null,
+        "quote": "Provider shall provide the Services in accordance with the Documentation."
+      },
+      {
+        "source": "party-provider",
+        "target": "term-time-24h",
+        "relationship": "OBLIGATED_TO",
+        "page_number": 1,
+        "chunk_id": null,
+        "section": "2. SERVICES AND SERVICE LEVELS",
+        "quote": "Scheduled maintenance will normally be communicated at least 24 hours in advance."
+      },
+      {
+        "source": "party-provider",
+        "target": "term-time-15d-suspension",
+        "relationship": "OBLIGATED_TO",
+        "page_number": 1,
+        "chunk_id": null,
+        "section": "3. FEES AND PAYMENT",
+        "quote": "Provider may suspend access for invoices more than 15 days overdue after providing Customer with at least 7 days' written notice"
+      },
+      {
+        "source": "party-provider",
+        "target": "term-time-15d-termination",
         "relationship": "TERMINATES_CONVENIENCE",
         "page_number": 3,
         "chunk_id": null,
@@ -934,7 +1301,7 @@
       },
       {
         "source": "party-provider",
-        "target": "term-180-days",
+        "target": "term-time-180d-backup",
         "relationship": "RETAINS_BACKUP",
         "page_number": 1,
         "chunk_id": null,
@@ -943,51 +1310,132 @@
       },
       {
         "source": "party-provider",
-        "target": "term-99.5-uptime",
-        "relationship": "COMMITS_SLA",
-        "page_number": 1,
+        "target": "finding-001",
+        "relationship": "IMPOSES_RISK",
+        "page_number": null,
         "chunk_id": null,
-        "section": "2. SERVICES AND SERVICE LEVELS",
-        "quote": "Provider will use commercially reasonable efforts to maintain 99.5% monthly availability"
+        "section": null,
+        "quote": ""
       },
       {
-        "source": "party-provider",
-        "target": "term-3-months",
-        "relationship": "LIABILITY_CAPPED_AT",
+        "source": "term-time-24h",
+        "target": "doc-contract",
+        "relationship": "GOVERNED_BY",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "term-time-15d-suspension",
+        "target": "doc-contract",
+        "relationship": "GOVERNED_BY",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "term-time-15d-termination",
+        "target": "doc-contract",
+        "relationship": "GOVERNED_BY",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "term-time-20d-audit",
+        "target": "doc-contract",
+        "relationship": "GOVERNED_BY",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "term-time-30d-invoice",
+        "target": "doc-contract",
+        "relationship": "GOVERNED_BY",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "term-time-30d-cure",
+        "target": "doc-contract",
+        "relationship": "GOVERNED_BY",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "term-time-30d-dispute",
+        "target": "doc-contract",
+        "relationship": "GOVERNED_BY",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "term-time-60d-cust-termination",
+        "target": "doc-contract",
+        "relationship": "GOVERNED_BY",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "term-time-90d-renewal",
+        "target": "doc-contract",
+        "relationship": "GOVERNED_BY",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "term-time-180d-backup",
+        "target": "doc-contract",
+        "relationship": "GOVERNED_BY",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "term-time-24m-term",
+        "target": "doc-contract",
+        "relationship": "GOVERNED_BY",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "term-time-24m-nonsolicit",
+        "target": "doc-contract",
+        "relationship": "GOVERNED_BY",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "finding-001",
+        "target": "clause-contractual risk",
+        "relationship": "FLAGGED_CLAUSE",
         "page_number": 3,
         "chunk_id": null,
-        "section": "9. LIMITATION OF LIABILITY",
-        "quote": "shall not exceed the fees paid or payable by Customer to Provider during the three months preceding the event"
+        "section": "Contractual Risk",
+        "quote": "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer."
       },
       {
-        "source": "party-provider",
-        "target": "asset-customer-logo",
-        "relationship": "USES_WITHOUT_APPROVAL",
-        "page_number": 5,
-        "chunk_id": null,
-        "section": "19. PUBLICITY",
-        "quote": "Provider may identify Customer by name and logo as a customer in Provider's website... without obtaining additional approval"
-      },
-      {
-        "source": "party-provider",
-        "target": "asset-customer-data",
-        "relationship": "RESPONSIBLE_FOR_SUBCONTRACTORS",
-        "page_number": 1,
-        "chunk_id": null,
-        "section": "4. DATA PROCESSING AND SECURITY",
-        "quote": "Provider remains responsible for the acts and omissions of its subcontractors to the same extent as if those acts or omissions were performed by Provider."
-      },
-      {
-        "source": "clause-10.3",
-        "target": "clause-10.4",
-        "relationship": "ASYMMETRIC_WITH",
-        "page_number": 3,
-        "chunk_id": null,
-        "section": "10. TERMINATION",
-        "quote": "Section 10.3 permits 15-day exit for Provider, while Section 10.4 restricts Customer exit until year 2 with 60-day notice."
-      },
-      {
-        "source": "finding-0001",
+        "source": "finding-001",
         "target": "evidence-chunk-0012",
         "relationship": "SUPPORTED_BY",
         "page_number": 3,
@@ -996,16 +1444,97 @@
         "quote": "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer."
       },
       {
-        "source": "finding-0001",
+        "source": "finding-001",
         "target": "evidence-chunk-0012",
         "relationship": "SUPPORTED_BY",
         "page_number": 3,
         "chunk_id": "chunk-0012",
         "section": null,
         "quote": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice."
+      },
+      {
+        "source": "gap-disaster-recovery-sla",
+        "target": "doc-contract",
+        "relationship": "OMITTED_FROM",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "gap-data-return-destruction-certification",
+        "target": "doc-contract",
+        "relationship": "OMITTED_FROM",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "gap-subcontractor-advance-notice",
+        "target": "doc-contract",
+        "relationship": "OMITTED_FROM",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "gap-force-majeure-termination",
+        "target": "doc-contract",
+        "relationship": "OMITTED_FROM",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "gap-customer-convenience-termination-parity",
+        "target": "doc-contract",
+        "relationship": "OMITTED_FROM",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "gap-cyber-insurance-requirements",
+        "target": "doc-contract",
+        "relationship": "OMITTED_FROM",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
       }
     ],
-    "total_nodes": 17,
-    "total_links": 14
-  }
+    "total_nodes": 28,
+    "total_links": 46
+  },
+  "pages": [
+    {
+      "page_number": 1,
+      "text": "MASTER SOFTWARE SERVICES AND DATA\nPROCESSING AGREEMENT\nAgreement Date: 15 September 2026    Agreement ID: MSA-2026-0915-47\nThis Master Software Services and Data Processing Agreement (the “Agreement”) is entered into by and between\nNorthstar Analytics Pvt. Ltd., a company incorporated under the laws of India, with its principal office at\nBengaluru, Karnataka (“Customer”), and Meridian Cloud Systems Pvt. Ltd., a company incorporated under the\nlaws of India, with its principal office at Hyderabad, Telangana (“Provider”). Customer and Provider are each a\n“Party” and together the “Parties.”\n1. DEFINITIONS\n1.1 Confidential Information means non-public business, technical, financial, customer, security, product, pricing,\nand operational information disclosed by either Party, whether marked confidential or whether a reasonable person\nwould understand the information to be confidential.\n1.2 Customer Data means all information submitted to the Services by Customer or on Customer’s behalf,\nincluding personal information, documents, source material, usage information, and audit records.\n1.3 Services means the hosted analytics, document processing, reporting, API access, and related support\nservices described in this Agreement and its Schedules.\n2. SERVICES AND SERVICE LEVELS\n2.1 Provider shall provide the Services substantially in accordance with Schedule A. Provider may modify\nnon-material features from time to time, provided that such modification does not materially reduce the core\nfunctionality of the Services.\n2.2 Provider will use commercially reasonable efforts to maintain 99.5% monthly availability, excluding scheduled\nmaintenance, emergency maintenance, force majeure events, failures caused by Customer, and third-party\nservices outside Provider’s reasonable control.\n2.3 Scheduled maintenance will normally be communicated at least 24 hours in advance. Emergency maintenance\nmay occur without prior notice where Provider reasonably believes that delay would create a security or\noperational risk.\n3. FEES AND PAYMENT\nService Tier\nIncluded Usage\nMonthly Fee\nOverage\nStandard\nUp to 10,000 documents\nI85,000\nI12 / document\nProfessional\nUp to 50,000 documents\nI2,40,000\nI8 / document\nEnterprise\nUp to 150,000 documents\nI5,50,000\nI5 / document\n3.1 Invoices are payable within 30 days of receipt. Undisputed late amounts may accrue interest at 1.5% per\nmonth or the maximum rate permitted by applicable law, whichever is lower.\n3.2 Provider may suspend access for invoices more than 15 days overdue after providing Customer with at least 7\ndays’ written notice and an opportunity to cure.\n4. DATA PROCESSING AND SECURITY\n4.1 Provider shall process Customer Data only to provide, secure, maintain, and improve the Services and to\ncomply with applicable law. Provider shall implement reasonable administrative, technical, and physical safeguards"
+    },
+    {
+      "page_number": 2,
+      "text": "appropriate to the nature of the data processed.\n4.2 Provider may use subcontractors to process Customer Data. Provider remains responsible for the acts and\nomissions of its subcontractors to the same extent as if those acts or omissions were performed by Provider.\n4.3 Provider shall notify Customer without undue delay after confirming a Security Incident involving unauthorized\naccess to Customer Data and shall provide reasonably available information concerning the nature and scope of\nthe incident.\n4.4 Provider may retain backup copies of Customer Data for up to 180 days after deletion from production\nsystems, provided such copies remain protected and are not restored except for disaster recovery purposes.\n5. CONFIDENTIALITY\n5.1 Each Party shall protect the other Party’s Confidential Information using at least reasonable care and shall use\nsuch information only to perform or receive rights under this Agreement.\n5.2 The confidentiality obligations do not apply to information that the receiving Party can demonstrate was already\nlawfully known, becomes public without breach, is independently developed, or is lawfully received from a third\nparty without a duty of confidentiality.\n5.3 If disclosure is required by law, the receiving Party shall, where legally permitted, provide prompt notice and\nreasonable cooperation so the disclosing Party may seek protective relief.\n6. INTELLECTUAL PROPERTY\n6.1 Customer retains all right, title, and interest in Customer Data. Provider retains all right, title, and interest in the\nServices, software, models, templates, documentation, and Provider-developed technology.\n6.2 Subject to payment of all applicable fees, Provider grants Customer a non-exclusive, non-transferable,\nworldwide license during the Term to use the Services for Customer’s internal business operations.\n6.3 Feedback provided by Customer may be used by Provider to improve its products and services, provided\nProvider does not disclose Customer Confidential Information in doing so."
+    },
+    {
+      "page_number": 3,
+      "text": "7. WARRANTIES\n7.1 Each Party represents that it has authority to enter into this Agreement. Provider warrants that the Services will\nmaterially conform to the applicable documentation during the Term.\n7.2 Except as expressly stated in this Agreement, the Services are provided on an “as available” basis and\nProvider disclaims all other warranties to the maximum extent permitted by law.\n8. INDEMNIFICATION\n8.1 Provider shall defend Customer against a third-party claim alleging that the Services, when used as permitted\nby this Agreement, infringe a third party’s registered intellectual property right, and shall pay damages finally\nawarded or settlements approved by Provider.\n8.2 Customer shall defend Provider against third-party claims arising from Customer Data or Customer’s unlawful\nuse of the Services, and shall pay damages finally awarded or settlements approved by Customer.\n8.3 The indemnified Party shall promptly notify the indemnifying Party of a claim and provide reasonable\ncooperation. The indemnifying Party shall control the defense, provided it may not settle a claim in a manner that\nadmits liability or imposes non-monetary obligations on the indemnified Party without consent.\n9. LIMITATION OF LIABILITY\n9.1 TO THE MAXIMUM EXTENT PERMITTED BY LAW, NEITHER PARTY SHALL BE LIABLE FOR INDIRECT,\nINCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, OR FOR LOST\nPROFITS, REVENUE, OR DATA.\n9.2 EXCEPT FOR CUSTOMER’S PAYMENT OBLIGATIONS, EACH PARTY’S AGGREGATE LIABILITY ARISING\nOUT OF OR RELATING TO THIS AGREEMENT SHALL NOT EXCEED THE FEES PAID OR PAYABLE BY\nCUSTOMER TO PROVIDER DURING THE THREE MONTHS PRECEDING THE EVENT GIVING RISE TO THE\nCLAIM.\n9.3 The limitations in Sections 9.1 and 9.2 shall not apply to fraud, willful misconduct, or a Party’s indemnification\nobligations under Section 8.\n10. TERMINATION\n10.1 Either Party may terminate this Agreement for material breach if the breach remains uncured for 30 days after\nwritten notice describing the breach.\n10.2 Either Party may terminate immediately upon written notice if the other Party becomes insolvent, enters\nliquidation, or ceases substantially all business operations.\n10.3 Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer.\n10.4 Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written\nnotice.\n11. NON-SOLICITATION\n11.1 During the Term and for 24 months thereafter, Customer shall not directly or indirectly solicit for employment\nany employee of Provider who materially participated in delivering the Services. This restriction shall not apply to\ngeneral advertisements not specifically targeted at Provider employees.\n12. GOVERNING LAW AND DISPUTES\n12.1 This Agreement shall be governed by the laws of India, without regard to conflict-of-law principles.\n12.2 The Parties shall first attempt in good faith to resolve disputes through executive-level negotiation. If a dispute\nis not resolved within 30 days, it shall be finally resolved by arbitration in Bengaluru, India, by a sole arbitrator"
+    },
+    {
+      "page_number": 4,
+      "text": "appointed in accordance with applicable arbitration law.\n13. NOTICES\nNotices under this Agreement must be in writing and delivered by courier, registered post, or email to the\naddresses specified below. Email notices are effective upon confirmation of transmission, provided no delivery\nfailure notice is received.\nParty\nEmail\nAddress\nCustomer\nlegal@northstaranalytics.example\nBengaluru, Karnataka, India\nProvider\ncontracts@meridiancloud.example\nHyderabad, Telangana, India"
+    },
+    {
+      "page_number": 5,
+      "text": "14. TERM AND RENEWAL\n14.1 The initial Term begins on the Agreement Date and continues for 24 months.\n14.2 Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will\nautomatically renew for successive 12-month periods.\n15. FORCE MAJEURE\nNeither Party shall be liable for delay or failure to perform caused by events beyond its reasonable control,\nincluding natural disasters, war, terrorism, government action, widespread internet failures, or labor disruptions,\nprovided that the affected Party uses reasonable efforts to mitigate the effects.\n16. ASSIGNMENT\nNeither Party may assign this Agreement without the other Party’s prior written consent, except that either Party\nmay assign the Agreement without consent to an affiliate or in connection with a merger, acquisition, corporate\nreorganization, or sale of substantially all assets, provided the assignee assumes the assigning Party’s obligations.\n17. ORDER OF PRECEDENCE\nIf there is a conflict between this Agreement and a Schedule, the following order of precedence applies: (1) the\napplicable Data Processing Addendum, (2) the applicable Order Form, (3) this Agreement, and (4) all other\nSchedules, unless the conflicting document expressly identifies the provision of this Agreement that it overrides.\n18. AUDIT RIGHTS\nCustomer may, no more than once per calendar year and upon 20 business days’ prior written notice, audit\nProvider’s compliance with the security obligations in Section 4. Provider may satisfy the request by providing an\nindependent third-party security report where reasonably sufficient to address the requested controls.\n19. PUBLICITY\nProvider may identify Customer by name and logo as a customer in Provider’s website, presentations, and\nmarketing materials without obtaining additional approval from Customer.\n20. GENERAL\nThis Agreement, together with its Schedules and Order Forms, constitutes the entire agreement between the\nParties concerning its subject matter and supersedes prior discussions relating to that subject matter. Any\namendment must be in writing and signed by authorized representatives of both Parties. If any provision is held\nunenforceable, the remaining provisions remain effective. A waiver must be in writing and applies only to the\nspecific instance for which it is given.\nSIGNATURES\nFor Northstar Analytics Pvt. Ltd.\nFor Meridian Cloud Systems Pvt. Ltd.\nName: __________________________\nName: __________________________\nTitle: ___________________________\nTitle: ___________________________\nDate: ___________________________\nDate: ___________________________\nSignature: ______________________\nSignature: ______________________"
+    },
+    {
+      "page_number": 6,
+      "text": "Testing note: This document is synthetic and intended solely for testing the Enterprise Auditor pipeline. It contains deliberately varied\nclause structures, tables, cross-references, asymmetric termination rights, broad publicity language, data-retention provisions, and other\npatterns useful for evaluating extraction, retrieval, risk detection, evidence grounding, verification, and knowledge-graph construction."
+    }
+  ],
+  "num_pages": 6
 }

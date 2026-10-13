@@ -24,17 +24,19 @@
 ## 2. 🔴 Deal-Breakers (1)
 ### 1. Asymmetric Termination Rights
 📖 **In Plain English:**  
-> The Provider has more favorable convenience termination rights compared to the Customer.
+> The Provider can walk away from the contract at any time with only 15 days' notice, giving your business very little time to find an alternative vendor or migrate your data.
 
 ⚠️ **Why It Matters:**  
-- The Provider can terminate the agreement for convenience at any time with only 15 days' notice, while the Customer can only terminate for convenience after 12 months and must provide 60 days' notice. This creates an imbalance in termination rights.
+- 1. Provider has a unilateral convenience termination right.
+- 2. 15-day notice period is unusually short for enterprise software services.
+- 3. Customer's convenience termination right is locked for 12 months with a 60-day notice.
 
 📄 **Contract Evidence (Page 3):**  
 > "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer."
 
 💡 **Suggested Negotiation Remedy:**  
 ```text
-Consider aligning the termination rights and notice periods for both parties to ensure fairness and balance in the agreement.
+Customer proposes modifying Section 10.3 to require at least 60 days' written notice for convenience termination, and granting Customer reciprocal convenience termination rights with the same notice.
 ```
 
 ## 3. 🟡 Watch Out (0)

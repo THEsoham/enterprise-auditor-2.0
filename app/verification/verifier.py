@@ -22,7 +22,7 @@ class GeminiVerifier:
         api_key = os.getenv("GEMINI_API_KEY")
         self.model = model or os.getenv(
             "GEMINI_MODEL",
-            "gemini-3.6-flash"
+            "gemini-3.8-flash"
         )
         self.client = None
 

@@ -21,7 +21,7 @@
 
 3. **⚖️ AI Courtroom Multi-Agent Debate**
    - **Auditor Agent (`gpt-4o-mini`)**: Probes the contract for hidden risks, asymmetries, and non-standard terms.
-   - **Skeptic Verifier (`gpt-4o-mini` / `gemini-3.6-flash`)**: Adversarially challenges findings against exact cited text and page references.
+   - **Skeptic Verifier (`gpt-4o-mini` / `gemini-3.8-flash`)**: Adversarially challenges findings against exact cited text and page references.
    - **Stopping Rules**: Automatic convergence or structured rebuttal when claims are ambiguous.
 
 4. **🎯 3 Plain-English Risk Categories**

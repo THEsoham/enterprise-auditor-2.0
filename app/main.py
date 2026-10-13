@@ -123,7 +123,9 @@ async def upload_document(file: UploadFile = File(...)):
 
     # If file is text/md/docx, convert to a valid PDF for the pipeline
     if ext in (".txt", ".md", ".docx"):
-        pdf_path = dest_dir / f"{stem}_converted.pdf"
+        import time
+        timestamp = int(time.time())
+        pdf_path = dest_dir / f"{stem}_{timestamp}_converted.pdf"
         try:
             if ext == ".docx":
                 import zipfile
@@ -140,7 +142,11 @@ async def upload_document(file: UploadFile = File(...)):
             else:
                 text_str = content.decode("utf-8", errors="ignore")
 
-            import fitz
+            try:
+                import pymupdf as fitz
+            except ImportError:
+                import fitz
+
             doc = fitz.open()
             lines = text_str.split("\n")
             lines_per_page = 45

@@ -1309,12 +1309,12 @@
     <div class="dialog-card">
       <div class="dialog-header">
         <h3 class="dialog-title">Upload Contract for Audit</h3>
-        <button class="btn-close" id="btn-close-upload-modal">&times;</button>
+        <button type="button" class="btn-close" id="btn-close-upload-modal" aria-label="Close dialog">&times;</button>
       </div>
 
       <div class="dialog-body" style="text-align: center; padding: 36px 24px;">
 
-        <input type="file" id="modal-file-input" accept=".pdf,.txt,.docx,.md" style="display: none;">
+        <input type="file" id="modal-file-input" accept=".pdf,.docx,.txt,.md" style="position: absolute; opacity: 0; width: 0.1px; height: 0.1px; overflow: hidden; pointer-events: none;" tabindex="-1">
 
         <div id="modal-drop-area"
           style="border: 2px dashed #CBD5E1; border-radius: var(--radius-lg); padding: 36px 20px; cursor: pointer; transition: border-color 0.2s ease;">
@@ -1329,7 +1329,7 @@
             here</div>
           <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Supports PDF, DOCX, TXT, and Markdown
             files.</p>
-          <button class="btn-dark" style="margin-top: 14px;" id="btn-browse-modal">Select from Computer</button>
+          <label for="modal-file-input" class="btn-dark" style="margin-top: 14px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none;" id="btn-browse-modal" role="button" tabindex="0">Select from Computer</label>
         </div>
 
 
