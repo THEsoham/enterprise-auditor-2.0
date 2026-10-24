@@ -447,7 +447,7 @@ class AuditPlanner:
         for template in self.GENERIC_PROBE_TEMPLATES:
             if template["probe_id"] not in used_probe_ids:
                 # Check if any chunk text mentions this topic at all
-                combined_text = " ".join(c.get("text", "") for c in chunks[:10]).lower()
+                combined_text = " ".join(c.get("text", "") for c in chunks).lower()
                 if any(kw in combined_text for kw in template["keywords"]):
                     probes.append(AuditProbe(
                         probe_id=template["probe_id"],
@@ -459,6 +459,19 @@ class AuditPlanner:
                         target_sections=[],
                     ))
                     used_probe_ids.add(template["probe_id"])
+
+        # Fallback safeguard: if no probes matched, include core generic probes so any document is audited
+        if not probes:
+            for template in self.GENERIC_PROBE_TEMPLATES[:5]:
+                probes.append(AuditProbe(
+                    probe_id=template["probe_id"],
+                    category=template["category"],
+                    target_area=template["target_area"],
+                    query=self._build_probe_query(template),
+                    priority=template["priority"],
+                    expected_type=template["expected_type"],
+                    target_sections=[],
+                ))
 
         # Sort by priority: critical > high > medium
         priority_order = {"critical": 0, "high": 1, "medium": 2}

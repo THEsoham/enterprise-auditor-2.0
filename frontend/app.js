@@ -2654,6 +2654,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  const btnLoadSampleDemo = document.getElementById("btn-load-sample-demo");
+  async function loadSampleDemo() {
+    try {
+      showToast("Loading sample agreement audit...", "info");
+      const res = await fetch("/api/sample/demo");
+      if (!res.ok) throw new Error("Sample report not available");
+      const data = await res.json();
+      if (data && data.report) {
+        renderAll(data.report);
+        try { modalUploadAudit?.close(); } catch (_) {}
+        showToast("Loaded sample contract demonstration!", "success");
+        enterAuditorApp("all");
+      }
+    } catch (err) {
+      showToast("Could not load sample demo: " + err.message, "error");
+    }
+  }
+  btnLoadSampleDemo?.addEventListener("click", loadSampleDemo);
+
   // Clicking browse button or drop area (fallback if label default is overridden)
   btnBrowseModal?.addEventListener("click", (e) => {
     // If it's a span or button, trigger the file input
