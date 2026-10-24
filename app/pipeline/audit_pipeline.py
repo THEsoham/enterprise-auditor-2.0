@@ -69,6 +69,15 @@ class AuditPipeline:
         print(f"[AUDIT] ENTERPRISE AUDITOR 2.0: AUDITING {document_name}")
         print("=" * 55 + "\n")
 
+        # 0. Reset indexes to prevent cross-document contamination
+        print("[0/9] Clearing previous document indexes...")
+        try:
+            self.retriever.vector_store.reset()
+        except Exception:
+            pass
+        self.retriever.bm25 = __import__('app.retrieval.bm25', fromlist=['BM25Index']).BM25Index()
+        self.retriever._all_chunks = {}
+
         # 1. Ingestion
         print("[1/9] Ingesting PDF and mapping pages...")
         pages = load_pdf(pdf_path)
