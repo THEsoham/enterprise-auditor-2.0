@@ -1,6 +1,9 @@
 import asyncio
 import json
+import os
 import sys
+import textwrap
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -16,6 +19,7 @@ if sys.stderr and hasattr(sys.stderr, "reconfigure"):
     except Exception:
         pass
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -27,6 +31,16 @@ from app.debate.debate_graph import DebateEngine
 from app.scoring.risk_scorer import RiskScorer
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DOCUMENTS_DIR = PROJECT_ROOT / "data" / "documents"
+REPORTS_DIR = PROJECT_ROOT / "data" / "reports"
+
+load_dotenv(PROJECT_ROOT / ".env")
+
+# Every audit resets and refills the shared vector index, so audits must not overlap
+AUDIT_LOCK = asyncio.Lock()
+
+# The contract currently loaded in the retrieval index; debates search this document
+indexed_document: Optional[Path] = None
 
 app = FastAPI(
     title="Enterprise Auditor 2.0 API",
@@ -39,7 +53,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -47,6 +61,7 @@ app.add_middleware(
 
 class DebateRequest(BaseModel):
     query: str
+    max_rounds: Optional[int] = None
 
 
 class AuditRequest(BaseModel):
@@ -60,19 +75,87 @@ async def health_check():
         "status": "online",
         "system": "Enterprise Auditor 2.0",
         "models": {
-            "auditor": "OpenAI gpt-4o-mini",
-            "verifier": "Gemini 3.6 Flash",
+            "auditor": f"OpenAI {os.getenv('OPENAI_MODEL', 'gpt-4o-mini')}",
+            "verifier": (
+                f"Gemini {os.getenv('GEMINI_MODEL', 'gemini-3.8-flash')} "
+                f"(fallbacks: {os.getenv('GEMINI_FALLBACK_MODELS', 'gemini-3.6-flash')}, then OpenAI)"
+                if os.getenv("GEMINI_API_KEY") and os.getenv("USE_GEMINI", "true").lower() == "true"
+                else f"OpenAI {os.getenv('OPENAI_MODEL', 'gpt-4o-mini')}"
+            ),
         }
     }
 
 
+def _safe_document_path(filename: str) -> Path:
+    """Resolve a filename inside data/documents, rejecting path traversal."""
+    path = (DOCUMENTS_DIR / Path(filename).name).resolve()
+    if path.parent != DOCUMENTS_DIR.resolve():
+        raise HTTPException(status_code=400, detail="Invalid filename.")
+    return path
+
+
+def _docx_to_text(content: bytes) -> str:
+    import io
+    import zipfile
+    import xml.etree.ElementTree as ET
+
+    with zipfile.ZipFile(io.BytesIO(content)) as z:
+        tree = ET.fromstring(z.read("word/document.xml"))
+
+    # One line per paragraph (<w:p>), joining its text runs (<w:t>)
+    paragraphs = []
+    for node in tree.iter():
+        if node.tag.endswith("}p"):
+            text = "".join(t.text or "" for t in node.iter() if t.tag.endswith("}t"))
+            if text.strip():
+                paragraphs.append(text)
+    return "\n".join(paragraphs)
+
+
+def _text_to_pdf(text: str, pdf_path: Path) -> None:
+    """Render plain text into a paginated PDF, wrapping long lines instead of truncating."""
+    try:
+        import pymupdf as fitz
+    except ImportError:
+        import fitz
+
+    lines = []
+    for raw_line in text.splitlines() or [""]:
+        lines.extend(textwrap.wrap(raw_line, width=95) or [""])
+
+    lines_per_page = 60
+    doc = fitz.open()
+    for i in range(0, max(len(lines), 1), lines_per_page):
+        page = doc.new_page()
+        page.insert_text((50, 50), "\n".join(lines[i : i + lines_per_page]), fontsize=10)
+    doc.save(pdf_path)
+    doc.close()
+
+
+async def _run_pipeline(pdf_path: Path, max_probes: int) -> dict:
+    global indexed_document
+    async with AUDIT_LOCK:
+        pipeline = AuditPipeline(max_debate_rounds=int(os.getenv("MAX_DEBATE_ROUNDS", "2")))
+        result = await asyncio.to_thread(pipeline.audit, pdf_path=pdf_path, max_probes=max_probes)
+        indexed_document = pdf_path
+        return result
+
+
+async def _ensure_indexed(pdf_path: Path) -> None:
+    """Load a contract into the retrieval index without re-running the audit."""
+    global indexed_document
+    async with AUDIT_LOCK:
+        if indexed_document != pdf_path:
+            await asyncio.to_thread(AuditPipeline(max_debate_rounds=1).index_document, pdf_path)
+            indexed_document = pdf_path
+
+
 @app.get("/api/report/latest")
 async def get_latest_report():
-    """Retrieve the baseline audit report JSON."""
-    report_dir = PROJECT_ROOT / "data" / "reports"
-    sample_files = list(report_dir.glob("sample_contract_audit.json"))
-    if sample_files:
-        with open(sample_files[0], "r", encoding="utf-8") as f:
+    """Retrieve the most recently generated audit report JSON."""
+    report_files = sorted(REPORTS_DIR.glob("*_audit.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+    if report_files:
+        with open(report_files[0], "r", encoding="utf-8") as f:
             return json.load(f)
 
     raise HTTPException(status_code=404, detail="No audit report found.")
@@ -81,18 +164,20 @@ async def get_latest_report():
 @app.get("/api/sample/demo")
 async def get_sample_demo_report():
     """Load the pre-computed sample contract audit on demand for demonstration."""
-    report_dir = PROJECT_ROOT / "data" / "reports"
-    sample_files = list(report_dir.glob("sample_contract*_audit.json"))
+    pdf_path = DOCUMENTS_DIR / "sample_contract.pdf"
+    sample_files = list(REPORTS_DIR.glob("sample_contract*_audit.json"))
     if sample_files:
         sample_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
         with open(sample_files[0], "r", encoding="utf-8") as f:
             data = json.load(f)
-            return {"report": data}
 
-    pdf_path = PROJECT_ROOT / "data" / "documents" / "sample_contract.pdf"
+        # Debates on the demo page must search the sample contract, not the last upload
+        if pdf_path.exists():
+            await _ensure_indexed(pdf_path)
+        return {"report": data}
+
     if pdf_path.exists():
-        pipeline = AuditPipeline(max_debate_rounds=2)
-        res = await asyncio.to_thread(pipeline.audit, pdf_path=pdf_path, max_probes=5)
+        res = await _run_pipeline(pdf_path, max_probes=5)
         return {"report": res["report"]}
 
     raise HTTPException(status_code=404, detail="Sample contract not found.")
@@ -101,103 +186,60 @@ async def get_sample_demo_report():
 @app.post("/api/upload")
 async def upload_document(file: UploadFile = File(...)):
     """Upload a new contract PDF/text document and run the autonomous audit pipeline."""
-    allowed_exts = (".pdf", ".txt", ".docx", ".md")
-    ext = Path(file.filename).suffix.lower()
-    if not ext.endswith(allowed_exts):
+    allowed_exts = {".pdf", ".txt", ".docx", ".md"}
+    original_name = Path(file.filename or "").name
+    ext = Path(original_name).suffix.lower()
+    if ext not in allowed_exts:
         raise HTTPException(
             status_code=400,
             detail=f"Unsupported file format '{ext}'. Supported formats: PDF, TXT, DOCX, MD."
         )
 
-    dest_dir = PROJECT_ROOT / "data" / "documents"
-    dest_dir.mkdir(parents=True, exist_ok=True)
+    DOCUMENTS_DIR.mkdir(parents=True, exist_ok=True)
 
-    stem = Path(file.filename).stem
-    dest_path = dest_dir / file.filename
-    if dest_path.exists():
-        import time
-        timestamp = int(time.time())
-        dest_path = dest_dir / f"{stem}_{timestamp}{ext}"
-
+    stem = Path(original_name).stem
     content = await file.read()
 
-    # If file is text/md/docx, convert to a valid PDF for the pipeline
-    if ext in (".txt", ".md", ".docx"):
-        import time
-        timestamp = int(time.time())
-        pdf_path = dest_dir / f"{stem}_{timestamp}_converted.pdf"
-        try:
-            if ext == ".docx":
-                import zipfile
-                import xml.etree.ElementTree as ET
-                import io
-                try:
-                    with zipfile.ZipFile(io.BytesIO(content)) as z:
-                        xml_content = z.read("word/document.xml")
-                    tree = ET.fromstring(xml_content)
-                    text_parts = [node.text for node in tree.iter() if node.tag.endswith("t") and node.text]
-                    text_str = "\n".join(text_parts) if text_parts else "Contract Document"
-                except Exception:
-                    text_str = content.decode("utf-8", errors="ignore")
-            else:
-                text_str = content.decode("utf-8", errors="ignore")
-
-            try:
-                import pymupdf as fitz
-            except ImportError:
-                import fitz
-
-            doc = fitz.open()
-            lines = text_str.split("\n")
-            lines_per_page = 45
-            for i in range(0, max(len(lines), 1), lines_per_page):
-                page = doc.new_page()
-                page_text = "\n".join(lines[i : i + lines_per_page])
-                page.insert_text((50, 50), page_text[:3500], fontsize=10)
-            doc.save(pdf_path)
-            doc.close()
-            dest_path = pdf_path
-        except Exception as conv_err:
-            print(f"Text to PDF conversion warning: {conv_err}")
-            with open(dest_path, "wb") as buffer:
-                buffer.write(content)
+    if ext == ".pdf":
+        dest_path = _safe_document_path(original_name)
+        if dest_path.exists():
+            dest_path = _safe_document_path(f"{stem}_{int(time.time())}{ext}")
+        dest_path.write_bytes(content)
     else:
-        with open(dest_path, "wb") as buffer:
-            buffer.write(content)
+        # The pipeline reads PDFs, so convert text/markdown/docx first
+        try:
+            text_str = _docx_to_text(content) if ext == ".docx" else content.decode("utf-8", errors="ignore")
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Could not read {original_name}: {e}")
+
+        if not text_str.strip():
+            raise HTTPException(status_code=400, detail=f"{original_name} contains no readable text.")
+
+        dest_path = _safe_document_path(f"{stem}_{int(time.time())}_converted.pdf")
+        _text_to_pdf(text_str, dest_path)
 
     try:
-        pipeline = AuditPipeline(max_debate_rounds=2)
-        result = await asyncio.to_thread(
-            pipeline.audit,
-            pdf_path=dest_path,
-            max_probes=4,
-        )
+        result = await _run_pipeline(dest_path, max_probes=4)
         return {
             "status": "success",
-            "filename": file.filename,
+            "filename": original_name,
             "report": result["report"],
-            "message": f"Successfully audited {file.filename}",
+            "message": f"Successfully audited {original_name}",
         }
     except Exception as e:
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Audit failed for {file.filename}: {str(e)}")
-
+        raise HTTPException(status_code=500, detail=f"Audit failed for {original_name}: {str(e)}")
 
 
 @app.post("/api/audit")
 async def run_audit(req: AuditRequest):
     """Execute autonomous audit pipeline on the specified contract PDF."""
-    pdf_path = PROJECT_ROOT / "data" / "documents" / req.filename
+    pdf_path = _safe_document_path(req.filename or "")
     if not pdf_path.exists():
         raise HTTPException(status_code=404, detail=f"Contract not found: {req.filename}")
 
-    pipeline = AuditPipeline(max_debate_rounds=2)
-    result = await asyncio.to_thread(
-        pipeline.audit,
-        pdf_path=pdf_path,
-        max_probes=req.max_probes,
-    )
+    result = await _run_pipeline(pdf_path, max_probes=req.max_probes)
     return result["report"]
 
 
@@ -211,44 +253,32 @@ async def run_courtroom_debate(req: DebateRequest):
     if not query:
         raise HTTPException(status_code=400, detail="Query cannot be empty.")
 
-    engine = DebateEngine(max_rounds=2)
-    result = await asyncio.to_thread(engine.run, query=query)
+    # Debates search the index of the last audited contract, so wait for any running audit
+    async with AUDIT_LOCK:
+        max_rounds = req.max_rounds or int(os.getenv("MAX_DEBATE_ROUNDS", "2"))
+        engine = DebateEngine(max_rounds=max(1, min(max_rounds, 4)))
+        result = await asyncio.to_thread(engine.run, query=query)
 
     finding = result.get("finding") or {}
     verification = result.get("verification") or {}
     history = result.get("history") or []
+    verdict = str(verification.get("verdict", "UNSUPPORTED")).upper()
 
-    scorer = RiskScorer()
-    verdict = str(verification.get("verdict", "ACCEPTED")).upper()
-    bucket = scorer.classify_bucket(
-        finding=finding,
-        verdict=verdict,
-        severity=finding.get("severity", "medium"),
-        final_score=80.0
-    )
-    plain_english, why_flagged, suggested_negotiation = scorer.generate_plain_english(
-        finding=finding,
-        bucket=bucket
-    )
-    clause_balance = scorer.detect_clause_balance(finding)
-
-    finding["bucket"] = bucket
-    finding["plain_english"] = plain_english
-    finding["why_flagged"] = why_flagged
-    finding["suggested_negotiation"] = suggested_negotiation
-    finding["clause_balance"] = clause_balance.model_dump()
+    risk_score = RiskScorer().score(finding=finding, verification=verification) if finding else {}
 
     return {
         "query": query,
         "verdict": verdict,
-        "status": result.get("final_status", "ACCEPTED"),
+        "status": result.get("final_status", verdict),
+        "verifier_model": verification.get("verifier_model", ""),
         "finding": finding,
         "verification": verification,
         "history": history,
-        "plain_english": plain_english,
-        "why_flagged": why_flagged,
-        "suggested_negotiation": suggested_negotiation,
-        "clause_balance": clause_balance.model_dump(),
+        "risk_score": risk_score,
+        "plain_english": finding.get("plain_english", ""),
+        "why_flagged": finding.get("why_flagged", verification.get("reasoning", "")),
+        "suggested_negotiation": finding.get("suggested_negotiation", ""),
+        "clause_balance": finding.get("clause_balance", {"is_asymmetric": False}),
         "evidence": finding.get("evidence", []),
     }
 
@@ -256,8 +286,7 @@ async def run_courtroom_debate(req: DebateRequest):
 @app.get("/api/download/memo")
 async def download_audit_memo():
     """Download the executive Markdown audit memo for the latest audited contract."""
-    report_dir = PROJECT_ROOT / "data" / "reports"
-    memo_files = list(report_dir.glob("*_audit_memo.md"))
+    memo_files = list(REPORTS_DIR.glob("*_audit_memo.md"))
     if not memo_files:
         raise HTTPException(status_code=404, detail="No audit memo found. Please audit a contract first.")
 

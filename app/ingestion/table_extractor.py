@@ -43,43 +43,86 @@ class TableExtractor:
         md += "| " + " | ".join(["---"] * col_count) + " |\n"
 
         for row in rows:
-            clean_cells = []
-            for i in range(col_count):
-                cell_val = str(row[i]).replace("\n", " ").strip() if i < len(row) and row[i] is not None else ""
-                # Clean up font glyph replacement for Rupee symbol: e.g. n85,000 -> ₹85,000, n8 -> ₹8
-                cell_val = re.sub(r"(?:(?<=^)|(?<=\s))[nI]([0-9]+(?:,[0-9]+)*)", r"₹\1", cell_val)
-                clean_cells.append(cell_val)
+            clean_cells = [
+                self._clean_cell(row[i]) if i < len(row) else ""
+                for i in range(col_count)
+            ]
             md += "| " + " | ".join(clean_cells) + " |\n"
 
         return md.strip()
 
-    def _analyze_pricing_risks(self, headers: list[str], rows: list[list[str]], page_number: int) -> list[dict]:
+    @staticmethod
+    def _clean_cell(value) -> str:
+        if value is None:
+            return ""
+        cell_val = str(value).replace("\n", " ").strip()
+        # Some PDF fonts lose the Rupee glyph and render it as "n" or "I": n85,000 -> ₹85,000
+        return re.sub(r"(?:(?<=^)|(?<=\s))[nI]([0-9]+(?:,[0-9]+)*)", r"₹\1", cell_val)
+
+    @staticmethod
+    def _parse_amount(cell: str) -> float | None:
+        match = re.search(r"\d[\d,]*(?:\.\d+)?", cell)
+        if not match:
+            return None
+        try:
+            return float(match.group(0).replace(",", ""))
+        except ValueError:
+            return None
+
+    def _analyze_pricing_risks(
+        self,
+        headers: list[str],
+        rows: list[list[str]],
+        page_number: int,
+        document_text: str = "",
+    ) -> list[dict]:
         """Identifies financial and operational risks embedded within pricing tables."""
         risks = []
-        h_str = " ".join([str(h).lower() for h in headers if h])
+        headers_lower = [str(h).lower() if h else "" for h in headers]
 
-        if "overage" in h_str and "tier" in h_str:
+        overage_col = next((i for i, h in enumerate(headers_lower) if "overage" in h or "excess" in h), None)
+        if overage_col is not None:
+            rates = []
+            for row in rows:
+                if overage_col < len(row):
+                    cell = self._clean_cell(row[overage_col])
+                    amount = self._parse_amount(cell)
+                    if amount is not None:
+                        rates.append((self._clean_cell(row[0]) if row else "", cell, amount))
+
+            if len(rates) >= 2:
+                highest = max(rates, key=lambda r: r[2])
+                lowest = min(rates, key=lambda r: r[2])
+                if lowest[2] > 0 and highest[2] > lowest[2]:
+                    pct = round((highest[2] / lowest[2] - 1) * 100)
+                    risks.append({
+                        "risk_title": "Overage Fee Exposure",
+                        "severity": "medium",
+                        "page_number": page_number,
+                        "observation": (
+                            f"The {highest[0]} tier overage rate ({highest[1]}) is {pct}% higher than the "
+                            f"{lowest[0]} tier rate ({lowest[1]}). Usage spikes on a lower tier could cause "
+                            "unpredictable invoice increases."
+                        ),
+                        "recommendation": (
+                            "Negotiate a monthly overage cap or an automatic tier upgrade when usage "
+                            "consistently exceeds the included quota."
+                        ),
+                    })
+
+        has_price_cap = re.search(
+            r"(?:increase|escalat|adjust)\w*.{0,100}(?:\d+(?:\.\d+)?\s*%|cpi|consumer price index)",
+            document_text,
+            re.IGNORECASE | re.DOTALL,
+        )
+        if document_text and not has_price_cap:
             risks.append({
-                "risk_title": "Overage Fee Exposure",
+                "risk_title": "No Price Increase Cap",
                 "severity": "medium",
                 "page_number": page_number,
                 "observation": (
-                    "Standard tier charges ₹12 per document overage, which is 140% higher than the Enterprise overage rate (₹5/doc). "
-                    "Unanticipated processing spikes could result in unpredictable monthly invoice surges."
-                ),
-                "recommendation": (
-                    "Negotiate a monthly overage cap (e.g., maximum 20% over base fee) or an automatic tier bump mechanism "
-                    "when usage consistently exceeds included quota."
-                ),
-            })
-
-            risks.append({
-                "risk_title": "Absence of Price Protection / Cap on Renewal",
-                "severity": "medium",
-                "page_number": page_number,
-                "observation": (
-                    "The pricing table does not define annual fee adjustment limits (e.g. CPI or maximum 3-5% increase). "
-                    "Upon automatic renewal, Provider is not contractually restricted from raising monthly tier fees."
+                    "Neither this pricing table nor the rest of the contract limits annual fee increases "
+                    "(e.g. a CPI link or a maximum percentage), so fees could rise on renewal."
                 ),
                 "recommendation": "Insert a price escalation cap: 'Fees shall not increase by more than 3% annually upon renewal.'",
             })
@@ -96,6 +139,8 @@ class TableExtractor:
         table_counter = 1
 
         with pdfplumber.open(pdf_path) as pdf:
+            document_text = "\n".join(page.extract_text() or "" for page in pdf.pages)
+
             for page_index, page in enumerate(pdf.pages, start=1):
                 raw_tables = page.extract_tables()
                 if not raw_tables:
@@ -123,7 +168,7 @@ class TableExtractor:
 
                     risks = []
                     if table_type == "pricing_tiers":
-                        risks = self._analyze_pricing_risks(headers, body_rows, page_index)
+                        risks = self._analyze_pricing_risks(headers, body_rows, page_index, document_text)
 
                     extracted_tables.append(TableData(
                         table_id=f"table-p{page_index}-{t_idx}",

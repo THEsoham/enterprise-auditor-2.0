@@ -1,8 +1,6 @@
 from typing import Optional
 import networkx as nx
 
-from app.auditing.obligation_extractor import ObligationExtractor
-
 
 class GraphBuilder:
     """
@@ -14,9 +12,6 @@ class GraphBuilder:
     5. Audit findings (Deal-breakers, Watch-outs, Protections) linked to verbatim quotes and pages
     6. Missing protection gaps
     """
-
-    def __init__(self):
-        self._obligation_extractor = ObligationExtractor()
 
     def build(
         self,
@@ -61,45 +56,23 @@ class GraphBuilder:
         graph.add_edge("party-customer", "doc-contract", relationship="PARTY_TO_AGREEMENT")
         graph.add_edge("party-provider", "doc-contract", relationship="PARTY_TO_AGREEMENT")
 
-        # 3. Dynamic Governed Assets & Commercial Concepts
-        assets = [
-            ("asset-customer-data", "Customer Data & Confidential Assets", "Confidential / IP"),
-            ("asset-services", "Cloud & Hosted Services", "Service Infrastructure"),
-            ("asset-ip-rights", "Intellectual Property & Brand Rights", "IP & Trademark"),
-            ("concept-invoices", "Invoices & Payment Consideration", "Commercial Consideration"),
-        ]
-        for aid, alabel, anature in assets:
-            graph.add_node(aid, node_type="asset", label=alabel, properties={"nature": anature})
+        # 3. Governed Assets & Commercial Concepts (added only when a finding touches them)
+        assets = {
+            "asset-customer-data": ("Customer Data & Confidential Assets", "Confidential / IP"),
+            "asset-services": ("Cloud & Hosted Services", "Service Infrastructure"),
+            "asset-ip-rights": ("Intellectual Property & Brand Rights", "IP & Trademark"),
+            "concept-invoices": ("Invoices & Payment Consideration", "Commercial Consideration"),
+        }
 
-        graph.add_edge(
-            "party-customer",
-            "asset-customer-data",
-            relationship="RETAINS_OWNERSHIP",
-            quote="Customer retains all right, title, and interest in Customer Data.",
-            page_number=1,
-        )
-        graph.add_edge(
-            "party-provider",
-            "asset-services",
-            relationship="COMMITS_SERVICE",
-            quote="Provider shall provide the Services in accordance with the Documentation.",
-            page_number=1,
-        )
-        graph.add_edge(
-            "party-customer",
-            "concept-invoices",
-            relationship="PAYS_WITHIN",
-            quote="Invoices are payable within 30 days of receipt.",
-            page_number=1,
-            section="3. FEES AND PAYMENT",
-        )
+        def link_asset(finding_node: str, asset_id: str) -> None:
+            if not graph.has_node(asset_id):
+                label, nature = assets[asset_id]
+                graph.add_node(asset_id, node_type="asset", label=label, properties={"nature": nature})
+            graph.add_edge(finding_node, asset_id, relationship="IMPACTS_ASSET")
 
-        # 4. Dynamic Obligations & Timeline Milestones
-        # If not supplied explicitly, pull from the ObligationExtractor
-        if not obligations:
-            ob_summary = self._obligation_extractor.extract([])
-            obligations_list = [t.model_dump() for t in ob_summary.timeline]
-        else:
+        # 4. Obligations & Timeline Milestones extracted from the contract text
+        obligations_list = []
+        if obligations:
             obligations_list = obligations.get("timeline") or obligations.get("timeline_items") or []
             if not obligations_list and "provider_obligations" in obligations:
                 obligations_list = (
@@ -140,15 +113,25 @@ class GraphBuilder:
             else:
                 rel = "OBLIGATED_TO"
 
-            party_src = "party-provider" if item.get("party") == "Provider" else "party-customer"
-            graph.add_edge(
-                party_src,
-                term_id,
-                relationship=rel,
-                page_number=item.get("page", 1),
-                section=item.get("section", ""),
-                quote=item.get("quote", action_text),
-            )
+            party = item.get("party")
+            if party == "Provider":
+                sources = ["party-provider"]
+            elif party == "Customer":
+                sources = ["party-customer"]
+            elif party in {"Mutual", "Either Party"}:
+                sources = ["party-customer", "party-provider"]
+            else:
+                sources = ["doc-contract"]
+
+            for party_src in sources:
+                graph.add_edge(
+                    party_src,
+                    term_id,
+                    relationship=rel,
+                    page_number=item.get("page", 1),
+                    section=item.get("section", ""),
+                    quote=item.get("quote", action_text),
+                )
             graph.add_edge(term_id, "doc-contract", relationship="GOVERNED_BY")
 
         # 5. Dynamic Verified Findings
@@ -209,13 +192,13 @@ class GraphBuilder:
             # Link finding to relevant asset
             cat = str(finding.get("category", "")).lower()
             if "data" in cat or "backup" in cat or "privacy" in cat or "security" in cat:
-                graph.add_edge(finding_id, "asset-customer-data", relationship="IMPACTS_ASSET")
+                link_asset(finding_id, "asset-customer-data")
             elif "ip" in cat or "logo" in cat or "publicity" in cat or "trademark" in cat:
-                graph.add_edge(finding_id, "asset-ip-rights", relationship="IMPACTS_ASSET")
+                link_asset(finding_id, "asset-ip-rights")
             elif "service" in cat or "sla" in cat or "uptime" in cat:
-                graph.add_edge(finding_id, "asset-services", relationship="IMPACTS_ASSET")
+                link_asset(finding_id, "asset-services")
             elif "liability" in cat or "fee" in cat or "payment" in cat:
-                graph.add_edge(finding_id, "concept-invoices", relationship="IMPACTS_ASSET")
+                link_asset(finding_id, "concept-invoices")
 
             # Link finding to its supporting chunks
             for ev_idx, item in enumerate(finding.get("evidence", []), start=1):
@@ -253,12 +236,6 @@ class GraphBuilder:
                     )
                     graph.add_edge("party-customer", gap_id, relationship="MISSING_SAFEGUARD")
                     graph.add_edge(gap_id, "doc-contract", relationship="OMITTED_FROM")
-
-        # 7. Asymmetry Link (if termination or liability clauses exist)
-        if "clause-termination" in created_clause_nodes:
-            other_clauses = [c for c in created_clause_nodes if c != "clause-termination"]
-            if other_clauses:
-                graph.add_edge("clause-termination", other_clauses[0], relationship="ASYMMETRIC_WITH")
 
         return graph
 

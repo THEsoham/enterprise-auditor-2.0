@@ -1039,31 +1039,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const topicCards = document.querySelectorAll(".suggested-topic-card");
     topicCards.forEach((card) => {
       const btn = card.querySelector(".btn-debate-topic");
+      // Called again after each audit render; attach the listener only once
+      if (!btn || btn.dataset.debateWired) return;
+      btn.dataset.debateWired = "1";
+
       const title = card.querySelector(".topic-card-title")?.textContent?.trim() || "";
-      const desc = card.querySelector(".topic-card-desc")?.textContent?.trim() || "";
-      const query = btn?.getAttribute("data-query") || title;
+      const query = btn.getAttribute("data-query") || title;
       const cat = card.querySelector(".topic-category-tag")?.textContent?.trim() || "COMMERCIAL RISK";
 
-      btn?.addEventListener("click", (e) => {
+      btn.addEventListener("click", (e) => {
         e.stopPropagation();
         topicCards.forEach((c) => c.classList.remove("is-debating"));
         card.classList.add("is-debating");
         if (courtroomQueryInput) courtroomQueryInput.value = query;
-
-        const topicPayload = {
-          title: title,
-          claim: query,
-          plain_english: desc,
-          category: cat,
-          severity: "deal_breaker",
-          confidence: 0.96,
-          evidence: [{ quote: desc, page: 2, chunk_id: "CLAUSE-REF" }],
-          why_flagged: "Asymmetric term identified creating immediate contractual exposure for enterprise procurement.",
-          suggested_negotiation: "Require mutual parity, customary cure window (30 days), and statutory liability caps.",
-          clause_balance: { asymmetry_summary: "Provider reserves unilateral advantages without reciprocal protections." }
-        };
-
-        launchLiveDebate(topicPayload, selectedDebateRounds);
+        launchLiveDebate({ query, title, category: cat }, selectedDebateRounds);
       });
     });
   }
@@ -1113,342 +1102,265 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Launch live interactive dual-model debate (Starts ONLY after user clicks a topic or query)
-  async function launchLiveDebate(claimData, rounds = 2) {
+  const VERDICT_STYLES = {
+    ACCEPTED: { cls: "verdict-accepted", label: "✓ Verdict: Accepted — finding verified" },
+    CORRECTED: { cls: "verdict-modified", label: "✎ Verdict: Corrected — finding revised" },
+    AMBIGUOUS: { cls: "verdict-modified", label: "? Verdict: Ambiguous — evidence unclear" },
+    REJECTED: { cls: "verdict-unsupported", label: "✕ Verdict: Rejected — contradicted by the contract" },
+    UNSUPPORTED: { cls: "verdict-unsupported", label: "✕ Verdict: Unsupported — not backed by the contract" },
+    UNVERIFIED: { cls: "verdict-unsupported", label: "! Verdict: Unverified — verifier unavailable" },
+  };
+
+  // "gemini:gemini-3.6-flash" -> "Gemini gemini-3.6-flash"
+  function describeVerifier(model) {
+    if (!model || model === "none") return "Skeptic Verifier";
+    if (model === "grounding-check") return "Automatic quote check";
+    const [provider, name] = model.split(":");
+    if (!name) return model;
+    return name.toLowerCase().startsWith(provider) ? name : `${provider === "gemini" ? "Gemini" : "OpenAI"} ${name}`;
+  }
+
+  function auditorTurnText(finding, roundIndex) {
+    if (!finding) {
+      return roundIndex === 0
+        ? "The Auditor found no clause in the contract that supports a finding for this question."
+        : "The Auditor conceded: the finding cannot be supported by the contract text.";
+    }
+    return [finding.title ? `${finding.title}.` : "", finding.claim || "", finding.reasoning || ""]
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  function skepticTurnText(verification) {
+    if (!verification) return "No verification was returned.";
+    const confidence = Math.round((verification.confidence || 0) * 100);
+    const objections = (verification.contradictions || []).length
+      ? ` Objections: ${verification.contradictions.join("; ")}`
+      : "";
+    return `${verification.verdict || "UNKNOWN"} (confidence ${confidence}%). ${verification.reasoning || ""}${objections}`;
+  }
+
+  function citationHtml(finding) {
+    const items = (finding?.evidence || []).filter((e) => e.quote);
+    return items
+      .map((e) => `<strong>Verbatim text (${escapeHtml(e.chunk_id || "chunk")} • Page ${escapeHtml(String(e.page ?? "?"))}):</strong><br>"${escapeHtml(e.quote)}"`)
+      .join("<br><br>");
+  }
+
+  // Run a real Auditor-vs-Skeptic debate on the backend, then play back what each model said
+  async function launchLiveDebate(topic, rounds = 2) {
     if (!debateLiveArenaStage) return;
 
-    // Abort any ongoing debate stream
-    if (liveDebateAbortCtrl) {
-      liveDebateAbortCtrl.abort();
-    }
+    if (liveDebateAbortCtrl) liveDebateAbortCtrl.abort();
     liveDebateAbortCtrl = new AbortController();
     const signal = liveDebateAbortCtrl.signal;
 
-    // Display and scroll to live arena
     debateLiveArenaStage.style.display = "block";
     debateLiveArenaStage.scrollIntoView({ behavior: "smooth", block: "nearest" });
 
-    const ev = claimData.evidence?.[0] || {};
-    const quote = ev.quote || claimData.claim || "Verbatim contractual provision under analysis.";
-    const pageNum = ev.page || 2;
-    const chunkId = ev.chunk_id || "CHUNK-DOC";
-    const categoryUpper = (claimData.category || "CONTRACT RISK").toUpperCase();
-    const recText = claimData.suggested_negotiation || claimData.recommendation || "Align clause terms with mutual commercial standards.";
-    const asymmInfo = claimData.clause_balance?.asymmetry_summary || "Disproportionate unilateral imbalance discovered in clause enforcement.";
-
-    // Step pipeline labels based on rechecks count
-    const stepDefinitions = [];
-    stepDefinitions.push({ id: 1, label: "Auditor Claim" });
-    stepDefinitions.push({ id: 2, label: "Gemini Counter" });
-    if (rounds >= 2) stepDefinitions.push({ id: 3, label: "Auditor Rebuttal" });
-    if (rounds >= 3) stepDefinitions.push({ id: 4, label: "Gemini Sur-Rebuttal" });
-    if (rounds >= 4) stepDefinitions.push({ id: 5, label: "Final Prosecution" });
-    stepDefinitions.push({ id: stepDefinitions.length + 1, label: "Consensus Verdict" });
-
-    const stepsHtml = stepDefinitions.map((step, idx) => {
-      const isFirst = idx === 0;
-      const connHtml = idx < stepDefinitions.length - 1 ? `<div class="debate-step-connector" id="step-conn-${step.id}"></div>` : "";
-      return `
-        <div class="debate-step-pill ${isFirst ? "active" : ""}" id="step-pill-${step.id}">
-          <span class="step-circle">${step.id}</span>
-          <span>${step.label}</span>
-        </div>
-        ${connHtml}
-      `;
-    }).join("");
-
-    // Build the Arena DOM skeleton
+    const categoryUpper = (topic.category || "CONTRACT RISK").toUpperCase();
     debateLiveArenaStage.innerHTML = `
       <div class="arena-active-card">
-        <!-- Stage Header -->
         <div class="arena-stage-header">
           <div class="arena-target-info">
-            <span class="arena-target-subtag">LIVE ADVERSARIAL DEBATE • ${escapeHtml(categoryUpper)} • ${rounds} RECHECK${rounds > 1 ? "S" : ""}</span>
-            <h3 class="arena-target-title">${escapeHtml(claimData.title || claimData.claim)}</h3>
+            <span class="arena-target-subtag">LIVE ADVERSARIAL DEBATE • ${escapeHtml(categoryUpper)} • UP TO ${rounds} ROUND${rounds > 1 ? "S" : ""}</span>
+            <h3 class="arena-target-title">${escapeHtml(topic.title || topic.query)}</h3>
           </div>
           <div class="arena-header-controls">
             <div class="live-speaker-status-pill speaking-openai" id="live-speaker-pill">
               <span class="live-pulse-dot"></span>
-              <span id="live-speaker-text">Round 1: OpenAI Auditor Speaking</span>
+              <span id="live-speaker-text">Auditor and Skeptic are debating…</span>
             </div>
             <button class="btn-close-arena" id="btn-close-live-arena" title="Close Live Arena">✕</button>
           </div>
         </div>
-
-        <!-- Turn Progress Pipeline -->
-        <div class="debate-progress-steps">
-          ${stepsHtml}
-        </div>
-
-        <!-- Dual Agent Clash Arena -->
-        <div class="arena-clash-grid">
-          <!-- Left: OpenAI Lead Auditor -->
-          <div class="arena-speaker-card openai-pillar active-speaker" id="openai-pillar-card">
-            <div class="arena-speaker-header">
-              <div class="speaker-avatar-wrap">
-                <div class="speaker-avatar-box">AI</div>
-                <div class="speaker-avatar-pulse"></div>
-              </div>
-              <div class="speaker-meta-wrap">
-                <span class="speaker-name">Lead Auditor</span>
-                <span class="speaker-role">OpenAI GPT-4o-mini • RISK PROSECUTION</span>
-              </div>
+        <div id="arena-debate-body">
+          <div class="arena-rebuttal-box" style="display: flex;">
+            <div style="font-size: 13.5px; color: var(--text-secondary); line-height: 1.5;">
+              Retrieving clauses, drafting the Auditor's finding, checking every quote against the contract, and cross-examining it. This usually takes 5–30 seconds.
             </div>
-            <div class="arena-speech-bubble" id="openai-speech-bubble">
-              <span class="typing-cursor"></span>
-            </div>
-            <div class="arena-citation-box" id="openai-citation-box" style="display: none;">
-              <strong>Verbatim Text (${escapeHtml(chunkId)} • Page ${pageNum}):</strong><br>
-              "${escapeHtml(quote)}"
-            </div>
-          </div>
-
-          <!-- Center: Clash Divider -->
-          <div class="arena-vs-column">
-            <div class="arena-vs-line"></div>
-            <div class="arena-vs-badge" id="arena-vs-badge">⚔️</div>
-            <div class="arena-vs-line"></div>
-          </div>
-
-          <!-- Right: Gemini Adversarial Skeptic -->
-          <div class="arena-speaker-card gemini-pillar" id="gemini-pillar-card">
-            <div class="arena-speaker-header">
-              <div class="speaker-avatar-wrap">
-                <div class="speaker-avatar-box">GE</div>
-                <div class="speaker-avatar-pulse"></div>
-              </div>
-              <div class="speaker-meta-wrap">
-                <span class="speaker-name">Adversarial Skeptic</span>
-                <span class="speaker-role">Gemini 3.6 Flash • CROSS-EXAMINATION</span>
-              </div>
-            </div>
-            <div class="arena-speech-bubble" id="gemini-speech-bubble" style="color: var(--text-muted);">
-              <span style="font-style: italic;">Awaiting Auditor claim formulation...</span>
-            </div>
-            <div class="gemini-verification-box" id="gemini-citation-box" style="display: none;">
-              <strong>Corroboration:</strong> 96% match against contract body.
-            </div>
-          </div>
-        </div>
-
-        <!-- Rebuttal Stage (Turn 3 & 4) -->
-        <div class="arena-rebuttal-box" id="arena-rebuttal-box" style="display: none;">
-          <div class="rebuttal-tag" id="rebuttal-tag-label">⚡ Round 2 Recheck: Auditor Counter-Rebuttal</div>
-          <div id="rebuttal-speech-bubble" style="font-size: 13.5px; color: var(--text-primary); line-height: 1.5;"></div>
-        </div>
-
-        <!-- Extra Sur-Rebuttal Stage (Turn 4 & 5 for deep rechecks) -->
-        <div class="arena-rebuttal-box" id="arena-sur-rebuttal-box" style="display: none; border-left-color: #059669;">
-          <div class="rebuttal-tag" id="sur-rebuttal-tag-label" style="color: #059669;">🛡️ Round 3 Recheck: Gemini Precedent Review</div>
-          <div id="sur-rebuttal-speech-bubble" style="font-size: 13.5px; color: var(--text-primary); line-height: 1.5;"></div>
-        </div>
-
-        <!-- Consensus & Verdict Stamp Banner (Final Turn) -->
-        <div class="arena-consensus-banner" id="arena-consensus-banner" style="display: none;">
-          <div class="consensus-header-row">
-            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-              <span class="verdict-stamp-badge verdict-accepted">
-                ✓ Verdict: Risk Confirmed (Accepted)
-              </span>
-              <span style="font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); font-weight: 600;">
-                Corroborated 96% across ${rounds} adversarial recheck${rounds > 1 ? "s" : ""}
-              </span>
-            </div>
-            <div class="consensus-metric-item">
-              <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Clause Balance:</span>
-              <span style="font-size: 12px; font-weight: 700; color: #DC2626;">Asymmetric Imbalance</span>
-            </div>
-          </div>
-
-          <div style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.45; background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px 12px;">
-            <strong>Asymmetry Assessment:</strong> ${escapeHtml(asymmInfo)}
-          </div>
-
-          <!-- Actionable Redline Proposal -->
-          <div class="redline-proposal-box">
-            <div>
-              <div style="font-size: 11px; font-weight: 700; color: #4F46E5; text-transform: uppercase; letter-spacing: 0.5px;">Recommended Redline Counter-Proposal:</div>
-              <div class="redline-proposal-text" style="margin-top: 4px;">${escapeHtml(recText)}</div>
-            </div>
-            <button class="btn-dark" id="btn-arena-copy-redline" style="flex-shrink: 0; height: 34px; font-size: 12px;">
-              Copy Counter-Proposal
-            </button>
-          </div>
-
-          <div class="arena-actions-row">
-            <button class="btn-outline-legal" id="btn-replay-debate" style="font-size: 12px; height: 32px;">
-              ↺ Replay Live Debate
-            </button>
           </div>
         </div>
       </div>
     `;
 
-    // Close button handler
     document.getElementById("btn-close-live-arena")?.addEventListener("click", () => {
       if (liveDebateAbortCtrl) liveDebateAbortCtrl.abort();
       debateLiveArenaStage.style.display = "none";
       document.querySelectorAll(".suggested-topic-card").forEach(c => c.classList.remove("is-debating"));
     });
 
-    // Copy redline handler
+    let result;
+    try {
+      const res = await fetch("/api/debate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: topic.query, max_rounds: rounds }),
+        signal,
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || `Server returned ${res.status}`);
+      }
+      result = await res.json();
+    } catch (err) {
+      if (signal.aborted) return;
+      const body = document.getElementById("arena-debate-body");
+      const liveText = document.getElementById("live-speaker-text");
+      if (liveText) liveText.textContent = "Debate failed";
+      if (body) {
+        body.innerHTML = `<div class="arena-rebuttal-box" style="display: flex;"><div style="font-size: 13.5px; line-height: 1.5;">The debate could not be run: ${escapeHtml(err.message)}</div></div>`;
+      }
+      return;
+    }
+
+    await playDebate(result, signal);
+  }
+
+  async function playDebate(result, signal) {
+    const body = document.getElementById("arena-debate-body");
+    const livePill = document.getElementById("live-speaker-pill");
+    const liveText = document.getElementById("live-speaker-text");
+    if (!body) return;
+
+    const history = result.history || [];
+    const finding = result.finding || {};
+    const verdict = String(result.verdict || "UNSUPPORTED").toUpperCase();
+    const style = VERDICT_STYLES[verdict] || VERDICT_STYLES.UNSUPPORTED;
+    const balance = finding.clause_balance || {};
+    const confidence = Math.round(((result.verification || {}).confidence || 0) * 100);
+    const hasFinding = Boolean(finding.title || finding.claim);
+
+    const roundsHtml = history.map((round, i) => `
+      <div class="arena-clash-grid" style="margin-bottom: 14px;">
+        <div class="arena-speaker-card openai-pillar" id="auditor-card-${i}">
+          <div class="arena-speaker-header">
+            <div class="speaker-avatar-wrap">
+              <div class="speaker-avatar-box">AI</div>
+              <div class="speaker-avatar-pulse"></div>
+            </div>
+            <div class="speaker-meta-wrap">
+              <span class="speaker-name">${i === 0 ? "Lead Auditor" : `Auditor Revision (Round ${escapeHtml(String(round.round))})`}</span>
+              <span class="speaker-role">OpenAI • RISK PROSECUTION</span>
+            </div>
+          </div>
+          <div class="arena-speech-bubble" id="auditor-bubble-${i}"></div>
+          <div class="arena-citation-box" id="auditor-cite-${i}" style="display: none;">${citationHtml(round.finding)}</div>
+        </div>
+
+        <div class="arena-vs-column">
+          <div class="arena-vs-line"></div>
+          <div class="arena-vs-badge">⚔️</div>
+          <div class="arena-vs-line"></div>
+        </div>
+
+        <div class="arena-speaker-card gemini-pillar" id="skeptic-card-${i}">
+          <div class="arena-speaker-header">
+            <div class="speaker-avatar-wrap">
+              <div class="speaker-avatar-box">SK</div>
+              <div class="speaker-avatar-pulse"></div>
+            </div>
+            <div class="speaker-meta-wrap">
+              <span class="speaker-name">Adversarial Skeptic</span>
+              <span class="speaker-role">${escapeHtml(describeVerifier(round.verification?.verifier_model))} • CROSS-EXAMINATION</span>
+            </div>
+          </div>
+          <div class="arena-speech-bubble" id="skeptic-bubble-${i}" style="color: var(--text-muted);">
+            <span style="font-style: italic;">Waiting for the Auditor…</span>
+          </div>
+        </div>
+      </div>
+    `).join("");
+
+    const redlineHtml = hasFinding && result.suggested_negotiation ? `
+          <div class="redline-proposal-box">
+            <div>
+              <div style="font-size: 11px; font-weight: 700; color: #4F46E5; text-transform: uppercase; letter-spacing: 0.5px;">Recommended Redline Counter-Proposal:</div>
+              <div class="redline-proposal-text" style="margin-top: 4px;">${escapeHtml(result.suggested_negotiation)}</div>
+            </div>
+            <button class="btn-dark" id="btn-arena-copy-redline" style="flex-shrink: 0; height: 34px; font-size: 12px;">
+              Copy Counter-Proposal
+            </button>
+          </div>` : "";
+
+    const noteStyle = "font-size: 12.5px; color: var(--text-secondary); line-height: 1.45; background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px 12px;";
+
+    body.innerHTML = roundsHtml + `
+        <div class="arena-consensus-banner" id="arena-consensus-banner" style="display: none;">
+          <div class="consensus-header-row">
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <span class="verdict-stamp-badge ${style.cls}">${escapeHtml(style.label)}</span>
+              <span style="font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); font-weight: 600;">
+                Skeptic confidence ${confidence}% • ${history.length} round${history.length === 1 ? "" : "s"} • ${escapeHtml(describeVerifier(result.verifier_model))}
+              </span>
+            </div>
+            ${hasFinding ? `
+            <div class="consensus-metric-item">
+              <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Clause Balance:</span>
+              <span style="font-size: 12px; font-weight: 700; color: ${balance.is_asymmetric ? "#DC2626" : "#059669"};">${balance.is_asymmetric ? "Asymmetric" : "Balanced"}</span>
+            </div>` : ""}
+          </div>
+          ${balance.asymmetry_summary ? `<div style="${noteStyle}"><strong>Asymmetry Assessment:</strong> ${escapeHtml(balance.asymmetry_summary)}</div>` : ""}
+          ${finding.plain_english ? `<div style="${noteStyle}"><strong>Plain English:</strong> ${escapeHtml(finding.plain_english)}</div>` : ""}
+          ${redlineHtml}
+          <div class="arena-actions-row">
+            <button class="btn-outline-legal" id="btn-replay-debate" style="font-size: 12px; height: 32px;">
+              ↺ Replay Debate
+            </button>
+          </div>
+        </div>
+    `;
+
     document.getElementById("btn-arena-copy-redline")?.addEventListener("click", (e) => {
-      copyToClipboard(recText, e.currentTarget, "Counter-proposal copied!");
+      copyToClipboard(result.suggested_negotiation, e.currentTarget, "Counter-proposal copied!");
     });
 
-    // Replay handler
+    // Replay re-plays the same recorded debate without calling the models again
     document.getElementById("btn-replay-debate")?.addEventListener("click", () => {
-      launchLiveDebate(claimData, rounds);
+      if (liveDebateAbortCtrl) liveDebateAbortCtrl.abort();
+      liveDebateAbortCtrl = new AbortController();
+      playDebate(result, liveDebateAbortCtrl.signal);
     });
 
-    // Turn Scripts Tailored to topic
-    const auditorArgument = `Contractual exposure detected regarding "${claimData.title || claimData.claim}". Verbatim reading indicates: "${quote}". ${claimData.plain_english ? claimData.plain_english + " " : ""}This language unfairly binds our enterprise while reserving unilateral operational flexibility for the other party. We argue this creates immediate financial and operational exposure.`;
-
-    const geminiChallenge = `Cross-examination note: Reviewing standard enterprise contract terms. While the Auditor flags the clause, agreements frequently structure ${claimData.category || "obligations"} around operational delivery constraints. However, evaluating reciprocal clauses confirms that the client is granted no balancing carve-out or cure window. The Auditor's concern is substantiated.`;
-
-    const auditorRebuttal = `Rebuttal (Recheck 1): Gemini's observation regarding delivery constraints does not cure the legal vulnerability. Without an explicit mutual clause, 30-day cure window, or indemnification ceiling, our enterprise remains exposed to disproportionate liability. The risk assessment must be upheld.`;
-
-    const geminiSurRebuttal = `Adversarial Check (Recheck 2): Reviewing enterprise procurement standards and statutory liability limits. The unilateral penalty exceeds benchmark norms by 300%. The Auditor's position is verified—immediate redline amendment is mandatory to restore reciprocal balance.`;
-
-    const auditorClosing = `Final Closing Defense (Recheck 3): Cross-model consensus achieved. The evidence demonstrates undeniable asymmetry and lack of standard cure rights. Formal redline counter-proposal drafted below for executive execution.`;
+    const setSpeaker = (kind, text) => {
+      if (livePill) livePill.className = `live-speaker-status-pill speaking-${kind}`;
+      if (liveText) liveText.textContent = text;
+    };
 
     try {
-      const livePill = document.getElementById("live-speaker-pill");
-      const liveText = document.getElementById("live-speaker-text");
-      const openAiBubble = document.getElementById("openai-speech-bubble");
-      const geminiBubble = document.getElementById("gemini-speech-bubble");
-      const openAiPillar = document.getElementById("openai-pillar-card");
-      const geminiPillar = document.getElementById("gemini-pillar-card");
-      const openAiCitation = document.getElementById("openai-citation-box");
-      const geminiCitation = document.getElementById("gemini-citation-box");
-      const rebuttalBox = document.getElementById("arena-rebuttal-box");
-      const rebuttalBubble = document.getElementById("rebuttal-speech-bubble");
-      const surRebuttalBox = document.getElementById("arena-sur-rebuttal-box");
-      const surRebuttalBubble = document.getElementById("sur-rebuttal-speech-bubble");
-      const consensusBanner = document.getElementById("arena-consensus-banner");
+      for (let i = 0; i < history.length; i++) {
+        const round = history[i];
+        const auditorCard = document.getElementById(`auditor-card-${i}`);
+        const skepticCard = document.getElementById(`skeptic-card-${i}`);
+        const auditorBubble = document.getElementById(`auditor-bubble-${i}`);
+        const skepticBubble = document.getElementById(`skeptic-bubble-${i}`);
+        const cite = document.getElementById(`auditor-cite-${i}`);
 
-      const markStep = (stepNum, active = false, completed = false) => {
-        const pill = document.getElementById(`step-pill-${stepNum}`);
-        const conn = document.getElementById(`step-conn-${stepNum - 1}`);
-        if (conn && completed) conn.classList.add("filled");
-        if (pill) {
-          if (completed) pill.className = "debate-step-pill completed";
-          else if (active) pill.className = "debate-step-pill active";
-        }
-      };
+        setSpeaker("openai", i === 0 ? "Round 1: Auditor presents finding" : `Round ${round.round}: Auditor revises finding`);
+        skepticCard?.classList.remove("active-speaker");
+        auditorCard?.classList.add("active-speaker");
+        if (auditorBubble) await typeTextStream(auditorBubble, auditorTurnText(round.finding, i), 11, signal);
+        if (cite && cite.innerHTML.trim()) cite.style.display = "block";
 
-      // TURN 1: OpenAI Lead Auditor Speaks
-      if (openAiBubble) {
-        await typeTextStream(openAiBubble, auditorArgument, 13, signal);
-        if (openAiCitation) openAiCitation.style.display = "block";
-      }
-
-      await sleepMs(700, signal);
-      if (signal.aborted) return;
-
-      // TURN 2: Gemini Adversarial Skeptic Counters
-      if (livePill) {
-        livePill.className = "live-speaker-status-pill speaking-gemini";
-        if (liveText) liveText.textContent = "Round 1 Counter: Gemini Skeptic Cross-Examining";
-      }
-      if (openAiPillar) openAiPillar.classList.remove("active-speaker");
-      if (geminiPillar) geminiPillar.classList.add("active-speaker");
-      markStep(1, false, true);
-      markStep(2, true, false);
-
-      if (geminiBubble) {
-        geminiBubble.style.color = "var(--text-primary)";
-        await typeTextStream(geminiBubble, geminiChallenge, 13, signal);
-        if (geminiCitation) geminiCitation.style.display = "block";
-      }
-
-      await sleepMs(700, signal);
-      if (signal.aborted) return;
-
-      let currentStepIdx = 2;
-
-      // TURN 3: Auditor Rebuttal (if rounds >= 2)
-      if (rounds >= 2) {
-        currentStepIdx++;
-        markStep(2, false, true);
-        markStep(currentStepIdx, true, false);
-
-        if (livePill) {
-          livePill.className = "live-speaker-status-pill speaking-openai";
-          if (liveText) liveText.textContent = "Round 2 Recheck: OpenAI Auditor Rebuttal";
-        }
-        if (geminiPillar) geminiPillar.classList.remove("active-speaker");
-        if (openAiPillar) openAiPillar.classList.add("active-speaker");
-
-        if (rebuttalBox) rebuttalBox.style.display = "flex";
-        if (rebuttalBubble) {
-          await typeTextStream(rebuttalBubble, auditorRebuttal, 12, signal);
-        }
-
-        await sleepMs(700, signal);
+        await sleepMs(500, signal);
         if (signal.aborted) return;
-      }
 
-      // TURN 4: Gemini Sur-Rebuttal (if rounds >= 3)
-      if (rounds >= 3) {
-        currentStepIdx++;
-        markStep(currentStepIdx - 1, false, true);
-        markStep(currentStepIdx, true, false);
-
-        if (livePill) {
-          livePill.className = "live-speaker-status-pill speaking-gemini";
-          if (liveText) liveText.textContent = "Round 3 Recheck: Gemini Precedent Analysis";
-        }
-        if (openAiPillar) openAiPillar.classList.remove("active-speaker");
-        if (geminiPillar) geminiPillar.classList.add("active-speaker");
-
-        if (surRebuttalBox) surRebuttalBox.style.display = "flex";
-        if (surRebuttalBubble) {
-          await typeTextStream(surRebuttalBubble, geminiSurRebuttal, 12, signal);
+        setSpeaker("gemini", `Round ${round.round}: ${describeVerifier(round.verification?.verifier_model)} cross-examining`);
+        auditorCard?.classList.remove("active-speaker");
+        skepticCard?.classList.add("active-speaker");
+        if (skepticBubble) {
+          skepticBubble.style.color = "var(--text-primary)";
+          await typeTextStream(skepticBubble, skepticTurnText(round.verification), 11, signal);
         }
 
-        await sleepMs(700, signal);
+        await sleepMs(500, signal);
         if (signal.aborted) return;
+        skepticCard?.classList.remove("active-speaker");
       }
 
-      // TURN 5: Auditor Final Closing (if rounds >= 4)
-      if (rounds >= 4) {
-        currentStepIdx++;
-        markStep(currentStepIdx - 1, false, true);
-        markStep(currentStepIdx, true, false);
-
-        if (livePill) {
-          livePill.className = "live-speaker-status-pill speaking-openai";
-          if (liveText) liveText.textContent = "Round 4 Recheck: OpenAI Final Closing";
-        }
-        if (geminiPillar) geminiPillar.classList.remove("active-speaker");
-        if (openAiPillar) openAiPillar.classList.add("active-speaker");
-
-        if (rebuttalBubble) {
-          const closingEl = document.createElement("div");
-          closingEl.style.cssText = "margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border-light); font-weight: 600;";
-          rebuttalBubble.appendChild(closingEl);
-          await typeTextStream(closingEl, auditorClosing, 12, signal);
-        }
-
-        await sleepMs(600, signal);
-        if (signal.aborted) return;
-      }
-
-      // FINAL TURN: Consensus Verdict
-      const finalStepId = stepDefinitions.length;
-      markStep(currentStepIdx, false, true);
-      markStep(finalStepId, false, true);
-
-      if (livePill) {
-        livePill.className = "live-speaker-status-pill speaking-verdict";
-        if (liveText) liveText.textContent = `✓ Consensus Reached • ${rounds} Recheck${rounds > 1 ? "s" : ""} Stamped`;
-      }
-      if (openAiPillar) openAiPillar.classList.remove("active-speaker");
-      if (geminiPillar) geminiPillar.classList.remove("active-speaker");
-
-      if (consensusBanner) consensusBanner.style.display = "flex";
-
+      setSpeaker("verdict", `Final verdict: ${verdict}`);
+      const banner = document.getElementById("arena-consensus-banner");
+      if (banner) banner.style.display = "flex";
     } catch (err) {
       console.warn("Live debate playback notice:", err);
     }
@@ -1459,42 +1371,20 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!queryText || !queryText.trim()) return;
     const cleanQ = queryText.trim();
 
-    // Check if query matches any suggested topic card
-    let matchedClaim = null;
+    // Reuse the title/category of a suggested topic if the query matches one
+    let title = cleanQ;
+    let category = "CUSTOM INQUIRY";
     const cards = document.querySelectorAll(".suggested-topic-card");
     cards.forEach(card => {
-      const title = card.querySelector(".topic-card-title")?.textContent?.trim() || "";
-      const query = card.querySelector(".btn-debate-topic")?.getAttribute("data-query") || "";
-      if (title.toLowerCase().includes(cleanQ.toLowerCase()) || cleanQ.toLowerCase().includes(title.toLowerCase()) || query.toLowerCase().includes(cleanQ.toLowerCase())) {
-        matchedClaim = {
-          title: title,
-          claim: query || title,
-          plain_english: card.querySelector(".topic-card-desc")?.textContent?.trim() || "",
-          category: card.querySelector(".topic-category-tag")?.textContent?.trim() || "COMMERCIAL RISK",
-          severity: "deal_breaker",
-          confidence: 0.96,
-          evidence: [{ quote: card.querySelector(".topic-card-desc")?.textContent?.trim() || cleanQ, page: 2, chunk_id: "INQUIRY-REF" }],
-          why_flagged: "Asymmetric term identified creating immediate contractual exposure for enterprise procurement.",
-          suggested_negotiation: "Require mutual parity, customary cure window (30 days), and statutory liability caps.",
-          clause_balance: { asymmetry_summary: "Provider reserves unilateral advantages without reciprocal protections." }
-        };
+      const cardTitle = card.querySelector(".topic-card-title")?.textContent?.trim() || "";
+      const cardQuery = card.querySelector(".btn-debate-topic")?.getAttribute("data-query") || "";
+      if (cardTitle && (cardTitle.toLowerCase().includes(cleanQ.toLowerCase()) || cleanQ.toLowerCase().includes(cardTitle.toLowerCase()) || cardQuery.toLowerCase().includes(cleanQ.toLowerCase()))) {
+        title = cardTitle;
+        category = card.querySelector(".topic-category-tag")?.textContent?.trim() || "COMMERCIAL RISK";
         cards.forEach(c => c.classList.remove("is-debating"));
         card.classList.add("is-debating");
       }
     });
-
-    const finalPayload = matchedClaim || {
-      title: cleanQ,
-      claim: cleanQ,
-      plain_english: `Inquiry regarding "${cleanQ}" evaluated across verbatim contract coordinates.`,
-      category: "CUSTOM INQUIRY",
-      severity: "watch_out",
-      confidence: 0.95,
-      evidence: [{ quote: "Verbatim text extracted during live inquiry.", page: 1, chunk_id: "INQUIRY-01" }],
-      why_flagged: "Dual-model inquiry triggered to identify exceptions, liabilities, and missing protections.",
-      suggested_negotiation: "Ensure terms are balanced and clearly bounded in the definitive agreement.",
-      clause_balance: { asymmetry_summary: "Evaluation of contractual reciprocity underway." }
-    };
 
     if (btnRunCourtroomDebate) {
       btnRunCourtroomDebate.disabled = true;
@@ -1502,23 +1392,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      launchLiveDebate(finalPayload, selectedDebateRounds);
-
-      // Call API in background to enrich if available
-      const res = await fetch("/api/debate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: cleanQ })
-      });
-
-      if (res.ok) {
-        const result = await res.json();
-        if (result.plain_english) finalPayload.plain_english = result.plain_english;
-        if (result.why_flagged) finalPayload.why_flagged = result.why_flagged;
-        if (result.suggested_negotiation) finalPayload.suggested_negotiation = result.suggested_negotiation;
-      }
-    } catch (err) {
-      console.log("Custom query fallback used:", err.message);
+      await launchLiveDebate({ query: cleanQ, title, category }, selectedDebateRounds);
     } finally {
       if (btnRunCourtroomDebate) {
         btnRunCourtroomDebate.disabled = false;

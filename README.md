@@ -21,7 +21,8 @@
 
 3. **⚖️ AI Courtroom Multi-Agent Debate**
    - **Auditor Agent (`gpt-4o-mini`)**: Probes the contract for hidden risks, asymmetries, and non-standard terms.
-   - **Skeptic Verifier (`gpt-4o-mini` / `gemini-3.8-flash`)**: Adversarially challenges findings against exact cited text and page references.
+   - **Quote Grounding Check (code, not an LLM)**: Every quoted piece of evidence must appear verbatim in the retrieved contract text; paraphrased or invented quotes are discarded and the chunk ID / page are corrected to where the text really is.
+   - **Skeptic Verifier (`gemini-3.8-flash` → `gemini-3.6-flash` → `gpt-4o-mini`)**: Adversarially challenges findings against the cited text. Each verdict records which model produced it (`verifier_model`). If every verifier fails, the finding is marked `UNVERIFIED` and dropped — never silently accepted.
    - **Stopping Rules**: Automatic convergence or structured rebuttal when claims are ambiguous.
 
 4. **🎯 3 Plain-English Risk Categories**
@@ -79,6 +80,8 @@ cd enterprise-auditor
 ```
 
 ### 2. Set Up Virtual Environment
+The virtual environment is platform-specific: a `.venv` created on Windows will not run on Linux/macOS (and vice versa). Create a fresh one on each machine.
+
 ```bash
 # Windows
 python -m venv .venv

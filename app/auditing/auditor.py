@@ -32,7 +32,7 @@ class Auditor:
         )
 
         return {
-            "status": "generated",
+            "status": "generated" if finding else "unsupported",
             "finding": finding,
             "evidence": evidence,
         }

@@ -5,100 +5,283 @@
     "provider": "Meridian Cloud Systems Pvt. Ltd."
   },
   "health": {
-    "health_score": 80.0,
+    "health_score": 73.0,
     "rating": "Moderate",
-    "headline": "Health Score: 80.0/100 (Moderate) — 1 Deal-Breakers, 0 Watch Out, 0 Protections",
+    "headline": "Health Score: 73.0/100 (Moderate) — 1 Deal-Breakers, 4 Watch Out, 2 Protections",
     "deal_breakers_count": 1,
-    "watch_out_count": 0,
-    "protections_count": 0,
+    "watch_out_count": 4,
+    "protections_count": 2,
     "missing_protections_count": 7,
     "deal_breakers": [
       {
         "title": "Asymmetric Termination Rights",
-        "category": "contractual risk",
-        "claim": "The Provider has the right to terminate for convenience with 15 days' notice, while the Customer can only terminate for convenience after 12 months with 60 days' notice.",
-        "plain_english": "The Provider can walk away from the contract at any time with only 15 days' notice, giving your business very little time to find an alternative vendor or migrate your data.",
-        "why_flagged": "1. Provider has a unilateral convenience termination right.\n2. 15-day notice period is unusually short for enterprise software services.\n3. Customer's convenience termination right is locked for 12 months with a 60-day notice.",
-        "suggested_negotiation": "Customer proposes modifying Section 10.3 to require at least 60 days' written notice for convenience termination, and granting Customer reciprocal convenience termination rights with the same notice.",
+        "category": "high",
+        "claim": "The Provider has more favorable termination rights compared to the Customer, allowing for termination for convenience with shorter notice.",
+        "plain_english": "The Provider can end the contract quickly, while the Customer has to wait longer and give more notice, which is unfair.",
+        "why_flagged": "This imbalance could leave the Customer vulnerable if the Provider decides to terminate the agreement unexpectedly.",
+        "suggested_negotiation": "Change 'Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice' to 'Customer may terminate for convenience at any time upon 30 days’ written notice.'",
         "clause_balance": {
           "is_asymmetric": true,
-          "provider_terms": "Can terminate for convenience at any time upon 15 days' notice.",
-          "customer_terms": "Can terminate for convenience only after 12 months and upon 60 days' notice.",
-          "asymmetry_summary": "Severe asymmetry: Provider can exit after 15 days; Customer is locked in for 12 months with 60-day notice."
+          "provider_terms": "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer.",
+          "customer_terms": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice.",
+          "asymmetry_summary": "The Provider has the right to terminate with shorter notice and without a waiting period, while the Customer faces longer notice and a waiting period."
         },
         "evidence": [
           {
             "chunk_id": "chunk-0012",
             "page": 3,
-            "quote": "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer."
+            "section": "10. TERMINATION",
+            "quote": "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer.",
+            "grounded": true
           },
           {
             "chunk_id": "chunk-0012",
             "page": 3,
-            "quote": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice."
+            "section": "10. TERMINATION",
+            "quote": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice.",
+            "grounded": true
+          }
+        ],
+        "severity": "high",
+        "bucket": "deal_breaker",
+        "confidence": 1.0
+      }
+    ],
+    "watch_out": [
+      {
+        "title": "Aggregate Liability Cap Analysis",
+        "category": "high",
+        "claim": "The aggregate liability cap is limited to the fees paid or payable by the Customer during the three months preceding the event giving rise to the claim.",
+        "plain_english": "If something goes wrong, the most you can get back is what you paid for the last three months, which might not be enough to cover your losses.",
+        "why_flagged": "This clause could leave the Customer vulnerable to significant financial losses without adequate recourse.",
+        "suggested_negotiation": "Change the liability cap to cover at least six months of fees or a percentage of total fees paid during the contract term.",
+        "clause_balance": {
+          "is_asymmetric": false,
+          "provider_terms": "",
+          "customer_terms": "",
+          "asymmetry_summary": ""
+        },
+        "evidence": [
+          {
+            "chunk_id": "chunk-0011",
+            "page": 3,
+            "section": "9. LIMITATION OF LIABILITY",
+            "quote": "EXCEPT FOR CUSTOMER’S PAYMENT OBLIGATIONS, EACH PARTY’S AGGREGATE LIABILITY ARISING OUT OF OR RELATING TO THIS AGREEMENT SHALL NOT EXCEED THE FEES PAID OR PAYABLE BY CUSTOMER TO PROVIDER DURING THE THREE MONTHS PRECEDING THE EVENT GIVING RISE TO THE CLAIM.",
+            "grounded": true
+          }
+        ],
+        "severity": "high",
+        "bucket": "watch_out",
+        "confidence": 0.9
+      },
+      {
+        "title": "Automatic Renewal Clause",
+        "category": "medium",
+        "claim": "The contract automatically renews unless the Customer provides a non-renewal notice at least 90 days before expiration.",
+        "plain_english": "If the Customer doesn't notify the Provider 90 days before the contract ends, it will automatically renew for another year.",
+        "why_flagged": "This could lead to the Customer being locked into an unwanted contract extension.",
+        "suggested_negotiation": "Change the notice period for non-renewal to 30 days instead of 90 days.",
+        "clause_balance": {
+          "is_asymmetric": true,
+          "provider_terms": "The Provider benefits from automatic renewal, ensuring continued revenue.",
+          "customer_terms": "The Customer must actively manage their notice to avoid renewal.",
+          "asymmetry_summary": "The Provider has a significant advantage as the Customer must remember to notify for non-renewal."
+        },
+        "evidence": [
+          {
+            "chunk_id": "chunk-0017",
+            "page": 5,
+            "section": "14. TERM AND RENEWAL",
+            "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods.",
+            "grounded": true
           }
         ],
         "severity": "medium",
-        "bucket": "deal_breaker",
+        "bucket": "watch_out",
         "confidence": 0.9
+      },
+      {
+        "title": "Data Retention After Deletion",
+        "category": "high",
+        "claim": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems.",
+        "plain_english": "The Provider can keep your data backups for up to 180 days even after you delete it, which could be a privacy concern.",
+        "why_flagged": "This retention period could expose the Customer to risks related to data privacy and unauthorized access.",
+        "suggested_negotiation": "Limit the retention of backup copies of Customer Data to no more than 30 days after deletion from production systems.",
+        "clause_balance": {
+          "is_asymmetric": true,
+          "provider_terms": "The Provider can retain backups for up to 180 days.",
+          "customer_terms": "The Customer has no control over the retention period of backups.",
+          "asymmetry_summary": "The Provider has significant rights to retain Customer Data without equivalent rights for the Customer."
+        },
+        "evidence": [
+          {
+            "chunk_id": "chunk-0006",
+            "page": 2,
+            "section": "4. DATA PROCESSING AND SECURITY",
+            "quote": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems, provided such copies remain protected and are not restored except for disaster recovery purposes.",
+            "grounded": true
+          }
+        ],
+        "severity": "high",
+        "bucket": "watch_out",
+        "confidence": 1.0
+      },
+      {
+        "title": "Indemnification Obligations",
+        "category": "high",
+        "claim": "The Provider is obligated to defend the Customer against certain third-party claims, while the Customer must defend the Provider against other claims, creating a significant one-sided exposure for the Customer.",
+        "plain_english": "The Customer has to defend the Provider against certain claims, which could expose them to significant liability, while the Provider's obligations are more limited.",
+        "why_flagged": "This imbalance in indemnification obligations could lead to substantial financial risk for the Customer.",
+        "suggested_negotiation": "Both parties shall indemnify and defend each other against third-party claims arising from their respective actions or data.",
+        "clause_balance": {
+          "is_asymmetric": true,
+          "provider_terms": "Provider defends Customer against specific intellectual property claims.",
+          "customer_terms": "Customer defends Provider against claims related to Customer Data or unlawful use.",
+          "asymmetry_summary": "The Provider's indemnification obligations are narrower than those of the Customer."
+        },
+        "evidence": [
+          {
+            "chunk_id": "chunk-0010",
+            "page": 3,
+            "section": "8. INDEMNIFICATION",
+            "quote": "8.1 Provider shall defend Customer against a third-party claim alleging that the Services, when used as permitted by this Agreement, infringe a third party’s registered intellectual property right, and shall pay damages finally awarded or settlements approved by Provider.",
+            "grounded": true
+          },
+          {
+            "chunk_id": "chunk-0010",
+            "page": 3,
+            "section": "8. INDEMNIFICATION",
+            "quote": "8.2 Customer shall defend Provider against third-party claims arising from Customer Data or Customer’s unlawful use of the Services, and shall pay damages finally awarded or settlements approved by Customer.",
+            "grounded": true
+          }
+        ],
+        "severity": "high",
+        "bucket": "watch_out",
+        "confidence": 1.0
       }
     ],
-    "watch_out": [],
-    "protections": [],
+    "protections": [
+      {
+        "title": "Bilateral Confidentiality Obligations",
+        "category": "confidentiality",
+        "claim": "The confidentiality obligations are bilateral and mutual, requiring each party to protect the other's confidential information.",
+        "plain_english": "Both parties must keep each other's confidential information safe, which is a good protection for the Customer.",
+        "why_flagged": "Mutual confidentiality obligations help safeguard the Customer's sensitive information.",
+        "suggested_negotiation": "Add language to clarify that both parties are equally liable for breaches of confidentiality.",
+        "clause_balance": {
+          "is_asymmetric": false,
+          "provider_terms": "",
+          "customer_terms": "",
+          "asymmetry_summary": ""
+        },
+        "evidence": [
+          {
+            "chunk_id": "chunk-0007",
+            "page": 2,
+            "section": "5. CONFIDENTIALITY",
+            "quote": "Each Party shall protect the other Party’s Confidential Information using at least reasonable care and shall use such information only to perform or receive rights under this Agreement.",
+            "grounded": true
+          }
+        ],
+        "severity": "medium",
+        "bucket": "protection",
+        "confidence": 1.0
+      },
+      {
+        "title": "Ownership of Data and Intellectual Property",
+        "category": "high",
+        "claim": "Customer retains ownership of Customer Data, while Provider retains ownership of its own technology and services.",
+        "plain_english": "The Customer owns its data, while the Provider owns its technology and services, which is a good protection for the Customer.",
+        "why_flagged": "It's important for the Customer to know that they retain ownership of their data, which protects them from potential claims or misuse by the Provider.",
+        "suggested_negotiation": "Clarify the definition of Customer Data to include all data types provided by the Customer.",
+        "clause_balance": {
+          "is_asymmetric": true,
+          "provider_terms": "Provider retains all right, title, and interest in the Services, software, models, templates, documentation, and Provider-developed technology.",
+          "customer_terms": "Customer retains all right, title, and interest in Customer Data.",
+          "asymmetry_summary": "The Provider has broader rights over its own technology compared to the Customer's rights over its data."
+        },
+        "evidence": [
+          {
+            "chunk_id": "chunk-0008",
+            "page": 2,
+            "section": "6. INTELLECTUAL PROPERTY",
+            "quote": "Customer retains all right, title, and interest in Customer Data. Provider retains all right, title, and interest in the Services, software, models, templates, documentation, and Provider-developed technology.",
+            "grounded": true
+          },
+          {
+            "chunk_id": "chunk-0008",
+            "page": 2,
+            "section": "6. INTELLECTUAL PROPERTY",
+            "quote": "Subject to payment of all applicable fees, Provider grants Customer a non-exclusive, non-transferable, worldwide license during the Term to use the Services for Customer’s internal business operations.",
+            "grounded": true
+          }
+        ],
+        "severity": "high",
+        "bucket": "protection",
+        "confidence": 1.0
+      }
+    ],
     "score_breakdown": {
       "base_score": 100.0,
       "deal_breaker_deductions": 8.0,
-      "watch_out_deductions": 0.0,
+      "watch_out_deductions": 12.0,
       "missing_deductions": 12.0,
-      "protection_rewards": 0.0
+      "protection_rewards": 5.0
     }
   },
   "summary": {
-    "health_score": 80.0,
+    "health_score": 73.0,
     "rating": "Moderate",
-    "headline": "Health Score: 80.0/100 (Moderate) — 1 Deal-Breakers, 0 Watch Out, 0 Protections",
+    "headline": "Health Score: 73.0/100 (Moderate) — 1 Deal-Breakers, 4 Watch Out, 2 Protections",
     "deal_breakers_count": 1,
-    "watch_out_count": 0,
-    "protections_count": 0,
+    "watch_out_count": 4,
+    "protections_count": 2,
     "missing_protections_count": 7,
-    "total_verified_findings": 1
+    "total_verified_findings": 7
   },
   "findings": [
     {
       "finding_id": "finding-001",
       "title": "Asymmetric Termination Rights",
-      "category": "contractual risk",
-      "severity": "medium",
+      "category": "high",
+      "severity": "high",
       "bucket": "deal_breaker",
-      "claim": "The Provider has the right to terminate for convenience with 15 days' notice, while the Customer can only terminate for convenience after 12 months with 60 days' notice.",
-      "plain_english": "The Provider can walk away from the contract at any time with only 15 days' notice, giving your business very little time to find an alternative vendor or migrate your data.",
-      "why_flagged": "1. Provider has a unilateral convenience termination right.\n2. 15-day notice period is unusually short for enterprise software services.\n3. Customer's convenience termination right is locked for 12 months with a 60-day notice.",
-      "suggested_negotiation": "Customer proposes modifying Section 10.3 to require at least 60 days' written notice for convenience termination, and granting Customer reciprocal convenience termination rights with the same notice.",
+      "claim": "The Provider has more favorable termination rights compared to the Customer, allowing for termination for convenience with shorter notice.",
+      "plain_english": "The Provider can end the contract quickly, while the Customer has to wait longer and give more notice, which is unfair.",
+      "why_flagged": "This imbalance could leave the Customer vulnerable if the Provider decides to terminate the agreement unexpectedly.",
+      "suggested_negotiation": "Change 'Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice' to 'Customer may terminate for convenience at any time upon 30 days’ written notice.'",
       "clause_balance": {
         "is_asymmetric": true,
-        "provider_terms": "Can terminate for convenience at any time upon 15 days' notice.",
-        "customer_terms": "Can terminate for convenience only after 12 months and upon 60 days' notice.",
-        "asymmetry_summary": "Severe asymmetry: Provider can exit after 15 days; Customer is locked in for 12 months with 60-day notice."
+        "provider_terms": "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer.",
+        "customer_terms": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice.",
+        "asymmetry_summary": "The Provider has the right to terminate with shorter notice and without a waiting period, while the Customer faces longer notice and a waiting period."
       },
-      "confidence": 0.9,
+      "confidence": 1.0,
+      "verdict": "ACCEPTED",
+      "verifier_model": "openai:gpt-4o-mini",
+      "verification_reasoning": "The Auditor's finding is supported by the contract evidence. The quotes provided confirm that the Provider has more favorable termination rights with a shorter notice period compared to the Customer, which creates an imbalance in termination rights as stated in the finding.",
       "evidence": [
         {
           "chunk_id": "chunk-0012",
           "page": 3,
-          "quote": "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer."
+          "section": "10. TERMINATION",
+          "quote": "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer.",
+          "grounded": true
         },
         {
           "chunk_id": "chunk-0012",
           "page": 3,
-          "quote": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice."
+          "section": "10. TERMINATION",
+          "quote": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice.",
+          "grounded": true
         }
       ],
       "risk_score": {
-        "severity_score": 0.5,
-        "confidence_score": 0.9,
+        "severity_score": 0.75,
+        "confidence_score": 1.0,
         "verification_score": 1.0,
         "evidence_score": 0.6666666666666666,
-        "final_score": 76.0,
+        "final_score": 87.92,
         "risk_level": "critical",
         "bucket": "deal_breaker"
       },
@@ -106,40 +289,45 @@
         {
           "round": 1,
           "finding": {
+            "status": "supported",
             "title": "Asymmetric Termination Rights",
-            "category": "contractual risk",
-            "severity": "medium",
-            "claim": "The Provider has the right to terminate for convenience with 15 days' notice, while the Customer can only terminate for convenience after 12 months with 60 days' notice.",
+            "category": "high",
+            "finding_type": "risk",
+            "severity": "high",
+            "claim": "The Provider has more favorable termination rights compared to the Customer, allowing for termination for convenience with shorter notice.",
             "evidence": [
               {
                 "chunk_id": "chunk-0012",
                 "page": 3,
-                "quote": "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer."
+                "section": "10. TERMINATION",
+                "quote": "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer.",
+                "grounded": true
               },
               {
                 "chunk_id": "chunk-0012",
                 "page": 3,
-                "quote": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice."
+                "section": "10. TERMINATION",
+                "quote": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice.",
+                "grounded": true
               }
             ],
-            "reasoning": "The differing notice periods and conditions for termination for convenience create an imbalance in the rights of the parties, potentially disadvantaging the Customer.",
-            "recommendation": "Consider aligning the termination rights and notice periods for both parties to ensure fairness and balance in the agreement.",
-            "confidence": 0.9,
-            "bucket": "deal_breaker",
-            "plain_english": "The Provider can walk away from the contract at any time with only 15 days' notice, giving your business very little time to find an alternative vendor or migrate your data.",
-            "why_flagged": "1. Provider has a unilateral convenience termination right.\n2. 15-day notice period is unusually short for enterprise software services.\n3. Customer's convenience termination right is locked for 12 months with a 60-day notice.",
-            "suggested_negotiation": "Customer proposes modifying Section 10.3 to require at least 60 days' written notice for convenience termination, and granting Customer reciprocal convenience termination rights with the same notice.",
+            "reasoning": "The Provider can terminate the agreement for convenience with only 15 days' notice, while the Customer must wait 12 months and provide 60 days' notice, creating an imbalance in termination rights.",
+            "recommendation": "Negotiate for equal termination rights or reduce the notice period required from the Customer.",
+            "plain_english": "The Provider can end the contract quickly, while the Customer has to wait longer and give more notice, which is unfair.",
+            "why_flagged": "This imbalance could leave the Customer vulnerable if the Provider decides to terminate the agreement unexpectedly.",
+            "suggested_negotiation": "Change 'Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice' to 'Customer may terminate for convenience at any time upon 30 days’ written notice.'",
             "clause_balance": {
               "is_asymmetric": true,
-              "provider_terms": "Can terminate for convenience at any time upon 15 days' notice.",
-              "customer_terms": "Can terminate for convenience only after 12 months and upon 60 days' notice.",
-              "asymmetry_summary": "Severe asymmetry: Provider can exit after 15 days; Customer is locked in for 12 months with 60-day notice."
-            }
+              "provider_terms": "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer.",
+              "customer_terms": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice.",
+              "asymmetry_summary": "The Provider has the right to terminate with shorter notice and without a waiting period, while the Customer faces longer notice and a waiting period."
+            },
+            "confidence": 1.0
           },
           "verification": {
             "status": "verified",
             "verdict": "ACCEPTED",
-            "reasoning": "The Auditor's finding is supported by the contract evidence, which clearly states the differing termination rights and notice periods for the Provider and Customer. The quotes provided by the Auditor match the contract text exactly, and the page numbers and chunk IDs are correct.",
+            "reasoning": "The Auditor's finding is supported by the contract evidence. The quotes provided confirm that the Provider has more favorable termination rights with a shorter notice period compared to the Customer, which creates an imbalance in termination rights as stated in the finding.",
             "supporting_evidence": [
               {
                 "chunk_id": "chunk-0012",
@@ -153,7 +341,602 @@
               }
             ],
             "contradictions": [],
+            "confidence": 1.0,
+            "verifier_model": "openai:gpt-4o-mini",
+            "grounding": {
+              "grounded_quotes": 2,
+              "ungrounded_quotes": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "finding_id": "finding-002",
+      "title": "Aggregate Liability Cap Analysis",
+      "category": "high",
+      "severity": "high",
+      "bucket": "watch_out",
+      "claim": "The aggregate liability cap is limited to the fees paid or payable by the Customer during the three months preceding the event giving rise to the claim.",
+      "plain_english": "If something goes wrong, the most you can get back is what you paid for the last three months, which might not be enough to cover your losses.",
+      "why_flagged": "This clause could leave the Customer vulnerable to significant financial losses without adequate recourse.",
+      "suggested_negotiation": "Change the liability cap to cover at least six months of fees or a percentage of total fees paid during the contract term.",
+      "clause_balance": {
+        "is_asymmetric": false,
+        "provider_terms": "",
+        "customer_terms": "",
+        "asymmetry_summary": ""
+      },
+      "confidence": 0.9,
+      "verdict": "ACCEPTED",
+      "verifier_model": "gemini:gemini-3.6-flash",
+      "verification_reasoning": "The claim, quote, chunk ID, and page number provided by the Auditor accurately match the contract text in chunk-0011 (Section 9.2). The finding correctly identifies the 3-month aggregate liability cap and its risk profile.",
+      "evidence": [
+        {
+          "chunk_id": "chunk-0011",
+          "page": 3,
+          "section": "9. LIMITATION OF LIABILITY",
+          "quote": "EXCEPT FOR CUSTOMER’S PAYMENT OBLIGATIONS, EACH PARTY’S AGGREGATE LIABILITY ARISING OUT OF OR RELATING TO THIS AGREEMENT SHALL NOT EXCEED THE FEES PAID OR PAYABLE BY CUSTOMER TO PROVIDER DURING THE THREE MONTHS PRECEDING THE EVENT GIVING RISE TO THE CLAIM.",
+          "grounded": true
+        }
+      ],
+      "risk_score": {
+        "severity_score": 0.75,
+        "confidence_score": 0.9,
+        "verification_score": 1.0,
+        "evidence_score": 0.3333333333333333,
+        "final_score": 81.83,
+        "risk_level": "critical",
+        "bucket": "watch_out"
+      },
+      "debate_history": [
+        {
+          "round": 1,
+          "finding": {
+            "status": "supported",
+            "title": "Aggregate Liability Cap Analysis",
+            "category": "high",
+            "finding_type": "risk",
+            "severity": "high",
+            "claim": "The aggregate liability cap is limited to the fees paid or payable by the Customer during the three months preceding the event giving rise to the claim.",
+            "evidence": [
+              {
+                "chunk_id": "chunk-0011",
+                "page": 3,
+                "section": "9. LIMITATION OF LIABILITY",
+                "quote": "EXCEPT FOR CUSTOMER’S PAYMENT OBLIGATIONS, EACH PARTY’S AGGREGATE LIABILITY ARISING OUT OF OR RELATING TO THIS AGREEMENT SHALL NOT EXCEED THE FEES PAID OR PAYABLE BY CUSTOMER TO PROVIDER DURING THE THREE MONTHS PRECEDING THE EVENT GIVING RISE TO THE CLAIM.",
+                "grounded": true
+              }
+            ],
+            "reasoning": "This limitation means that if a significant issue arises, the Customer's potential recovery is capped at a maximum of three months' worth of fees, which may not cover substantial damages.",
+            "recommendation": "Negotiate for a higher liability cap or a different calculation method that considers the potential damages more comprehensively.",
+            "plain_english": "If something goes wrong, the most you can get back is what you paid for the last three months, which might not be enough to cover your losses.",
+            "why_flagged": "This clause could leave the Customer vulnerable to significant financial losses without adequate recourse.",
+            "suggested_negotiation": "Change the liability cap to cover at least six months of fees or a percentage of total fees paid during the contract term.",
+            "clause_balance": {
+              "is_asymmetric": false,
+              "provider_terms": "",
+              "customer_terms": "",
+              "asymmetry_summary": ""
+            },
             "confidence": 0.9
+          },
+          "verification": {
+            "status": "verified",
+            "verdict": "ACCEPTED",
+            "reasoning": "The claim, quote, chunk ID, and page number provided by the Auditor accurately match the contract text in chunk-0011 (Section 9.2). The finding correctly identifies the 3-month aggregate liability cap and its risk profile.",
+            "supporting_evidence": [
+              {
+                "chunk_id": "chunk-0011",
+                "page": 3,
+                "quote": "EXCEPT FOR CUSTOMER’S PAYMENT OBLIGATIONS, EACH PARTY’S AGGREGATE LIABILITY ARISING OUT OF OR RELATING TO THIS AGREEMENT SHALL NOT EXCEED THE FEES PAID OR PAYABLE BY CUSTOMER TO PROVIDER DURING THE THREE MONTHS PRECEDING THE EVENT GIVING RISE TO THE CLAIM."
+              }
+            ],
+            "contradictions": [],
+            "confidence": 0.95,
+            "verifier_model": "gemini:gemini-3.6-flash",
+            "grounding": {
+              "grounded_quotes": 1,
+              "ungrounded_quotes": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "finding_id": "finding-003",
+      "title": "Automatic Renewal Clause",
+      "category": "medium",
+      "severity": "medium",
+      "bucket": "watch_out",
+      "claim": "The contract automatically renews unless the Customer provides a non-renewal notice at least 90 days before expiration.",
+      "plain_english": "If the Customer doesn't notify the Provider 90 days before the contract ends, it will automatically renew for another year.",
+      "why_flagged": "This could lead to the Customer being locked into an unwanted contract extension.",
+      "suggested_negotiation": "Change the notice period for non-renewal to 30 days instead of 90 days.",
+      "clause_balance": {
+        "is_asymmetric": true,
+        "provider_terms": "The Provider benefits from automatic renewal, ensuring continued revenue.",
+        "customer_terms": "The Customer must actively manage their notice to avoid renewal.",
+        "asymmetry_summary": "The Provider has a significant advantage as the Customer must remember to notify for non-renewal."
+      },
+      "confidence": 0.9,
+      "verdict": "ACCEPTED",
+      "verifier_model": "gemini:gemini-3.6-flash",
+      "verification_reasoning": "The Auditor's claim, quoted evidence, chunk ID, page number, and severity level are all accurate and directly supported by Section 14.2 in chunk-0017.",
+      "evidence": [
+        {
+          "chunk_id": "chunk-0017",
+          "page": 5,
+          "section": "14. TERM AND RENEWAL",
+          "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods.",
+          "grounded": true
+        }
+      ],
+      "risk_score": {
+        "severity_score": 0.5,
+        "confidence_score": 0.9,
+        "verification_score": 1.0,
+        "evidence_score": 0.3333333333333333,
+        "final_score": 73.08,
+        "risk_level": "high",
+        "bucket": "watch_out"
+      },
+      "debate_history": [
+        {
+          "round": 1,
+          "finding": {
+            "status": "supported",
+            "title": "Automatic Renewal Clause",
+            "category": "medium",
+            "finding_type": "risk",
+            "severity": "medium",
+            "claim": "The contract automatically renews unless the Customer provides a non-renewal notice at least 90 days before expiration.",
+            "evidence": [
+              {
+                "chunk_id": "chunk-0017",
+                "page": 5,
+                "section": "14. TERM AND RENEWAL",
+                "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods.",
+                "grounded": true
+              }
+            ],
+            "reasoning": "This clause indicates that the contract will renew automatically, which could lock the Customer into a longer commitment without their explicit consent if they fail to provide timely notice.",
+            "recommendation": "Negotiate for a shorter notice period for non-renewal to provide more flexibility.",
+            "plain_english": "If the Customer doesn't notify the Provider 90 days before the contract ends, it will automatically renew for another year.",
+            "why_flagged": "This could lead to the Customer being locked into an unwanted contract extension.",
+            "suggested_negotiation": "Change the notice period for non-renewal to 30 days instead of 90 days.",
+            "clause_balance": {
+              "is_asymmetric": true,
+              "provider_terms": "The Provider benefits from automatic renewal, ensuring continued revenue.",
+              "customer_terms": "The Customer must actively manage their notice to avoid renewal.",
+              "asymmetry_summary": "The Provider has a significant advantage as the Customer must remember to notify for non-renewal."
+            },
+            "confidence": 0.9
+          },
+          "verification": {
+            "status": "verified",
+            "verdict": "ACCEPTED",
+            "reasoning": "The Auditor's claim, quoted evidence, chunk ID, page number, and severity level are all accurate and directly supported by Section 14.2 in chunk-0017.",
+            "supporting_evidence": [
+              {
+                "chunk_id": "chunk-0017",
+                "page": 5,
+                "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods."
+              }
+            ],
+            "contradictions": [],
+            "confidence": 0.95,
+            "verifier_model": "gemini:gemini-3.6-flash",
+            "grounding": {
+              "grounded_quotes": 1,
+              "ungrounded_quotes": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "finding_id": "finding-004",
+      "title": "Data Retention After Deletion",
+      "category": "high",
+      "severity": "high",
+      "bucket": "watch_out",
+      "claim": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems.",
+      "plain_english": "The Provider can keep your data backups for up to 180 days even after you delete it, which could be a privacy concern.",
+      "why_flagged": "This retention period could expose the Customer to risks related to data privacy and unauthorized access.",
+      "suggested_negotiation": "Limit the retention of backup copies of Customer Data to no more than 30 days after deletion from production systems.",
+      "clause_balance": {
+        "is_asymmetric": true,
+        "provider_terms": "The Provider can retain backups for up to 180 days.",
+        "customer_terms": "The Customer has no control over the retention period of backups.",
+        "asymmetry_summary": "The Provider has significant rights to retain Customer Data without equivalent rights for the Customer."
+      },
+      "confidence": 1.0,
+      "verdict": "ACCEPTED",
+      "verifier_model": "gemini:gemini-3.6-flash",
+      "verification_reasoning": "The Auditor's claim, quote, chunk ID, page number, and section title accurately reflect section 4.4 in chunk-0006. The severity assessment is reasonable and proportionate given standard data privacy concerns surrounding long data retention periods for deleted customer data.",
+      "evidence": [
+        {
+          "chunk_id": "chunk-0006",
+          "page": 2,
+          "section": "4. DATA PROCESSING AND SECURITY",
+          "quote": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems, provided such copies remain protected and are not restored except for disaster recovery purposes.",
+          "grounded": true
+        }
+      ],
+      "risk_score": {
+        "severity_score": 0.75,
+        "confidence_score": 1.0,
+        "verification_score": 1.0,
+        "evidence_score": 0.3333333333333333,
+        "final_score": 84.58,
+        "risk_level": "critical",
+        "bucket": "watch_out"
+      },
+      "debate_history": [
+        {
+          "round": 1,
+          "finding": {
+            "status": "supported",
+            "title": "Data Retention After Deletion",
+            "category": "high",
+            "finding_type": "risk",
+            "severity": "high",
+            "claim": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems.",
+            "evidence": [
+              {
+                "chunk_id": "chunk-0006",
+                "page": 2,
+                "section": "4. DATA PROCESSING AND SECURITY",
+                "quote": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems, provided such copies remain protected and are not restored except for disaster recovery purposes.",
+                "grounded": true
+              }
+            ],
+            "reasoning": "This clause allows the Provider to retain Customer Data backups for an extended period after deletion, which could pose a risk to the Customer's data privacy and control over their information.",
+            "recommendation": "Negotiate a shorter retention period for backups or clarify conditions under which data can be retained.",
+            "plain_english": "The Provider can keep your data backups for up to 180 days even after you delete it, which could be a privacy concern.",
+            "why_flagged": "This retention period could expose the Customer to risks related to data privacy and unauthorized access.",
+            "suggested_negotiation": "Limit the retention of backup copies of Customer Data to no more than 30 days after deletion from production systems.",
+            "clause_balance": {
+              "is_asymmetric": true,
+              "provider_terms": "The Provider can retain backups for up to 180 days.",
+              "customer_terms": "The Customer has no control over the retention period of backups.",
+              "asymmetry_summary": "The Provider has significant rights to retain Customer Data without equivalent rights for the Customer."
+            },
+            "confidence": 1.0
+          },
+          "verification": {
+            "status": "verified",
+            "verdict": "ACCEPTED",
+            "reasoning": "The Auditor's claim, quote, chunk ID, page number, and section title accurately reflect section 4.4 in chunk-0006. The severity assessment is reasonable and proportionate given standard data privacy concerns surrounding long data retention periods for deleted customer data.",
+            "supporting_evidence": [
+              {
+                "chunk_id": "chunk-0006",
+                "page": 2,
+                "quote": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems, provided such copies remain protected and are not restored except for disaster recovery purposes."
+              }
+            ],
+            "contradictions": [],
+            "confidence": 1.0,
+            "verifier_model": "gemini:gemini-3.6-flash",
+            "grounding": {
+              "grounded_quotes": 1,
+              "ungrounded_quotes": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "finding_id": "finding-005",
+      "title": "Bilateral Confidentiality Obligations",
+      "category": "confidentiality",
+      "severity": "medium",
+      "bucket": "protection",
+      "claim": "The confidentiality obligations are bilateral and mutual, requiring each party to protect the other's confidential information.",
+      "plain_english": "Both parties must keep each other's confidential information safe, which is a good protection for the Customer.",
+      "why_flagged": "Mutual confidentiality obligations help safeguard the Customer's sensitive information.",
+      "suggested_negotiation": "Add language to clarify that both parties are equally liable for breaches of confidentiality.",
+      "clause_balance": {
+        "is_asymmetric": false,
+        "provider_terms": "",
+        "customer_terms": "",
+        "asymmetry_summary": ""
+      },
+      "confidence": 1.0,
+      "verdict": "ACCEPTED",
+      "verifier_model": "openai:gpt-4o-mini",
+      "verification_reasoning": "The Auditor's finding is supported by the contract evidence, which explicitly states that each party has a duty to protect the other's confidential information, confirming the mutual obligations.",
+      "evidence": [
+        {
+          "chunk_id": "chunk-0007",
+          "page": 2,
+          "section": "5. CONFIDENTIALITY",
+          "quote": "Each Party shall protect the other Party’s Confidential Information using at least reasonable care and shall use such information only to perform or receive rights under this Agreement.",
+          "grounded": true
+        }
+      ],
+      "risk_score": {
+        "severity_score": 0.5,
+        "confidence_score": 1.0,
+        "verification_score": 1.0,
+        "evidence_score": 0.3333333333333333,
+        "final_score": 75.83,
+        "risk_level": "critical",
+        "bucket": "protection"
+      },
+      "debate_history": [
+        {
+          "round": 1,
+          "finding": {
+            "status": "supported",
+            "title": "Bilateral Confidentiality Obligations",
+            "category": "confidentiality",
+            "finding_type": "protection",
+            "severity": "medium",
+            "claim": "The confidentiality obligations are bilateral and mutual, requiring each party to protect the other's confidential information.",
+            "evidence": [
+              {
+                "chunk_id": "chunk-0007",
+                "page": 2,
+                "section": "5. CONFIDENTIALITY",
+                "quote": "Each Party shall protect the other Party’s Confidential Information using at least reasonable care and shall use such information only to perform or receive rights under this Agreement.",
+                "grounded": true
+              }
+            ],
+            "reasoning": "The contract explicitly states that each party has a duty to protect the other's confidential information, indicating mutual obligations.",
+            "recommendation": "Ensure that both parties are equally bound by confidentiality obligations to prevent unilateral disclosure.",
+            "plain_english": "Both parties must keep each other's confidential information safe, which is a good protection for the Customer.",
+            "why_flagged": "Mutual confidentiality obligations help safeguard the Customer's sensitive information.",
+            "suggested_negotiation": "Add language to clarify that both parties are equally liable for breaches of confidentiality.",
+            "clause_balance": {
+              "is_asymmetric": false,
+              "provider_terms": "",
+              "customer_terms": "",
+              "asymmetry_summary": ""
+            },
+            "confidence": 1.0
+          },
+          "verification": {
+            "status": "verified",
+            "verdict": "ACCEPTED",
+            "reasoning": "The Auditor's finding is supported by the contract evidence, which explicitly states that each party has a duty to protect the other's confidential information, confirming the mutual obligations.",
+            "supporting_evidence": [
+              {
+                "chunk_id": "chunk-0007",
+                "page": 2,
+                "quote": "Each Party shall protect the other Party’s Confidential Information using at least reasonable care and shall use such information only to perform or receive rights under this Agreement."
+              }
+            ],
+            "contradictions": [],
+            "confidence": 1.0,
+            "verifier_model": "openai:gpt-4o-mini",
+            "grounding": {
+              "grounded_quotes": 1,
+              "ungrounded_quotes": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "finding_id": "finding-006",
+      "title": "Ownership of Data and Intellectual Property",
+      "category": "high",
+      "severity": "high",
+      "bucket": "protection",
+      "claim": "Customer retains ownership of Customer Data, while Provider retains ownership of its own technology and services.",
+      "plain_english": "The Customer owns its data, while the Provider owns its technology and services, which is a good protection for the Customer.",
+      "why_flagged": "It's important for the Customer to know that they retain ownership of their data, which protects them from potential claims or misuse by the Provider.",
+      "suggested_negotiation": "Clarify the definition of Customer Data to include all data types provided by the Customer.",
+      "clause_balance": {
+        "is_asymmetric": true,
+        "provider_terms": "Provider retains all right, title, and interest in the Services, software, models, templates, documentation, and Provider-developed technology.",
+        "customer_terms": "Customer retains all right, title, and interest in Customer Data.",
+        "asymmetry_summary": "The Provider has broader rights over its own technology compared to the Customer's rights over its data."
+      },
+      "confidence": 1.0,
+      "verdict": "ACCEPTED",
+      "verifier_model": "openai:gpt-4o-mini",
+      "verification_reasoning": "The Auditor's finding is fully supported by the contract evidence. The claim regarding ownership of Customer Data and Provider's technology is explicitly stated in the provided quotes, which match the contract text accurately.",
+      "evidence": [
+        {
+          "chunk_id": "chunk-0008",
+          "page": 2,
+          "section": "6. INTELLECTUAL PROPERTY",
+          "quote": "Customer retains all right, title, and interest in Customer Data. Provider retains all right, title, and interest in the Services, software, models, templates, documentation, and Provider-developed technology.",
+          "grounded": true
+        },
+        {
+          "chunk_id": "chunk-0008",
+          "page": 2,
+          "section": "6. INTELLECTUAL PROPERTY",
+          "quote": "Subject to payment of all applicable fees, Provider grants Customer a non-exclusive, non-transferable, worldwide license during the Term to use the Services for Customer’s internal business operations.",
+          "grounded": true
+        }
+      ],
+      "risk_score": {
+        "severity_score": 0.75,
+        "confidence_score": 1.0,
+        "verification_score": 1.0,
+        "evidence_score": 0.6666666666666666,
+        "final_score": 87.92,
+        "risk_level": "critical",
+        "bucket": "protection"
+      },
+      "debate_history": [
+        {
+          "round": 1,
+          "finding": {
+            "status": "supported",
+            "title": "Ownership of Data and Intellectual Property",
+            "category": "high",
+            "finding_type": "protection",
+            "severity": "high",
+            "claim": "Customer retains ownership of Customer Data, while Provider retains ownership of its own technology and services.",
+            "evidence": [
+              {
+                "chunk_id": "chunk-0008",
+                "page": 2,
+                "section": "6. INTELLECTUAL PROPERTY",
+                "quote": "Customer retains all right, title, and interest in Customer Data. Provider retains all right, title, and interest in the Services, software, models, templates, documentation, and Provider-developed technology.",
+                "grounded": true
+              },
+              {
+                "chunk_id": "chunk-0008",
+                "page": 2,
+                "section": "6. INTELLECTUAL PROPERTY",
+                "quote": "Subject to payment of all applicable fees, Provider grants Customer a non-exclusive, non-transferable, worldwide license during the Term to use the Services for Customer’s internal business operations.",
+                "grounded": true
+              }
+            ],
+            "reasoning": "This clause clearly delineates ownership rights, ensuring that the Customer maintains ownership of its data, which is crucial for protecting its interests and preventing unauthorized use or claims by the Provider.",
+            "recommendation": "Ensure that the definition of Customer Data is comprehensive to cover all forms of data the Customer may provide.",
+            "plain_english": "The Customer owns its data, while the Provider owns its technology and services, which is a good protection for the Customer.",
+            "why_flagged": "It's important for the Customer to know that they retain ownership of their data, which protects them from potential claims or misuse by the Provider.",
+            "suggested_negotiation": "Clarify the definition of Customer Data to include all data types provided by the Customer.",
+            "clause_balance": {
+              "is_asymmetric": true,
+              "provider_terms": "Provider retains all right, title, and interest in the Services, software, models, templates, documentation, and Provider-developed technology.",
+              "customer_terms": "Customer retains all right, title, and interest in Customer Data.",
+              "asymmetry_summary": "The Provider has broader rights over its own technology compared to the Customer's rights over its data."
+            },
+            "confidence": 1.0
+          },
+          "verification": {
+            "status": "verified",
+            "verdict": "ACCEPTED",
+            "reasoning": "The Auditor's finding is fully supported by the contract evidence. The claim regarding ownership of Customer Data and Provider's technology is explicitly stated in the provided quotes, which match the contract text accurately.",
+            "supporting_evidence": [
+              {
+                "chunk_id": "chunk-0008",
+                "page": 2,
+                "quote": "Customer retains all right, title, and interest in Customer Data. Provider retains all right, title, and interest in the Services, software, models, templates, documentation, and Provider-developed technology."
+              },
+              {
+                "chunk_id": "chunk-0008",
+                "page": 2,
+                "quote": "Subject to payment of all applicable fees, Provider grants Customer a non-exclusive, non-transferable, worldwide license during the Term to use the Services for Customer’s internal business operations."
+              }
+            ],
+            "contradictions": [],
+            "confidence": 1.0,
+            "verifier_model": "openai:gpt-4o-mini",
+            "grounding": {
+              "grounded_quotes": 2,
+              "ungrounded_quotes": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "finding_id": "finding-007",
+      "title": "Indemnification Obligations",
+      "category": "high",
+      "severity": "high",
+      "bucket": "watch_out",
+      "claim": "The Provider is obligated to defend the Customer against certain third-party claims, while the Customer must defend the Provider against other claims, creating a significant one-sided exposure for the Customer.",
+      "plain_english": "The Customer has to defend the Provider against certain claims, which could expose them to significant liability, while the Provider's obligations are more limited.",
+      "why_flagged": "This imbalance in indemnification obligations could lead to substantial financial risk for the Customer.",
+      "suggested_negotiation": "Both parties shall indemnify and defend each other against third-party claims arising from their respective actions or data.",
+      "clause_balance": {
+        "is_asymmetric": true,
+        "provider_terms": "Provider defends Customer against specific intellectual property claims.",
+        "customer_terms": "Customer defends Provider against claims related to Customer Data or unlawful use.",
+        "asymmetry_summary": "The Provider's indemnification obligations are narrower than those of the Customer."
+      },
+      "confidence": 1.0,
+      "verdict": "ACCEPTED",
+      "verifier_model": "openai:gpt-4o-mini",
+      "verification_reasoning": "The Auditor's finding is supported by the contract evidence. The indemnification obligations outlined in the contract clearly show that the Provider is obligated to defend the Customer against specific third-party claims, while the Customer is required to defend the Provider against claims related to Customer Data or unlawful use. This creates a significant imbalance in liability exposure, which aligns with the Auditor's assessment of high severity.",
+      "evidence": [
+        {
+          "chunk_id": "chunk-0010",
+          "page": 3,
+          "section": "8. INDEMNIFICATION",
+          "quote": "8.1 Provider shall defend Customer against a third-party claim alleging that the Services, when used as permitted by this Agreement, infringe a third party’s registered intellectual property right, and shall pay damages finally awarded or settlements approved by Provider.",
+          "grounded": true
+        },
+        {
+          "chunk_id": "chunk-0010",
+          "page": 3,
+          "section": "8. INDEMNIFICATION",
+          "quote": "8.2 Customer shall defend Provider against third-party claims arising from Customer Data or Customer’s unlawful use of the Services, and shall pay damages finally awarded or settlements approved by Customer.",
+          "grounded": true
+        }
+      ],
+      "risk_score": {
+        "severity_score": 0.75,
+        "confidence_score": 1.0,
+        "verification_score": 1.0,
+        "evidence_score": 0.6666666666666666,
+        "final_score": 87.92,
+        "risk_level": "critical",
+        "bucket": "watch_out"
+      },
+      "debate_history": [
+        {
+          "round": 1,
+          "finding": {
+            "status": "supported",
+            "title": "Indemnification Obligations",
+            "category": "high",
+            "finding_type": "risk",
+            "severity": "high",
+            "claim": "The Provider is obligated to defend the Customer against certain third-party claims, while the Customer must defend the Provider against other claims, creating a significant one-sided exposure for the Customer.",
+            "evidence": [
+              {
+                "chunk_id": "chunk-0010",
+                "page": 3,
+                "section": "8. INDEMNIFICATION",
+                "quote": "8.1 Provider shall defend Customer against a third-party claim alleging that the Services, when used as permitted by this Agreement, infringe a third party’s registered intellectual property right, and shall pay damages finally awarded or settlements approved by Provider.",
+                "grounded": true
+              },
+              {
+                "chunk_id": "chunk-0010",
+                "page": 3,
+                "section": "8. INDEMNIFICATION",
+                "quote": "8.2 Customer shall defend Provider against third-party claims arising from Customer Data or Customer’s unlawful use of the Services, and shall pay damages finally awarded or settlements approved by Customer.",
+                "grounded": true
+              }
+            ],
+            "reasoning": "The indemnification obligations create a scenario where the Customer is responsible for defending the Provider against claims related to Customer Data or unlawful use, while the Provider only defends the Customer against specific intellectual property claims. This creates a risk of significant liability for the Customer.",
+            "recommendation": "Negotiate for mutual indemnification obligations that balance the responsibilities of both parties more equitably.",
+            "plain_english": "The Customer has to defend the Provider against certain claims, which could expose them to significant liability, while the Provider's obligations are more limited.",
+            "why_flagged": "This imbalance in indemnification obligations could lead to substantial financial risk for the Customer.",
+            "suggested_negotiation": "Both parties shall indemnify and defend each other against third-party claims arising from their respective actions or data.",
+            "clause_balance": {
+              "is_asymmetric": true,
+              "provider_terms": "Provider defends Customer against specific intellectual property claims.",
+              "customer_terms": "Customer defends Provider against claims related to Customer Data or unlawful use.",
+              "asymmetry_summary": "The Provider's indemnification obligations are narrower than those of the Customer."
+            },
+            "confidence": 1.0
+          },
+          "verification": {
+            "status": "verified",
+            "verdict": "ACCEPTED",
+            "reasoning": "The Auditor's finding is supported by the contract evidence. The indemnification obligations outlined in the contract clearly show that the Provider is obligated to defend the Customer against specific third-party claims, while the Customer is required to defend the Provider against claims related to Customer Data or unlawful use. This creates a significant imbalance in liability exposure, which aligns with the Auditor's assessment of high severity.",
+            "supporting_evidence": [
+              {
+                "chunk_id": "chunk-0010",
+                "page": 3,
+                "quote": "8.1 Provider shall defend Customer against a third-party claim alleging that the Services, when used as permitted by this Agreement, infringe a third party’s registered intellectual property right, and shall pay damages finally awarded or settlements approved by Provider."
+              },
+              {
+                "chunk_id": "chunk-0010",
+                "page": 3,
+                "quote": "8.2 Customer shall defend Provider against third-party claims arising from Customer Data or Customer’s unlawful use of the Services, and shall pay damages finally awarded or settlements approved by Customer."
+              }
+            ],
+            "contradictions": [],
+            "confidence": 1.0,
+            "verifier_model": "openai:gpt-4o-mini",
+            "grounding": {
+              "grounded_quotes": 2,
+              "ungrounded_quotes": []
+            }
           }
         }
       ]
@@ -166,7 +949,7 @@
       "category": "business_continuity",
       "status": "MISSING",
       "risk_level": "high",
-      "why_it_matters": "The contract does not define explicit Recovery Time Objectives (RTO) or Recovery Point Objectives (RPO). If Provider suffers a catastrophic datacenter outage, there is no contractual commitment for when service or data will be restored.",
+      "why_it_matters": "Without explicit Recovery Time / Recovery Point Objectives there is no contractual commitment for when service or data will be restored after a catastrophic outage.",
       "recommended_clause": "Provider shall maintain a business continuity and disaster recovery plan with a Recovery Time Objective (RTO) of not more than 4 hours and a Recovery Point Objective (RPO) of not more than 1 hour.",
       "evidence_snippet": "No disaster recovery SLA or RTO/RPO targets found."
     },
@@ -176,9 +959,9 @@
       "category": "data_security",
       "status": "VAGUE",
       "risk_level": "critical",
-      "why_it_matters": "Section 4.3 only requires notice 'without undue delay'. It lacks an explicit hour-based maximum window (e.g., within 24 to 72 hours). Without a strict timeframe, Customer may fail to meet mandatory regulatory reporting deadlines.",
+      "why_it_matters": "Breach notification should have an hour-based maximum (e.g. 24-72 hours). Wording such as 'without undue delay' may cause the customer to miss regulatory reporting deadlines.",
       "recommended_clause": "Provider shall notify Customer in writing without undue delay, and in any event within forty-eight (48) hours, after becoming aware of or confirming any Security Incident involving Customer Data.",
-      "evidence_snippet": "Section 4.3 specifies 'without undue delay', but omits an explicit hour-based SLA."
+      "evidence_snippet": "Provider shall notify Customer without undue delay after confirming a Security Incident involving unauthorized access to Customer Data and shall provide reasonably available information concerning the nature and scope of the incident."
     },
     {
       "check_id": "data-return-destruction-certification",
@@ -186,9 +969,9 @@
       "category": "data_security",
       "status": "MISSING",
       "risk_level": "high",
-      "why_it_matters": "The agreement permits Provider to retain backups for up to 180 days, but lacks an affirmative obligation for Provider to return all Customer Data upon expiration and certify permanent destruction in writing.",
+      "why_it_matters": "The provider should be obliged to return or destroy all customer data at the end of the contract and certify the destruction in writing.",
       "recommended_clause": "Within thirty (30) days of termination, Provider shall, at Customer's election, return or permanently and securely destroy all Customer Data, and deliver written certification of compliance signed by an officer of Provider.",
-      "evidence_snippet": "Permits 180-day backup retention, but lacks affirmative destruction certification."
+      "evidence_snippet": "No obligation to return or destroy customer data with written certification found."
     },
     {
       "check_id": "subcontractor-advance-notice",
@@ -196,9 +979,9 @@
       "category": "data_security",
       "status": "MISSING",
       "risk_level": "medium",
-      "why_it_matters": "Section 4.2 allows Provider to use subcontractors without prior notification or opportunity for Customer to object, which may violate Customer compliance standards or data residency policies.",
+      "why_it_matters": "Subcontractors processing customer data should require advance notice and a right to object, otherwise compliance or data-residency policies may be breached without the customer knowing.",
       "recommended_clause": "Provider shall provide Customer with at least thirty (30) days' prior written notice before engaging any new subcontractor to process Customer Data, and Customer may object on reasonable security or compliance grounds.",
-      "evidence_snippet": "Section 4.2 permits subcontractors without advance notice or objection rights."
+      "evidence_snippet": "Provider may use subcontractors to process Customer Data."
     },
     {
       "check_id": "force-majeure-termination",
@@ -206,9 +989,9 @@
       "category": "termination",
       "status": "MISSING",
       "risk_level": "medium",
-      "why_it_matters": "Section 15 suspends liability during Force Majeure events, but gives Customer no right to terminate the contract if the outage or failure lasts for an extended period (e.g., longer than 30 consecutive days).",
+      "why_it_matters": "If a force majeure event lasts a long time, the customer should be able to exit the contract instead of paying for services that cannot be delivered.",
       "recommended_clause": "If a Force Majeure event prevents performance of the Services for more than thirty (30) consecutive days, Customer may terminate this Agreement immediately upon written notice without penalty.",
-      "evidence_snippet": "Section 15 suspends performance but provides no exit right for extended outages."
+      "evidence_snippet": "Neither Party shall be liable for delay or failure to perform caused by events beyond its reasonable control, including natural disasters, war, terrorism, government action, widespread internet failures, or labor disruptions, provided that…"
     },
     {
       "check_id": "customer-convenience-termination-parity",
@@ -216,9 +999,9 @@
       "category": "termination",
       "status": "MISSING",
       "risk_level": "high",
-      "why_it_matters": "Provider can terminate for convenience at any time upon 15 days' notice, but Customer is barred from terminating during the first 12 months and must provide 60 days' notice thereafter.",
+      "why_it_matters": "When only one side can walk away for convenience, or on much shorter notice, the other side carries the risk of a sudden exit.",
       "recommended_clause": "Either Party may terminate this Agreement for convenience at any time upon sixty (60) days' prior written notice.",
-      "evidence_snippet": "Section 10.4 locks Customer for 12 months with 60-day notice, while Section 10.3 allows Provider 15-day exit."
+      "evidence_snippet": "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer. / Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice."
     },
     {
       "check_id": "cyber-insurance-requirements",
@@ -226,7 +1009,7 @@
       "category": "risk_management",
       "status": "MISSING",
       "risk_level": "medium",
-      "why_it_matters": "The agreement contains no requirement for Provider to maintain Technology Errors & Omissions or Cyber Liability insurance to backstop its indemnification and security commitments.",
+      "why_it_matters": "Technology Errors & Omissions and Cyber Liability insurance backstop the provider's indemnification and security commitments.",
       "recommended_clause": "Provider shall maintain commercial general liability insurance, technology errors & omissions, and cyber liability insurance with policy limits of not less than $5,000,000 per occurrence during the Term.",
       "evidence_snippet": "No insurance maintenance requirements found."
     },
@@ -236,9 +1019,9 @@
       "category": "confidentiality",
       "status": "PRESENT",
       "risk_level": "none",
-      "why_it_matters": "Standard core protection exists in the contract.",
-      "recommended_clause": "Clause present in Section 5.",
-      "evidence_snippet": "Section 5: CONFIDENTIALITY"
+      "why_it_matters": "A confidentiality clause is a standard core protection for both parties.",
+      "recommended_clause": "Each Party shall protect the other Party's Confidential Information using at least reasonable care and use it only to perform this Agreement.",
+      "evidence_snippet": "Each Party shall protect the other Party’s Confidential Information using at least reasonable care and shall use such information only to perform or receive rights under this Agreement."
     },
     {
       "check_id": "liability-clause-present",
@@ -246,9 +1029,9 @@
       "category": "liability",
       "status": "PRESENT",
       "risk_level": "none",
-      "why_it_matters": "Standard core protection exists in the contract.",
-      "recommended_clause": "Clause present in Section 9.",
-      "evidence_snippet": "Section 9: LIMITATION OF LIABILITY"
+      "why_it_matters": "A limitation of liability clause defines the maximum financial exposure of each party.",
+      "recommended_clause": "Each Party's aggregate liability shall not exceed the fees paid or payable during the twelve (12) months preceding the event giving rise to the claim.",
+      "evidence_snippet": "9. LIMITATION OF LIABILITY"
     },
     {
       "check_id": "termination-clause-present",
@@ -256,287 +1039,385 @@
       "category": "termination",
       "status": "PRESENT",
       "risk_level": "none",
-      "why_it_matters": "Standard core protection exists in the contract.",
-      "recommended_clause": "Clause present in Section 10.",
-      "evidence_snippet": "Section 10: TERMINATION"
+      "why_it_matters": "A termination clause defines how and when either party can end the agreement.",
+      "recommended_clause": "Either Party may terminate this Agreement for material breach that remains uncured 30 days after written notice.",
+      "evidence_snippet": "Either Party may terminate this Agreement for material breach if the breach remains uncured for 30 days after written notice describing the breach."
     }
   ],
   "clause_balance": [
     {
       "title": "Asymmetric Termination Rights",
-      "provider_terms": "Can terminate for convenience at any time upon 15 days' notice.",
-      "customer_terms": "Can terminate for convenience only after 12 months and upon 60 days' notice.",
-      "asymmetry_summary": "Severe asymmetry: Provider can exit after 15 days; Customer is locked in for 12 months with 60-day notice.",
+      "provider_terms": "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer.",
+      "customer_terms": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice.",
+      "asymmetry_summary": "The Provider has the right to terminate with shorter notice and without a waiting period, while the Customer faces longer notice and a waiting period.",
+      "page": 3
+    },
+    {
+      "title": "Automatic Renewal Clause",
+      "provider_terms": "The Provider benefits from automatic renewal, ensuring continued revenue.",
+      "customer_terms": "The Customer must actively manage their notice to avoid renewal.",
+      "asymmetry_summary": "The Provider has a significant advantage as the Customer must remember to notify for non-renewal.",
+      "page": 5
+    },
+    {
+      "title": "Data Retention After Deletion",
+      "provider_terms": "The Provider can retain backups for up to 180 days.",
+      "customer_terms": "The Customer has no control over the retention period of backups.",
+      "asymmetry_summary": "The Provider has significant rights to retain Customer Data without equivalent rights for the Customer.",
+      "page": 2
+    },
+    {
+      "title": "Ownership of Data and Intellectual Property",
+      "provider_terms": "Provider retains all right, title, and interest in the Services, software, models, templates, documentation, and Provider-developed technology.",
+      "customer_terms": "Customer retains all right, title, and interest in Customer Data.",
+      "asymmetry_summary": "The Provider has broader rights over its own technology compared to the Customer's rights over its data.",
+      "page": 2
+    },
+    {
+      "title": "Indemnification Obligations",
+      "provider_terms": "Provider defends Customer against specific intellectual property claims.",
+      "customer_terms": "Customer defends Provider against claims related to Customer Data or unlawful use.",
+      "asymmetry_summary": "The Provider's indemnification obligations are narrower than those of the Customer.",
       "page": 3
     }
   ],
   "obligations": {
     "provider_obligations": [
       {
-        "obligation_id": "obl-prov-uptime",
+        "obligation_id": "obl-001",
         "party": "Provider",
-        "duty": "Maintain 99.5% monthly availability for Services",
-        "timeframe_label": "Continuous monthly SLA",
-        "days": 0.0,
-        "section": "2. SERVICES AND SERVICE LEVELS",
-        "page": 1,
-        "quote": "Provider will use commercially reasonable efforts to maintain 99.5% monthly availability"
-      },
-      {
-        "obligation_id": "obl-prov-maint-notice",
-        "party": "Provider",
-        "duty": "Provide advance notice for scheduled maintenance",
-        "timeframe_label": "24 Hours notice",
-        "days": 1.0,
-        "section": "2. SERVICES AND SERVICE LEVELS",
-        "page": 1,
-        "quote": "Scheduled maintenance will normally be communicated at least 24 hours in advance."
-      },
-      {
-        "obligation_id": "obl-prov-subcontractors",
-        "party": "Provider",
-        "duty": "Remain fully responsible for acts and omissions of subcontractors",
+        "duty": "Provider shall provide the Services substantially in accordance with Schedule A.",
         "timeframe_label": "Ongoing",
-        "days": 0.0,
+        "days": null,
+        "section": "2. SERVICES AND SERVICE LEVELS",
+        "page": 1,
+        "quote": "Provider shall provide the Services substantially in accordance with Schedule A."
+      },
+      {
+        "obligation_id": "obl-002",
+        "party": "Provider",
+        "duty": "Provider will use commercially reasonable efforts to maintain 99.5% monthly availability, excluding scheduled maintenance, emergency maintenance, force majeure events, failures caused by Customer, and third-party…",
+        "timeframe_label": "Ongoing",
+        "days": null,
+        "section": "2. SERVICES AND SERVICE LEVELS",
+        "page": 1,
+        "quote": "Provider will use commercially reasonable efforts to maintain 99.5% monthly availability, excluding scheduled maintenance, emergency maintenance, force majeure events, failures caused by Customer, and third-party services outside Provider’s reasonable control."
+      },
+      {
+        "obligation_id": "obl-003",
+        "party": "Provider",
+        "duty": "Provider shall process Customer Data only to provide, secure, maintain, and improve the Services and to comply with applicable law.",
+        "timeframe_label": "Ongoing",
+        "days": null,
         "section": "4. DATA PROCESSING AND SECURITY",
         "page": 1,
+        "quote": "Provider shall process Customer Data only to provide, secure, maintain, and improve the Services and to comply with applicable law."
+      },
+      {
+        "obligation_id": "obl-004",
+        "party": "Provider",
+        "duty": "Provider shall implement reasonable administrative, technical, and physical safeguards",
+        "timeframe_label": "Ongoing",
+        "days": null,
+        "section": "4. DATA PROCESSING AND SECURITY",
+        "page": 1,
+        "quote": "Provider shall implement reasonable administrative, technical, and physical safeguards"
+      },
+      {
+        "obligation_id": "obl-005",
+        "party": "Provider",
+        "duty": "Provider remains responsible for the acts and omissions of its subcontractors to the same extent as if those acts or omissions were performed by Provider.",
+        "timeframe_label": "Ongoing",
+        "days": null,
+        "section": "4. DATA PROCESSING AND SECURITY",
+        "page": 2,
         "quote": "Provider remains responsible for the acts and omissions of its subcontractors to the same extent as if those acts or omissions were performed by Provider."
       },
       {
-        "obligation_id": "obl-prov-security-incident",
+        "obligation_id": "obl-006",
         "party": "Provider",
-        "duty": "Notify Customer of confirmed security incidents",
-        "timeframe_label": "Without undue delay",
-        "days": 0.0,
+        "duty": "Provider shall notify Customer without undue delay after confirming a Security Incident involving unauthorized access to Customer Data and shall provide reasonably available information concerning the nature and scope…",
+        "timeframe_label": "Ongoing",
+        "days": null,
         "section": "4. DATA PROCESSING AND SECURITY",
-        "page": 1,
-        "quote": "Provider shall notify Customer without undue delay after confirming a Security Incident involving unauthorized access to Customer Data"
+        "page": 2,
+        "quote": "Provider shall notify Customer without undue delay after confirming a Security Incident involving unauthorized access to Customer Data and shall provide reasonably available information concerning the nature and scope of the incident."
       },
       {
-        "obligation_id": "obl-prov-backup-retention",
+        "obligation_id": "obl-009",
         "party": "Provider",
-        "duty": "Delete backup copies within 180 days post-deletion",
-        "timeframe_label": "Up to 180 Days",
-        "days": 180.0,
-        "section": "4. DATA PROCESSING AND SECURITY",
-        "page": 1,
-        "quote": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems"
+        "duty": "Provider warrants that the Services will materially conform to the applicable documentation during the Term.",
+        "timeframe_label": "Ongoing",
+        "days": null,
+        "section": "7. WARRANTIES",
+        "page": 3,
+        "quote": "Provider warrants that the Services will materially conform to the applicable documentation during the Term."
       },
       {
-        "obligation_id": "obl-prov-ip-indemnity",
+        "obligation_id": "obl-010",
         "party": "Provider",
-        "duty": "Defend Customer against third-party registered IP infringement claims",
-        "timeframe_label": "Upon claim notice",
-        "days": 0.0,
+        "duty": "Provider shall defend Customer against a third-party claim alleging that the Services, when used as permitted by this Agreement, infringe a third party’s registered intellectual property right, and shall pay damages…",
+        "timeframe_label": "Ongoing",
+        "days": null,
         "section": "8. INDEMNIFICATION",
         "page": 3,
-        "quote": "Provider shall defend Customer against a third-party claim alleging that the Services... infringe a third party's registered intellectual property right"
-      },
-      {
-        "obligation_id": "obl-prov-audit-compliance",
-        "party": "Provider",
-        "duty": "Support annual security audit or provide third-party SOC/security report",
-        "timeframe_label": "Upon 20 business days' notice",
-        "days": 28.0,
-        "section": "18. AUDIT RIGHTS",
-        "page": 5,
-        "quote": "Customer may, no more than once per calendar year and upon 20 business days' prior written notice, audit Provider's compliance"
+        "quote": "Provider shall defend Customer against a third-party claim alleging that the Services, when used as permitted by this Agreement, infringe a third party’s registered intellectual property right, and shall pay damages finally awarded or settlements approved by Provider."
       }
     ],
     "customer_obligations": [
       {
-        "obligation_id": "obl-cust-payment",
+        "obligation_id": "obl-011",
         "party": "Customer",
-        "duty": "Pay invoices within 30 days of receipt",
-        "timeframe_label": "30 Days",
-        "days": 30.0,
-        "section": "3. FEES AND PAYMENT",
-        "page": 1,
-        "quote": "Invoices are payable within 30 days of receipt. Undisputed late amounts may accrue interest at 1.5% per month"
-      },
-      {
-        "obligation_id": "obl-cust-data-defense",
-        "party": "Customer",
-        "duty": "Defend Provider against claims arising from Customer Data or unlawful use",
-        "timeframe_label": "Upon claim notice",
-        "days": 0.0,
+        "duty": "Customer shall defend Provider against third-party claims arising from Customer Data or Customer’s unlawful use of the Services, and shall pay damages finally awarded or settlements approved by Customer.",
+        "timeframe_label": "Ongoing",
+        "days": null,
         "section": "8. INDEMNIFICATION",
         "page": 3,
-        "quote": "Customer shall defend Provider against third-party claims arising from Customer Data or Customer's unlawful use"
+        "quote": "Customer shall defend Provider against third-party claims arising from Customer Data or Customer’s unlawful use of the Services, and shall pay damages finally awarded or settlements approved by Customer."
       },
       {
-        "obligation_id": "obl-cust-non-solicitation",
+        "obligation_id": "obl-016",
         "party": "Customer",
-        "duty": "Refrain from soliciting Provider's employees during Term and for 24 months post-term",
-        "timeframe_label": "24 Months post-term",
-        "days": 730.0,
+        "duty": "During the Term and for 24 months thereafter, Customer shall not directly or indirectly solicit for employment any employee of Provider who materially participated in delivering the Services.",
+        "timeframe_label": "24 months",
+        "days": 729.6,
         "section": "11. NON-SOLICITATION",
         "page": 3,
-        "quote": "During the Term and for 24 months thereafter, Customer shall not directly or indirectly solicit for employment any employee of Provider"
-      },
-      {
-        "obligation_id": "obl-cust-non-renewal",
-        "party": "Customer",
-        "duty": "Provide written notice of non-renewal to prevent automatic 12-month extension",
-        "timeframe_label": "90 Days prior to expiration",
-        "days": 90.0,
-        "section": "14. TERM AND RENEWAL",
-        "page": 5,
-        "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew"
+        "quote": "During the Term and for 24 months thereafter, Customer shall not directly or indirectly solicit for employment any employee of Provider who materially participated in delivering the Services."
       }
     ],
     "mutual_obligations": [
       {
-        "obligation_id": "obl-mut-confidentiality",
+        "obligation_id": "obl-007",
         "party": "Mutual",
-        "duty": "Protect other party's Confidential Information with at least reasonable care",
-        "timeframe_label": "Ongoing during Term & post-term",
-        "days": 0.0,
+        "duty": "Each Party shall protect the other Party’s Confidential Information using at least reasonable care and shall use such information only to perform or receive rights under this Agreement.",
+        "timeframe_label": "Ongoing",
+        "days": null,
         "section": "5. CONFIDENTIALITY",
         "page": 2,
-        "quote": "Each Party shall protect the other Party's Confidential Information using at least reasonable care"
+        "quote": "Each Party shall protect the other Party’s Confidential Information using at least reasonable care and shall use such information only to perform or receive rights under this Agreement."
       },
       {
-        "obligation_id": "obl-mut-breach-cure",
+        "obligation_id": "obl-008",
         "party": "Mutual",
-        "duty": "Notice and opportunity to cure material breach before termination",
-        "timeframe_label": "30 Days cure period",
-        "days": 30.0,
-        "section": "10. TERMINATION",
+        "duty": "If disclosure is required by law, the receiving Party shall, where legally permitted, provide prompt notice and reasonable cooperation so the disclosing Party may seek protective relief.",
+        "timeframe_label": "Ongoing",
+        "days": null,
+        "section": "5. CONFIDENTIALITY",
+        "page": 2,
+        "quote": "If disclosure is required by law, the receiving Party shall, where legally permitted, provide prompt notice and reasonable cooperation so the disclosing Party may seek protective relief."
+      },
+      {
+        "obligation_id": "obl-012",
+        "party": "Mutual",
+        "duty": "The indemnified Party shall promptly notify the indemnifying Party of a claim and provide reasonable cooperation.",
+        "timeframe_label": "Ongoing",
+        "days": null,
+        "section": "8. INDEMNIFICATION",
         "page": 3,
-        "quote": "Either Party may terminate this Agreement for material breach if the breach remains uncured for 30 days after written notice"
+        "quote": "The indemnified Party shall promptly notify the indemnifying Party of a claim and provide reasonable cooperation."
       },
       {
-        "obligation_id": "obl-mut-negotiation",
+        "obligation_id": "obl-013",
         "party": "Mutual",
-        "duty": "Executive-level good-faith dispute resolution before commencing arbitration",
-        "timeframe_label": "30 Days negotiation period",
-        "days": 30.0,
+        "duty": "The indemnifying Party shall control the defense, provided it may not settle a claim in a manner that admits liability or imposes non-monetary obligations on the indemnified Party without consent.",
+        "timeframe_label": "Ongoing",
+        "days": null,
+        "section": "8. INDEMNIFICATION",
+        "page": 3,
+        "quote": "The indemnifying Party shall control the defense, provided it may not settle a claim in a manner that admits liability or imposes non-monetary obligations on the indemnified Party without consent."
+      },
+      {
+        "obligation_id": "obl-014",
+        "party": "Mutual",
+        "duty": "TO THE MAXIMUM EXTENT PERMITTED BY LAW, NEITHER PARTY SHALL BE LIABLE FOR INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, OR FOR LOST PROFITS, REVENUE, OR DATA.",
+        "timeframe_label": "Ongoing",
+        "days": null,
+        "section": "9. LIMITATION OF LIABILITY",
+        "page": 3,
+        "quote": "TO THE MAXIMUM EXTENT PERMITTED BY LAW, NEITHER PARTY SHALL BE LIABLE FOR INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, OR FOR LOST PROFITS, REVENUE, OR DATA."
+      },
+      {
+        "obligation_id": "obl-015",
+        "party": "Mutual",
+        "duty": "EXCEPT FOR CUSTOMER’S PAYMENT OBLIGATIONS, EACH PARTY’S AGGREGATE LIABILITY ARISING OUT OF OR RELATING TO THIS AGREEMENT SHALL NOT EXCEED THE FEES PAID OR PAYABLE BY CUSTOMER TO PROVIDER DURING THE THREE MONTHS…",
+        "timeframe_label": "THREE MONTHS",
+        "days": 91.2,
+        "section": "9. LIMITATION OF LIABILITY",
+        "page": 3,
+        "quote": "EXCEPT FOR CUSTOMER’S PAYMENT OBLIGATIONS, EACH PARTY’S AGGREGATE LIABILITY ARISING OUT OF OR RELATING TO THIS AGREEMENT SHALL NOT EXCEED THE FEES PAID OR PAYABLE BY CUSTOMER TO PROVIDER DURING THE THREE MONTHS PRECEDING THE EVENT GIVING RISE TO THE CLAIM."
+      },
+      {
+        "obligation_id": "obl-017",
+        "party": "Mutual",
+        "duty": "The Parties shall first attempt in good faith to resolve disputes through executive-level negotiation.",
+        "timeframe_label": "Ongoing",
+        "days": null,
         "section": "12. GOVERNING LAW AND DISPUTES",
         "page": 3,
-        "quote": "The Parties shall first attempt in good faith to resolve disputes through executive-level negotiation. If a dispute is not resolved within 30 days, it shall be finally resolved by arbitration"
+        "quote": "The Parties shall first attempt in good faith to resolve disputes through executive-level negotiation."
+      },
+      {
+        "obligation_id": "obl-018",
+        "party": "Mutual",
+        "duty": "Neither Party shall be liable for delay or failure to perform caused by events beyond its reasonable control, including natural disasters, war, terrorism, government action, widespread internet failures, or labor…",
+        "timeframe_label": "Ongoing",
+        "days": null,
+        "section": "15. FORCE MAJEURE",
+        "page": 5,
+        "quote": "Neither Party shall be liable for delay or failure to perform caused by events beyond its reasonable control, including natural disasters, war, terrorism, government action, widespread internet failures, or labor disruptions, provided that the affected Party uses reasonable efforts to mitigate the effects."
       }
     ],
     "timeline": [
       {
-        "event_id": "time-24h",
-        "period_label": "24 Hours",
+        "event_id": "time-001",
+        "period_label": "24 hours",
         "days": 1.0,
-        "party": "Provider",
-        "action": "Advance notification required for scheduled maintenance",
+        "party": "General",
+        "action": "Scheduled maintenance will normally be communicated at least 24 hours in advance.",
         "section": "2. SERVICES AND SERVICE LEVELS",
         "page": 1,
         "quote": "Scheduled maintenance will normally be communicated at least 24 hours in advance."
       },
       {
-        "event_id": "time-15d-suspension",
-        "period_label": "15 Days",
-        "days": 15.0,
+        "event_id": "time-004",
+        "period_label": "7 days",
+        "days": 7.0,
         "party": "Provider",
-        "action": "Right to suspend service for invoices overdue by more than 15 days (with 7 days notice)",
+        "action": "Provider may suspend access for invoices more than 15 days overdue after providing Customer with at least 7 days’ written notice and an opportunity to cure.",
         "section": "3. FEES AND PAYMENT",
         "page": 1,
-        "quote": "Provider may suspend access for invoices more than 15 days overdue after providing Customer with at least 7 days' written notice"
+        "quote": "Provider may suspend access for invoices more than 15 days overdue after providing Customer with at least 7 days’ written notice and an opportunity to cure."
       },
       {
-        "event_id": "time-15d-termination",
-        "period_label": "15 Days",
+        "event_id": "time-003",
+        "period_label": "15 days",
         "days": 15.0,
         "party": "Provider",
-        "action": "Can terminate agreement for convenience at any time upon 15 days' written notice",
+        "action": "Provider may suspend access for invoices more than 15 days overdue after providing Customer with at least 7 days’ written notice and an opportunity to cure.",
+        "section": "3. FEES AND PAYMENT",
+        "page": 1,
+        "quote": "Provider may suspend access for invoices more than 15 days overdue after providing Customer with at least 7 days’ written notice and an opportunity to cure."
+      },
+      {
+        "event_id": "time-008",
+        "period_label": "15 days",
+        "days": 15.0,
+        "party": "Provider",
+        "action": "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer.",
         "section": "10. TERMINATION",
         "page": 3,
-        "quote": "Provider may terminate this Agreement for convenience at any time upon 15 days' written notice to Customer."
+        "quote": "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer."
       },
       {
-        "event_id": "time-20d-audit",
-        "period_label": "20 Business Days (~28 Days)",
+        "event_id": "time-015",
+        "period_label": "20 business days",
         "days": 28.0,
         "party": "Customer",
-        "action": "Prior written notice required to audit Provider's security compliance",
+        "action": "Customer may, no more than once per calendar year and upon 20 business days’ prior written notice, audit Provider’s compliance with the security obligations in Section 4. Provider may satisfy the request by providing an…",
         "section": "18. AUDIT RIGHTS",
         "page": 5,
-        "quote": "Customer may, no more than once per calendar year and upon 20 business days' prior written notice, audit Provider's compliance"
+        "quote": "Customer may, no more than once per calendar year and upon 20 business days’ prior written notice, audit Provider’s compliance with the security obligations in Section 4. Provider may satisfy the request by providing an independent third-party security report where reasonably sufficient to address the requested controls."
       },
       {
-        "event_id": "time-30d-invoice",
-        "period_label": "30 Days",
+        "event_id": "time-002",
+        "period_label": "30 days",
         "days": 30.0,
-        "party": "Customer",
-        "action": "Invoice payment due window from date of receipt",
+        "party": "General",
+        "action": "Invoices are payable within 30 days of receipt.",
         "section": "3. FEES AND PAYMENT",
         "page": 1,
         "quote": "Invoices are payable within 30 days of receipt."
       },
       {
-        "event_id": "time-30d-cure",
-        "period_label": "30 Days",
+        "event_id": "time-007",
+        "period_label": "30 days",
         "days": 30.0,
         "party": "Mutual",
-        "action": "Written cure period following notice of material breach before termination takes effect",
+        "action": "Either Party may terminate this Agreement for material breach if the breach remains uncured for 30 days after written notice describing the breach.",
         "section": "10. TERMINATION",
         "page": 3,
-        "quote": "if the breach remains uncured for 30 days after written notice describing the breach."
+        "quote": "Either Party may terminate this Agreement for material breach if the breach remains uncured for 30 days after written notice describing the breach."
       },
       {
-        "event_id": "time-30d-dispute",
-        "period_label": "30 Days",
+        "event_id": "time-012",
+        "period_label": "30 days",
         "days": 30.0,
-        "party": "Mutual",
-        "action": "Mandatory executive negotiation window before dispute can be referred to arbitration",
+        "party": "General",
+        "action": "If a dispute is not resolved within 30 days, it shall be finally resolved by arbitration in Bengaluru, India, by a sole arbitrator",
         "section": "12. GOVERNING LAW AND DISPUTES",
         "page": 3,
-        "quote": "If a dispute is not resolved within 30 days, it shall be finally resolved by arbitration in Bengaluru"
+        "quote": "If a dispute is not resolved within 30 days, it shall be finally resolved by arbitration in Bengaluru, India, by a sole arbitrator"
       },
       {
-        "event_id": "time-60d-cust-termination",
-        "period_label": "60 Days",
+        "event_id": "time-010",
+        "period_label": "60 days",
         "days": 60.0,
         "party": "Customer",
-        "action": "Convenience termination notice period (only exercisable after the first 12 months)",
+        "action": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice.",
         "section": "10. TERMINATION",
         "page": 3,
-        "quote": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days' written notice."
+        "quote": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice."
       },
       {
-        "event_id": "time-90d-renewal",
-        "period_label": "90 Days",
+        "event_id": "time-013",
+        "period_label": "90 days",
         "days": 90.0,
-        "party": "Either Party",
-        "action": "Written non-renewal notice required to prevent automatic 12-month extension",
+        "party": "Mutual",
+        "action": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods.",
         "section": "14. TERM AND RENEWAL",
         "page": 5,
-        "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew"
+        "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods."
       },
       {
-        "event_id": "time-180d-backup",
-        "period_label": "180 Days",
+        "event_id": "time-006",
+        "period_label": "THREE MONTHS",
+        "days": 91.2,
+        "party": "Mutual",
+        "action": "EXCEPT FOR CUSTOMER’S PAYMENT OBLIGATIONS, EACH PARTY’S AGGREGATE LIABILITY ARISING OUT OF OR RELATING TO THIS AGREEMENT SHALL NOT EXCEED THE FEES PAID OR PAYABLE BY CUSTOMER TO PROVIDER DURING THE THREE MONTHS…",
+        "section": "9. LIMITATION OF LIABILITY",
+        "page": 3,
+        "quote": "EXCEPT FOR CUSTOMER’S PAYMENT OBLIGATIONS, EACH PARTY’S AGGREGATE LIABILITY ARISING OUT OF OR RELATING TO THIS AGREEMENT SHALL NOT EXCEED THE FEES PAID OR PAYABLE BY CUSTOMER TO PROVIDER DURING THE THREE MONTHS PRECEDING THE EVENT GIVING RISE TO THE CLAIM."
+      },
+      {
+        "event_id": "time-005",
+        "period_label": "180 days",
         "days": 180.0,
         "party": "Provider",
-        "action": "Maximum retention period for Customer Data in disaster-recovery backups after deletion",
+        "action": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems, provided such copies remain protected and are not restored except for disaster recovery purposes.",
         "section": "4. DATA PROCESSING AND SECURITY",
-        "page": 1,
-        "quote": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems"
+        "page": 2,
+        "quote": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems, provided such copies remain protected and are not restored except for disaster recovery purposes."
       },
       {
-        "event_id": "time-24m-term",
-        "period_label": "24 Months",
-        "days": 730.0,
+        "event_id": "time-009",
+        "period_label": "12 months",
+        "days": 364.8,
+        "party": "Customer",
+        "action": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice.",
+        "section": "10. TERMINATION",
+        "page": 3,
+        "quote": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice."
+      },
+      {
+        "event_id": "time-014",
+        "period_label": "12-month",
+        "days": 364.8,
         "party": "Mutual",
-        "action": "Initial contract term duration from the Agreement Date",
+        "action": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods.",
         "section": "14. TERM AND RENEWAL",
         "page": 5,
-        "quote": "The initial Term begins on the Agreement Date and continues for 24 months."
+        "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods."
       },
       {
-        "event_id": "time-24m-nonsolicit",
-        "period_label": "24 Months (Post-Term)",
-        "days": 730.0,
+        "event_id": "time-011",
+        "period_label": "24 months",
+        "days": 729.6,
         "party": "Customer",
-        "action": "Employee non-solicitation restriction continues for 24 months post contract expiration",
+        "action": "During the Term and for 24 months thereafter, Customer shall not directly or indirectly solicit for employment any employee of Provider who materially participated in delivering the Services.",
         "section": "11. NON-SOLICITATION",
         "page": 3,
-        "quote": "During the Term and for 24 months thereafter, Customer shall not directly or indirectly solicit for employment any employee of Provider"
+        "quote": "During the Term and for 24 months thereafter, Customer shall not directly or indirectly solicit for employment any employee of Provider who materially participated in delivering the Services."
       }
     ]
   },
@@ -577,14 +1458,14 @@
           "risk_title": "Overage Fee Exposure",
           "severity": "medium",
           "page_number": 1,
-          "observation": "Standard tier charges ₹12 per document overage, which is 140% higher than the Enterprise overage rate (₹5/doc). Unanticipated processing spikes could result in unpredictable monthly invoice surges.",
-          "recommendation": "Negotiate a monthly overage cap (e.g., maximum 20% over base fee) or an automatic tier bump mechanism when usage consistently exceeds included quota."
+          "observation": "The Standard tier overage rate (₹12 / document) is 140% higher than the Enterprise tier rate (₹5 / document). Usage spikes on a lower tier could cause unpredictable invoice increases.",
+          "recommendation": "Negotiate a monthly overage cap or an automatic tier upgrade when usage consistently exceeds the included quota."
         },
         {
-          "risk_title": "Absence of Price Protection / Cap on Renewal",
+          "risk_title": "No Price Increase Cap",
           "severity": "medium",
           "page_number": 1,
-          "observation": "The pricing table does not define annual fee adjustment limits (e.g. CPI or maximum 3-5% increase). Upon automatic renewal, Provider is not contractually restricted from raising monthly tier fees.",
+          "observation": "Neither this pricing table nor the rest of the contract limits annual fee increases (e.g. a CPI link or a maximum percentage), so fees could rise on renewal.",
           "recommendation": "Insert a price escalation cap: 'Fees shall not increase by more than 3% annually upon renewal.'"
         }
       ]
@@ -712,62 +1593,14 @@
         }
       },
       {
-        "id": "asset-customer-data",
-        "label": "Customer Data & Confidential Assets",
-        "node_type": "asset",
-        "properties": {
-          "node_type": "asset",
-          "label": "Customer Data & Confidential Assets",
-          "properties": {
-            "nature": "Confidential / IP"
-          }
-        }
-      },
-      {
-        "id": "asset-services",
-        "label": "Cloud & Hosted Services",
-        "node_type": "asset",
-        "properties": {
-          "node_type": "asset",
-          "label": "Cloud & Hosted Services",
-          "properties": {
-            "nature": "Service Infrastructure"
-          }
-        }
-      },
-      {
-        "id": "asset-ip-rights",
-        "label": "Intellectual Property & Brand Rights",
-        "node_type": "asset",
-        "properties": {
-          "node_type": "asset",
-          "label": "Intellectual Property & Brand Rights",
-          "properties": {
-            "nature": "IP & Trademark"
-          }
-        }
-      },
-      {
-        "id": "concept-invoices",
-        "label": "Invoices & Payment Consideration",
-        "node_type": "asset",
-        "properties": {
-          "node_type": "asset",
-          "label": "Invoices & Payment Consideration",
-          "properties": {
-            "nature": "Commercial Consideration"
-          }
-        }
-      },
-      {
-        "id": "term-time-24h",
-        "label": "24 Hours",
+        "id": "term-time-001",
+        "label": "24 hours",
         "node_type": "term_metric",
         "properties": {
           "node_type": "term_metric",
-          "label": "24 Hours",
+          "label": "24 hours",
           "properties": {
-            "action": "Advance notification required for scheduled maintenance",
+            "action": "Scheduled maintenance will normally be communicated at least 24 hours in advance.",
             "days": 1.0,
             "section": "2. SERVICES AND SERVICE LEVELS",
             "page": 1
@@ -775,14 +1608,29 @@
         }
       },
       {
-        "id": "term-time-15d-suspension",
-        "label": "15 Days",
+        "id": "term-time-004",
+        "label": "7 days",
         "node_type": "term_metric",
         "properties": {
           "node_type": "term_metric",
-          "label": "15 Days",
+          "label": "7 days",
           "properties": {
-            "action": "Right to suspend service for invoices overdue by more than 15 days (with 7 days notice)",
+            "action": "Provider may suspend access for invoices more than 15 days overdue after providing Customer with at least 7 days’ written notice and an opportunity to cure.",
+            "days": 7.0,
+            "section": "3. FEES AND PAYMENT",
+            "page": 1
+          }
+        }
+      },
+      {
+        "id": "term-time-003",
+        "label": "15 days",
+        "node_type": "term_metric",
+        "properties": {
+          "node_type": "term_metric",
+          "label": "15 days",
+          "properties": {
+            "action": "Provider may suspend access for invoices more than 15 days overdue after providing Customer with at least 7 days’ written notice and an opportunity to cure.",
             "days": 15.0,
             "section": "3. FEES AND PAYMENT",
             "page": 1
@@ -790,14 +1638,14 @@
         }
       },
       {
-        "id": "term-time-15d-termination",
-        "label": "15 Days",
+        "id": "term-time-008",
+        "label": "15 days",
         "node_type": "term_metric",
         "properties": {
           "node_type": "term_metric",
-          "label": "15 Days",
+          "label": "15 days",
           "properties": {
-            "action": "Can terminate agreement for convenience at any time upon 15 days' written notice",
+            "action": "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer.",
             "days": 15.0,
             "section": "10. TERMINATION",
             "page": 3
@@ -805,14 +1653,14 @@
         }
       },
       {
-        "id": "term-time-20d-audit",
-        "label": "20 Business Days (~28 Days)",
+        "id": "term-time-015",
+        "label": "20 business days",
         "node_type": "term_metric",
         "properties": {
           "node_type": "term_metric",
-          "label": "20 Business Days (~28 Days)",
+          "label": "20 business days",
           "properties": {
-            "action": "Prior written notice required to audit Provider's security compliance",
+            "action": "Customer may, no more than once per calendar year and upon 20 business days’ prior written notice, audit Provider’s compliance with the security obligations in Section 4. Provider may satisfy the request by providing an…",
             "days": 28.0,
             "section": "18. AUDIT RIGHTS",
             "page": 5
@@ -820,14 +1668,14 @@
         }
       },
       {
-        "id": "term-time-30d-invoice",
-        "label": "30 Days",
+        "id": "term-time-002",
+        "label": "30 days",
         "node_type": "term_metric",
         "properties": {
           "node_type": "term_metric",
-          "label": "30 Days",
+          "label": "30 days",
           "properties": {
-            "action": "Invoice payment due window from date of receipt",
+            "action": "Invoices are payable within 30 days of receipt.",
             "days": 30.0,
             "section": "3. FEES AND PAYMENT",
             "page": 1
@@ -835,14 +1683,14 @@
         }
       },
       {
-        "id": "term-time-30d-cure",
-        "label": "30 Days",
+        "id": "term-time-007",
+        "label": "30 days",
         "node_type": "term_metric",
         "properties": {
           "node_type": "term_metric",
-          "label": "30 Days",
+          "label": "30 days",
           "properties": {
-            "action": "Written cure period following notice of material breach before termination takes effect",
+            "action": "Either Party may terminate this Agreement for material breach if the breach remains uncured for 30 days after written notice describing the breach.",
             "days": 30.0,
             "section": "10. TERMINATION",
             "page": 3
@@ -850,14 +1698,14 @@
         }
       },
       {
-        "id": "term-time-30d-dispute",
-        "label": "30 Days",
+        "id": "term-time-012",
+        "label": "30 days",
         "node_type": "term_metric",
         "properties": {
           "node_type": "term_metric",
-          "label": "30 Days",
+          "label": "30 days",
           "properties": {
-            "action": "Mandatory executive negotiation window before dispute can be referred to arbitration",
+            "action": "If a dispute is not resolved within 30 days, it shall be finally resolved by arbitration in Bengaluru, India, by a sole arbitrator",
             "days": 30.0,
             "section": "12. GOVERNING LAW AND DISPUTES",
             "page": 3
@@ -865,14 +1713,14 @@
         }
       },
       {
-        "id": "term-time-60d-cust-termination",
-        "label": "60 Days",
+        "id": "term-time-010",
+        "label": "60 days",
         "node_type": "term_metric",
         "properties": {
           "node_type": "term_metric",
-          "label": "60 Days",
+          "label": "60 days",
           "properties": {
-            "action": "Convenience termination notice period (only exercisable after the first 12 months)",
+            "action": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice.",
             "days": 60.0,
             "section": "10. TERMINATION",
             "page": 3
@@ -880,14 +1728,14 @@
         }
       },
       {
-        "id": "term-time-90d-renewal",
-        "label": "90 Days",
+        "id": "term-time-013",
+        "label": "90 days",
         "node_type": "term_metric",
         "properties": {
           "node_type": "term_metric",
-          "label": "90 Days",
+          "label": "90 days",
           "properties": {
-            "action": "Written non-renewal notice required to prevent automatic 12-month extension",
+            "action": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods.",
             "days": 90.0,
             "section": "14. TERM AND RENEWAL",
             "page": 5
@@ -895,45 +1743,75 @@
         }
       },
       {
-        "id": "term-time-180d-backup",
-        "label": "180 Days",
+        "id": "term-time-006",
+        "label": "THREE MONTHS",
         "node_type": "term_metric",
         "properties": {
           "node_type": "term_metric",
-          "label": "180 Days",
+          "label": "THREE MONTHS",
           "properties": {
-            "action": "Maximum retention period for Customer Data in disaster-recovery backups after deletion",
-            "days": 180.0,
-            "section": "4. DATA PROCESSING AND SECURITY",
-            "page": 1
+            "action": "EXCEPT FOR CUSTOMER’S PAYMENT OBLIGATIONS, EACH PARTY’S AGGREGATE LIABILITY ARISING OUT OF OR RELATING TO THIS AGREEMENT SHALL NOT EXCEED THE FEES PAID OR PAYABLE BY CUSTOMER TO PROVIDER DURING THE THREE MONTHS…",
+            "days": 91.2,
+            "section": "9. LIMITATION OF LIABILITY",
+            "page": 3
           }
         }
       },
       {
-        "id": "term-time-24m-term",
-        "label": "24 Months",
+        "id": "term-time-005",
+        "label": "180 days",
         "node_type": "term_metric",
         "properties": {
           "node_type": "term_metric",
-          "label": "24 Months",
+          "label": "180 days",
           "properties": {
-            "action": "Initial contract term duration from the Agreement Date",
-            "days": 730.0,
+            "action": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems, provided such copies remain protected and are not restored except for disaster recovery purposes.",
+            "days": 180.0,
+            "section": "4. DATA PROCESSING AND SECURITY",
+            "page": 2
+          }
+        }
+      },
+      {
+        "id": "term-time-009",
+        "label": "12 months",
+        "node_type": "term_metric",
+        "properties": {
+          "node_type": "term_metric",
+          "label": "12 months",
+          "properties": {
+            "action": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice.",
+            "days": 364.8,
+            "section": "10. TERMINATION",
+            "page": 3
+          }
+        }
+      },
+      {
+        "id": "term-time-014",
+        "label": "12-month",
+        "node_type": "term_metric",
+        "properties": {
+          "node_type": "term_metric",
+          "label": "12-month",
+          "properties": {
+            "action": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods.",
+            "days": 364.8,
             "section": "14. TERM AND RENEWAL",
             "page": 5
           }
         }
       },
       {
-        "id": "term-time-24m-nonsolicit",
-        "label": "24 Months (Post-Term)",
+        "id": "term-time-011",
+        "label": "24 months",
         "node_type": "term_metric",
         "properties": {
           "node_type": "term_metric",
-          "label": "24 Months (Post-Term)",
+          "label": "24 months",
           "properties": {
-            "action": "Employee non-solicitation restriction continues for 24 months post contract expiration",
-            "days": 730.0,
+            "action": "During the Term and for 24 months thereafter, Customer shall not directly or indirectly solicit for employment any employee of Provider who materially participated in delivering the Services.",
+            "days": 729.6,
             "section": "11. NON-SOLICITATION",
             "page": 3
           }
@@ -946,22 +1824,22 @@
         "properties": {
           "node_type": "risk_finding",
           "label": "Asymmetric Termination Rights",
-          "severity": "medium",
+          "severity": "high",
           "bucket": "deal_breaker",
-          "category": "contractual risk",
-          "claim": "The Provider has the right to terminate for convenience with 15 days' notice, while the Customer can only terminate for convenience after 12 months with 60 days' notice.",
-          "plain_english": "The Provider can walk away from the contract at any time with only 15 days' notice, giving your business very little time to find an alternative vendor or migrate your data."
+          "category": "high",
+          "claim": "The Provider has more favorable termination rights compared to the Customer, allowing for termination for convenience with shorter notice.",
+          "plain_english": "The Provider can end the contract quickly, while the Customer has to wait longer and give more notice, which is unfair."
         }
       },
       {
-        "id": "clause-contractual risk",
-        "label": "Clause: Contractual Risk",
+        "id": "clause-high",
+        "label": "Clause: 10. TERMINATION",
         "node_type": "clause",
         "properties": {
           "node_type": "clause",
-          "label": "Clause: Contractual Risk",
+          "label": "Clause: 10. TERMINATION",
           "properties": {
-            "section": "Contractual Risk"
+            "section": "10. TERMINATION"
           }
         }
       },
@@ -977,6 +1855,180 @@
         }
       },
       {
+        "id": "finding-002",
+        "label": "Aggregate Liability Cap Analysis",
+        "node_type": "risk_finding",
+        "properties": {
+          "node_type": "risk_finding",
+          "label": "Aggregate Liability Cap Analysis",
+          "severity": "high",
+          "bucket": "watch_out",
+          "category": "high",
+          "claim": "The aggregate liability cap is limited to the fees paid or payable by the Customer during the three months preceding the event giving rise to the claim.",
+          "plain_english": "If something goes wrong, the most you can get back is what you paid for the last three months, which might not be enough to cover your losses."
+        }
+      },
+      {
+        "id": "evidence-chunk-0011",
+        "label": "chunk-0011",
+        "node_type": "evidence",
+        "properties": {
+          "node_type": "evidence",
+          "label": "chunk-0011",
+          "page_number": 3,
+          "quote": "EXCEPT FOR CUSTOMER’S PAYMENT OBLIGATIONS, EACH PARTY’S AGGREGATE LIABILITY ARISING OUT OF OR RELATING TO THIS AGREEMENT SHALL NOT EXCEED THE FEES PAID OR PAYABLE BY CUSTOMER TO PROVIDER DURING THE THREE MONTHS PRECEDING THE EVENT GIVING RISE TO THE CLAIM."
+        }
+      },
+      {
+        "id": "finding-003",
+        "label": "Automatic Renewal Clause",
+        "node_type": "risk_finding",
+        "properties": {
+          "node_type": "risk_finding",
+          "label": "Automatic Renewal Clause",
+          "severity": "medium",
+          "bucket": "watch_out",
+          "category": "medium",
+          "claim": "The contract automatically renews unless the Customer provides a non-renewal notice at least 90 days before expiration.",
+          "plain_english": "If the Customer doesn't notify the Provider 90 days before the contract ends, it will automatically renew for another year."
+        }
+      },
+      {
+        "id": "clause-medium",
+        "label": "Clause: 14. TERM AND RENEWAL",
+        "node_type": "clause",
+        "properties": {
+          "node_type": "clause",
+          "label": "Clause: 14. TERM AND RENEWAL",
+          "properties": {
+            "section": "14. TERM AND RENEWAL"
+          }
+        }
+      },
+      {
+        "id": "evidence-chunk-0017",
+        "label": "chunk-0017",
+        "node_type": "evidence",
+        "properties": {
+          "node_type": "evidence",
+          "label": "chunk-0017",
+          "page_number": 5,
+          "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods."
+        }
+      },
+      {
+        "id": "finding-004",
+        "label": "Data Retention After Deletion",
+        "node_type": "risk_finding",
+        "properties": {
+          "node_type": "risk_finding",
+          "label": "Data Retention After Deletion",
+          "severity": "high",
+          "bucket": "watch_out",
+          "category": "high",
+          "claim": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems.",
+          "plain_english": "The Provider can keep your data backups for up to 180 days even after you delete it, which could be a privacy concern."
+        }
+      },
+      {
+        "id": "evidence-chunk-0006",
+        "label": "chunk-0006",
+        "node_type": "evidence",
+        "properties": {
+          "node_type": "evidence",
+          "label": "chunk-0006",
+          "page_number": 2,
+          "quote": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems, provided such copies remain protected and are not restored except for disaster recovery purposes."
+        }
+      },
+      {
+        "id": "finding-005",
+        "label": "Bilateral Confidentiality Obligations",
+        "node_type": "protection",
+        "properties": {
+          "node_type": "protection",
+          "label": "Bilateral Confidentiality Obligations",
+          "severity": "medium",
+          "bucket": "protection",
+          "category": "confidentiality",
+          "claim": "The confidentiality obligations are bilateral and mutual, requiring each party to protect the other's confidential information.",
+          "plain_english": "Both parties must keep each other's confidential information safe, which is a good protection for the Customer."
+        }
+      },
+      {
+        "id": "clause-confidentiality",
+        "label": "Clause: 5. CONFIDENTIALITY",
+        "node_type": "clause",
+        "properties": {
+          "node_type": "clause",
+          "label": "Clause: 5. CONFIDENTIALITY",
+          "properties": {
+            "section": "5. CONFIDENTIALITY"
+          }
+        }
+      },
+      {
+        "id": "evidence-chunk-0007",
+        "label": "chunk-0007",
+        "node_type": "evidence",
+        "properties": {
+          "node_type": "evidence",
+          "label": "chunk-0007",
+          "page_number": 2,
+          "quote": "Each Party shall protect the other Party’s Confidential Information using at least reasonable care and shall use such information only to perform or receive rights under this Agreement."
+        }
+      },
+      {
+        "id": "finding-006",
+        "label": "Ownership of Data and Intellectual Property",
+        "node_type": "protection",
+        "properties": {
+          "node_type": "protection",
+          "label": "Ownership of Data and Intellectual Property",
+          "severity": "high",
+          "bucket": "protection",
+          "category": "high",
+          "claim": "Customer retains ownership of Customer Data, while Provider retains ownership of its own technology and services.",
+          "plain_english": "The Customer owns its data, while the Provider owns its technology and services, which is a good protection for the Customer."
+        }
+      },
+      {
+        "id": "evidence-chunk-0008",
+        "label": "chunk-0008",
+        "node_type": "evidence",
+        "properties": {
+          "node_type": "evidence",
+          "label": "chunk-0008",
+          "page_number": 2,
+          "quote": "Customer retains all right, title, and interest in Customer Data. Provider retains all right, title, and interest in the Services, software, models, templates, documentation, and Provider-developed technology."
+        }
+      },
+      {
+        "id": "finding-007",
+        "label": "Indemnification Obligations",
+        "node_type": "risk_finding",
+        "properties": {
+          "node_type": "risk_finding",
+          "label": "Indemnification Obligations",
+          "severity": "high",
+          "bucket": "watch_out",
+          "category": "high",
+          "claim": "The Provider is obligated to defend the Customer against certain third-party claims, while the Customer must defend the Provider against other claims, creating a significant one-sided exposure for the Customer.",
+          "plain_english": "The Customer has to defend the Provider against certain claims, which could expose them to significant liability, while the Provider's obligations are more limited."
+        }
+      },
+      {
+        "id": "evidence-chunk-0010",
+        "label": "chunk-0010",
+        "node_type": "evidence",
+        "properties": {
+          "node_type": "evidence",
+          "label": "chunk-0010",
+          "page_number": 3,
+          "quote": "8.1 Provider shall defend Customer against a third-party claim alleging that the Services, when used as permitted by this Agreement, infringe a third party’s registered intellectual property right, and shall pay damages finally awarded or settlements approved by Provider."
+        }
+      },
+      {
         "id": "gap-disaster-recovery-sla",
         "label": "Missing: Disaster Recovery SLA & RTO/RPO",
         "node_type": "missing_protection",
@@ -989,7 +2041,7 @@
             "category": "business_continuity",
             "status": "MISSING",
             "risk_level": "high",
-            "why_it_matters": "The contract does not define explicit Recovery Time Objectives (RTO) or Recovery Point Objectives (RPO). If Provider suffers a catastrophic datacenter outage, there is no contractual commitment for when service or data will be restored.",
+            "why_it_matters": "Without explicit Recovery Time / Recovery Point Objectives there is no contractual commitment for when service or data will be restored after a catastrophic outage.",
             "recommended_clause": "Provider shall maintain a business continuity and disaster recovery plan with a Recovery Time Objective (RTO) of not more than 4 hours and a Recovery Point Objective (RPO) of not more than 1 hour.",
             "evidence_snippet": "No disaster recovery SLA or RTO/RPO targets found."
           }
@@ -1008,9 +2060,9 @@
             "category": "data_security",
             "status": "MISSING",
             "risk_level": "high",
-            "why_it_matters": "The agreement permits Provider to retain backups for up to 180 days, but lacks an affirmative obligation for Provider to return all Customer Data upon expiration and certify permanent destruction in writing.",
+            "why_it_matters": "The provider should be obliged to return or destroy all customer data at the end of the contract and certify the destruction in writing.",
             "recommended_clause": "Within thirty (30) days of termination, Provider shall, at Customer's election, return or permanently and securely destroy all Customer Data, and deliver written certification of compliance signed by an officer of Provider.",
-            "evidence_snippet": "Permits 180-day backup retention, but lacks affirmative destruction certification."
+            "evidence_snippet": "No obligation to return or destroy customer data with written certification found."
           }
         }
       },
@@ -1027,9 +2079,9 @@
             "category": "data_security",
             "status": "MISSING",
             "risk_level": "medium",
-            "why_it_matters": "Section 4.2 allows Provider to use subcontractors without prior notification or opportunity for Customer to object, which may violate Customer compliance standards or data residency policies.",
+            "why_it_matters": "Subcontractors processing customer data should require advance notice and a right to object, otherwise compliance or data-residency policies may be breached without the customer knowing.",
             "recommended_clause": "Provider shall provide Customer with at least thirty (30) days' prior written notice before engaging any new subcontractor to process Customer Data, and Customer may object on reasonable security or compliance grounds.",
-            "evidence_snippet": "Section 4.2 permits subcontractors without advance notice or objection rights."
+            "evidence_snippet": "Provider may use subcontractors to process Customer Data."
           }
         }
       },
@@ -1046,9 +2098,9 @@
             "category": "termination",
             "status": "MISSING",
             "risk_level": "medium",
-            "why_it_matters": "Section 15 suspends liability during Force Majeure events, but gives Customer no right to terminate the contract if the outage or failure lasts for an extended period (e.g., longer than 30 consecutive days).",
+            "why_it_matters": "If a force majeure event lasts a long time, the customer should be able to exit the contract instead of paying for services that cannot be delivered.",
             "recommended_clause": "If a Force Majeure event prevents performance of the Services for more than thirty (30) consecutive days, Customer may terminate this Agreement immediately upon written notice without penalty.",
-            "evidence_snippet": "Section 15 suspends performance but provides no exit right for extended outages."
+            "evidence_snippet": "Neither Party shall be liable for delay or failure to perform caused by events beyond its reasonable control, including natural disasters, war, terrorism, government action, widespread internet failures, or labor disruptions, provided that…"
           }
         }
       },
@@ -1065,9 +2117,9 @@
             "category": "termination",
             "status": "MISSING",
             "risk_level": "high",
-            "why_it_matters": "Provider can terminate for convenience at any time upon 15 days' notice, but Customer is barred from terminating during the first 12 months and must provide 60 days' notice thereafter.",
+            "why_it_matters": "When only one side can walk away for convenience, or on much shorter notice, the other side carries the risk of a sudden exit.",
             "recommended_clause": "Either Party may terminate this Agreement for convenience at any time upon sixty (60) days' prior written notice.",
-            "evidence_snippet": "Section 10.4 locks Customer for 12 months with 60-day notice, while Section 10.3 allows Provider 15-day exit."
+            "evidence_snippet": "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer. / Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice."
           }
         }
       },
@@ -1084,7 +2136,7 @@
             "category": "risk_management",
             "status": "MISSING",
             "risk_level": "medium",
-            "why_it_matters": "The agreement contains no requirement for Provider to maintain Technology Errors & Omissions or Cyber Liability insurance to backstop its indemnification and security commitments.",
+            "why_it_matters": "Technology Errors & Omissions and Cyber Liability insurance backstop the provider's indemnification and security commitments.",
             "recommended_clause": "Provider shall maintain commercial general liability insurance, technology errors & omissions, and cyber liability insurance with policy limits of not less than $5,000,000 per occurrence during the Term.",
             "evidence_snippet": "No insurance maintenance requirements found."
           }
@@ -1103,97 +2155,133 @@
       },
       {
         "source": "party-customer",
-        "target": "asset-customer-data",
-        "relationship": "RETAINS_OWNERSHIP",
-        "page_number": 1,
-        "chunk_id": null,
-        "section": null,
-        "quote": "Customer retains all right, title, and interest in Customer Data."
-      },
-      {
-        "source": "party-customer",
-        "target": "concept-invoices",
-        "relationship": "PAYS_WITHIN",
-        "page_number": 1,
-        "chunk_id": null,
-        "section": "3. FEES AND PAYMENT",
-        "quote": "Invoices are payable within 30 days of receipt."
-      },
-      {
-        "source": "party-customer",
-        "target": "term-time-20d-audit",
+        "target": "term-time-015",
         "relationship": "MAY_AUDIT",
         "page_number": 5,
         "chunk_id": null,
         "section": "18. AUDIT RIGHTS",
-        "quote": "Customer may, no more than once per calendar year and upon 20 business days' prior written notice, audit Provider's compliance"
+        "quote": "Customer may, no more than once per calendar year and upon 20 business days’ prior written notice, audit Provider’s compliance with the security obligations in Section 4. Provider may satisfy the request by providing an independent third-party security report where reasonably sufficient to address the requested controls."
       },
       {
         "source": "party-customer",
-        "target": "term-time-30d-invoice",
-        "relationship": "OBLIGATED_TO",
-        "page_number": 1,
-        "chunk_id": null,
-        "section": "3. FEES AND PAYMENT",
-        "quote": "Invoices are payable within 30 days of receipt."
-      },
-      {
-        "source": "party-customer",
-        "target": "term-time-30d-cure",
-        "relationship": "OBLIGATED_TO",
+        "target": "term-time-007",
+        "relationship": "TERMINATES_CONVENIENCE",
         "page_number": 3,
         "chunk_id": null,
         "section": "10. TERMINATION",
-        "quote": "if the breach remains uncured for 30 days after written notice describing the breach."
+        "quote": "Either Party may terminate this Agreement for material breach if the breach remains uncured for 30 days after written notice describing the breach."
       },
       {
         "source": "party-customer",
-        "target": "term-time-30d-dispute",
-        "relationship": "OBLIGATED_TO",
-        "page_number": 3,
-        "chunk_id": null,
-        "section": "12. GOVERNING LAW AND DISPUTES",
-        "quote": "If a dispute is not resolved within 30 days, it shall be finally resolved by arbitration in Bengaluru"
-      },
-      {
-        "source": "party-customer",
-        "target": "term-time-60d-cust-termination",
-        "relationship": "OBLIGATED_TO",
+        "target": "term-time-010",
+        "relationship": "TERMINATES_CONVENIENCE",
         "page_number": 3,
         "chunk_id": null,
         "section": "10. TERMINATION",
-        "quote": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days' written notice."
+        "quote": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice."
       },
       {
         "source": "party-customer",
-        "target": "term-time-90d-renewal",
+        "target": "term-time-013",
         "relationship": "OBLIGATED_TO",
         "page_number": 5,
         "chunk_id": null,
         "section": "14. TERM AND RENEWAL",
-        "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew"
+        "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods."
       },
       {
         "source": "party-customer",
-        "target": "term-time-24m-term",
+        "target": "term-time-006",
+        "relationship": "LIABILITY_CAPPED_AT",
+        "page_number": 3,
+        "chunk_id": null,
+        "section": "9. LIMITATION OF LIABILITY",
+        "quote": "EXCEPT FOR CUSTOMER’S PAYMENT OBLIGATIONS, EACH PARTY’S AGGREGATE LIABILITY ARISING OUT OF OR RELATING TO THIS AGREEMENT SHALL NOT EXCEED THE FEES PAID OR PAYABLE BY CUSTOMER TO PROVIDER DURING THE THREE MONTHS PRECEDING THE EVENT GIVING RISE TO THE CLAIM."
+      },
+      {
+        "source": "party-customer",
+        "target": "term-time-009",
+        "relationship": "TERMINATES_CONVENIENCE",
+        "page_number": 3,
+        "chunk_id": null,
+        "section": "10. TERMINATION",
+        "quote": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice."
+      },
+      {
+        "source": "party-customer",
+        "target": "term-time-014",
         "relationship": "OBLIGATED_TO",
         "page_number": 5,
         "chunk_id": null,
         "section": "14. TERM AND RENEWAL",
-        "quote": "The initial Term begins on the Agreement Date and continues for 24 months."
+        "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods."
       },
       {
         "source": "party-customer",
-        "target": "term-time-24m-nonsolicit",
+        "target": "term-time-011",
         "relationship": "OBLIGATED_TO",
         "page_number": 3,
         "chunk_id": null,
         "section": "11. NON-SOLICITATION",
-        "quote": "During the Term and for 24 months thereafter, Customer shall not directly or indirectly solicit for employment any employee of Provider"
+        "quote": "During the Term and for 24 months thereafter, Customer shall not directly or indirectly solicit for employment any employee of Provider who materially participated in delivering the Services."
       },
       {
         "source": "party-customer",
         "target": "finding-001",
+        "relationship": "EXPOSED_TO_RISK",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "party-customer",
+        "target": "finding-002",
+        "relationship": "EXPOSED_TO_RISK",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "party-customer",
+        "target": "finding-003",
+        "relationship": "EXPOSED_TO_RISK",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "party-customer",
+        "target": "finding-004",
+        "relationship": "EXPOSED_TO_RISK",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "party-customer",
+        "target": "finding-005",
+        "relationship": "BENEFITS_FROM",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "party-customer",
+        "target": "finding-006",
+        "relationship": "BENEFITS_FROM",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "party-customer",
+        "target": "finding-007",
         "relationship": "EXPOSED_TO_RISK",
         "page_number": null,
         "chunk_id": null,
@@ -1265,48 +2353,75 @@
       },
       {
         "source": "party-provider",
-        "target": "asset-services",
-        "relationship": "COMMITS_SERVICE",
-        "page_number": 1,
-        "chunk_id": null,
-        "section": null,
-        "quote": "Provider shall provide the Services in accordance with the Documentation."
-      },
-      {
-        "source": "party-provider",
-        "target": "term-time-24h",
-        "relationship": "OBLIGATED_TO",
-        "page_number": 1,
-        "chunk_id": null,
-        "section": "2. SERVICES AND SERVICE LEVELS",
-        "quote": "Scheduled maintenance will normally be communicated at least 24 hours in advance."
-      },
-      {
-        "source": "party-provider",
-        "target": "term-time-15d-suspension",
+        "target": "term-time-004",
         "relationship": "OBLIGATED_TO",
         "page_number": 1,
         "chunk_id": null,
         "section": "3. FEES AND PAYMENT",
-        "quote": "Provider may suspend access for invoices more than 15 days overdue after providing Customer with at least 7 days' written notice"
+        "quote": "Provider may suspend access for invoices more than 15 days overdue after providing Customer with at least 7 days’ written notice and an opportunity to cure."
       },
       {
         "source": "party-provider",
-        "target": "term-time-15d-termination",
+        "target": "term-time-003",
+        "relationship": "OBLIGATED_TO",
+        "page_number": 1,
+        "chunk_id": null,
+        "section": "3. FEES AND PAYMENT",
+        "quote": "Provider may suspend access for invoices more than 15 days overdue after providing Customer with at least 7 days’ written notice and an opportunity to cure."
+      },
+      {
+        "source": "party-provider",
+        "target": "term-time-008",
         "relationship": "TERMINATES_CONVENIENCE",
         "page_number": 3,
         "chunk_id": null,
         "section": "10. TERMINATION",
-        "quote": "Provider may terminate this Agreement for convenience at any time upon 15 days' written notice to Customer."
+        "quote": "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer."
       },
       {
         "source": "party-provider",
-        "target": "term-time-180d-backup",
+        "target": "term-time-007",
+        "relationship": "TERMINATES_CONVENIENCE",
+        "page_number": 3,
+        "chunk_id": null,
+        "section": "10. TERMINATION",
+        "quote": "Either Party may terminate this Agreement for material breach if the breach remains uncured for 30 days after written notice describing the breach."
+      },
+      {
+        "source": "party-provider",
+        "target": "term-time-013",
+        "relationship": "OBLIGATED_TO",
+        "page_number": 5,
+        "chunk_id": null,
+        "section": "14. TERM AND RENEWAL",
+        "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods."
+      },
+      {
+        "source": "party-provider",
+        "target": "term-time-006",
+        "relationship": "LIABILITY_CAPPED_AT",
+        "page_number": 3,
+        "chunk_id": null,
+        "section": "9. LIMITATION OF LIABILITY",
+        "quote": "EXCEPT FOR CUSTOMER’S PAYMENT OBLIGATIONS, EACH PARTY’S AGGREGATE LIABILITY ARISING OUT OF OR RELATING TO THIS AGREEMENT SHALL NOT EXCEED THE FEES PAID OR PAYABLE BY CUSTOMER TO PROVIDER DURING THE THREE MONTHS PRECEDING THE EVENT GIVING RISE TO THE CLAIM."
+      },
+      {
+        "source": "party-provider",
+        "target": "term-time-005",
         "relationship": "RETAINS_BACKUP",
-        "page_number": 1,
+        "page_number": 2,
         "chunk_id": null,
         "section": "4. DATA PROCESSING AND SECURITY",
-        "quote": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems"
+        "quote": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems, provided such copies remain protected and are not restored except for disaster recovery purposes."
+      },
+      {
+        "source": "party-provider",
+        "target": "term-time-014",
+        "relationship": "OBLIGATED_TO",
+        "page_number": 5,
+        "chunk_id": null,
+        "section": "14. TERM AND RENEWAL",
+        "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods."
       },
       {
         "source": "party-provider",
@@ -1318,7 +2433,88 @@
         "quote": ""
       },
       {
-        "source": "term-time-24h",
+        "source": "party-provider",
+        "target": "finding-002",
+        "relationship": "IMPOSES_RISK",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "party-provider",
+        "target": "finding-003",
+        "relationship": "IMPOSES_RISK",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "party-provider",
+        "target": "finding-004",
+        "relationship": "IMPOSES_RISK",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "party-provider",
+        "target": "finding-005",
+        "relationship": "COMMITS_PROTECTION",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "party-provider",
+        "target": "finding-006",
+        "relationship": "COMMITS_PROTECTION",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "party-provider",
+        "target": "finding-007",
+        "relationship": "IMPOSES_RISK",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "doc-contract",
+        "target": "term-time-001",
+        "relationship": "OBLIGATED_TO",
+        "page_number": 1,
+        "chunk_id": null,
+        "section": "2. SERVICES AND SERVICE LEVELS",
+        "quote": "Scheduled maintenance will normally be communicated at least 24 hours in advance."
+      },
+      {
+        "source": "doc-contract",
+        "target": "term-time-002",
+        "relationship": "OBLIGATED_TO",
+        "page_number": 1,
+        "chunk_id": null,
+        "section": "3. FEES AND PAYMENT",
+        "quote": "Invoices are payable within 30 days of receipt."
+      },
+      {
+        "source": "doc-contract",
+        "target": "term-time-012",
+        "relationship": "OBLIGATED_TO",
+        "page_number": 3,
+        "chunk_id": null,
+        "section": "12. GOVERNING LAW AND DISPUTES",
+        "quote": "If a dispute is not resolved within 30 days, it shall be finally resolved by arbitration in Bengaluru, India, by a sole arbitrator"
+      },
+      {
+        "source": "term-time-001",
         "target": "doc-contract",
         "relationship": "GOVERNED_BY",
         "page_number": null,
@@ -1327,7 +2523,7 @@
         "quote": ""
       },
       {
-        "source": "term-time-15d-suspension",
+        "source": "term-time-004",
         "target": "doc-contract",
         "relationship": "GOVERNED_BY",
         "page_number": null,
@@ -1336,7 +2532,7 @@
         "quote": ""
       },
       {
-        "source": "term-time-15d-termination",
+        "source": "term-time-003",
         "target": "doc-contract",
         "relationship": "GOVERNED_BY",
         "page_number": null,
@@ -1345,7 +2541,7 @@
         "quote": ""
       },
       {
-        "source": "term-time-20d-audit",
+        "source": "term-time-008",
         "target": "doc-contract",
         "relationship": "GOVERNED_BY",
         "page_number": null,
@@ -1354,7 +2550,7 @@
         "quote": ""
       },
       {
-        "source": "term-time-30d-invoice",
+        "source": "term-time-015",
         "target": "doc-contract",
         "relationship": "GOVERNED_BY",
         "page_number": null,
@@ -1363,7 +2559,7 @@
         "quote": ""
       },
       {
-        "source": "term-time-30d-cure",
+        "source": "term-time-002",
         "target": "doc-contract",
         "relationship": "GOVERNED_BY",
         "page_number": null,
@@ -1372,7 +2568,7 @@
         "quote": ""
       },
       {
-        "source": "term-time-30d-dispute",
+        "source": "term-time-007",
         "target": "doc-contract",
         "relationship": "GOVERNED_BY",
         "page_number": null,
@@ -1381,7 +2577,7 @@
         "quote": ""
       },
       {
-        "source": "term-time-60d-cust-termination",
+        "source": "term-time-012",
         "target": "doc-contract",
         "relationship": "GOVERNED_BY",
         "page_number": null,
@@ -1390,7 +2586,7 @@
         "quote": ""
       },
       {
-        "source": "term-time-90d-renewal",
+        "source": "term-time-010",
         "target": "doc-contract",
         "relationship": "GOVERNED_BY",
         "page_number": null,
@@ -1399,7 +2595,7 @@
         "quote": ""
       },
       {
-        "source": "term-time-180d-backup",
+        "source": "term-time-013",
         "target": "doc-contract",
         "relationship": "GOVERNED_BY",
         "page_number": null,
@@ -1408,7 +2604,7 @@
         "quote": ""
       },
       {
-        "source": "term-time-24m-term",
+        "source": "term-time-006",
         "target": "doc-contract",
         "relationship": "GOVERNED_BY",
         "page_number": null,
@@ -1417,7 +2613,34 @@
         "quote": ""
       },
       {
-        "source": "term-time-24m-nonsolicit",
+        "source": "term-time-005",
+        "target": "doc-contract",
+        "relationship": "GOVERNED_BY",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "term-time-009",
+        "target": "doc-contract",
+        "relationship": "GOVERNED_BY",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "term-time-014",
+        "target": "doc-contract",
+        "relationship": "GOVERNED_BY",
+        "page_number": null,
+        "chunk_id": null,
+        "section": null,
+        "quote": ""
+      },
+      {
+        "source": "term-time-011",
         "target": "doc-contract",
         "relationship": "GOVERNED_BY",
         "page_number": null,
@@ -1427,11 +2650,11 @@
       },
       {
         "source": "finding-001",
-        "target": "clause-contractual risk",
+        "target": "clause-high",
         "relationship": "FLAGGED_CLAUSE",
         "page_number": 3,
         "chunk_id": null,
-        "section": "Contractual Risk",
+        "section": "10. TERMINATION",
         "quote": "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer."
       },
       {
@@ -1451,6 +2674,132 @@
         "chunk_id": "chunk-0012",
         "section": null,
         "quote": "Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice."
+      },
+      {
+        "source": "finding-002",
+        "target": "clause-high",
+        "relationship": "FLAGGED_CLAUSE",
+        "page_number": 3,
+        "chunk_id": null,
+        "section": "9. LIMITATION OF LIABILITY",
+        "quote": "EXCEPT FOR CUSTOMER’S PAYMENT OBLIGATIONS, EACH PARTY’S AGGREGATE LIABILITY ARISING OUT OF OR RELATING TO THIS AGREEMENT SHALL NOT EXCEED THE FEES PAID OR PAYABLE BY CUSTOMER TO PROVIDER DURING THE THREE MONTHS PRECEDING THE EVENT GIVING RISE TO THE CLAIM."
+      },
+      {
+        "source": "finding-002",
+        "target": "evidence-chunk-0011",
+        "relationship": "SUPPORTED_BY",
+        "page_number": 3,
+        "chunk_id": "chunk-0011",
+        "section": null,
+        "quote": "EXCEPT FOR CUSTOMER’S PAYMENT OBLIGATIONS, EACH PARTY’S AGGREGATE LIABILITY ARISING OUT OF OR RELATING TO THIS AGREEMENT SHALL NOT EXCEED THE FEES PAID OR PAYABLE BY CUSTOMER TO PROVIDER DURING THE THREE MONTHS PRECEDING THE EVENT GIVING RISE TO THE CLAIM."
+      },
+      {
+        "source": "finding-003",
+        "target": "clause-medium",
+        "relationship": "FLAGGED_CLAUSE",
+        "page_number": 5,
+        "chunk_id": null,
+        "section": "14. TERM AND RENEWAL",
+        "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods."
+      },
+      {
+        "source": "finding-003",
+        "target": "evidence-chunk-0017",
+        "relationship": "SUPPORTED_BY",
+        "page_number": 5,
+        "chunk_id": "chunk-0017",
+        "section": null,
+        "quote": "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods."
+      },
+      {
+        "source": "finding-004",
+        "target": "clause-high",
+        "relationship": "FLAGGED_CLAUSE",
+        "page_number": 2,
+        "chunk_id": null,
+        "section": "4. DATA PROCESSING AND SECURITY",
+        "quote": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems, provided such copies remain protected and are not restored except for disaster recovery purposes."
+      },
+      {
+        "source": "finding-004",
+        "target": "evidence-chunk-0006",
+        "relationship": "SUPPORTED_BY",
+        "page_number": 2,
+        "chunk_id": "chunk-0006",
+        "section": null,
+        "quote": "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems, provided such copies remain protected and are not restored except for disaster recovery purposes."
+      },
+      {
+        "source": "finding-005",
+        "target": "clause-confidentiality",
+        "relationship": "FLAGGED_CLAUSE",
+        "page_number": 2,
+        "chunk_id": null,
+        "section": "5. CONFIDENTIALITY",
+        "quote": "Each Party shall protect the other Party’s Confidential Information using at least reasonable care and shall use such information only to perform or receive rights under this Agreement."
+      },
+      {
+        "source": "finding-005",
+        "target": "evidence-chunk-0007",
+        "relationship": "SUPPORTED_BY",
+        "page_number": 2,
+        "chunk_id": "chunk-0007",
+        "section": null,
+        "quote": "Each Party shall protect the other Party’s Confidential Information using at least reasonable care and shall use such information only to perform or receive rights under this Agreement."
+      },
+      {
+        "source": "finding-006",
+        "target": "clause-high",
+        "relationship": "FLAGGED_CLAUSE",
+        "page_number": 2,
+        "chunk_id": null,
+        "section": "6. INTELLECTUAL PROPERTY",
+        "quote": "Customer retains all right, title, and interest in Customer Data. Provider retains all right, title, and interest in the Services, software, models, templates, documentation, and Provider-developed technology."
+      },
+      {
+        "source": "finding-006",
+        "target": "evidence-chunk-0008",
+        "relationship": "SUPPORTED_BY",
+        "page_number": 2,
+        "chunk_id": "chunk-0008",
+        "section": null,
+        "quote": "Customer retains all right, title, and interest in Customer Data. Provider retains all right, title, and interest in the Services, software, models, templates, documentation, and Provider-developed technology."
+      },
+      {
+        "source": "finding-006",
+        "target": "evidence-chunk-0008",
+        "relationship": "SUPPORTED_BY",
+        "page_number": 2,
+        "chunk_id": "chunk-0008",
+        "section": null,
+        "quote": "Subject to payment of all applicable fees, Provider grants Customer a non-exclusive, non-transferable, worldwide license during the Term to use the Services for Customer’s internal business operations."
+      },
+      {
+        "source": "finding-007",
+        "target": "clause-high",
+        "relationship": "FLAGGED_CLAUSE",
+        "page_number": 3,
+        "chunk_id": null,
+        "section": "8. INDEMNIFICATION",
+        "quote": "8.1 Provider shall defend Customer against a third-party claim alleging that the Services, when used as permitted by this Agreement, infringe a third party’s registered intellectual property right, and shall pay damages finally awarded or settlements approved by Provider."
+      },
+      {
+        "source": "finding-007",
+        "target": "evidence-chunk-0010",
+        "relationship": "SUPPORTED_BY",
+        "page_number": 3,
+        "chunk_id": "chunk-0010",
+        "section": null,
+        "quote": "8.1 Provider shall defend Customer against a third-party claim alleging that the Services, when used as permitted by this Agreement, infringe a third party’s registered intellectual property right, and shall pay damages finally awarded or settlements approved by Provider."
+      },
+      {
+        "source": "finding-007",
+        "target": "evidence-chunk-0010",
+        "relationship": "SUPPORTED_BY",
+        "page_number": 3,
+        "chunk_id": "chunk-0010",
+        "section": null,
+        "quote": "8.2 Customer shall defend Provider against third-party claims arising from Customer Data or Customer’s unlawful use of the Services, and shall pay damages finally awarded or settlements approved by Customer."
       },
       {
         "source": "gap-disaster-recovery-sla",
@@ -1507,8 +2856,8 @@
         "quote": ""
       }
     ],
-    "total_nodes": 28,
-    "total_links": 46
+    "total_nodes": 41,
+    "total_links": 79
   },
   "pages": [
     {

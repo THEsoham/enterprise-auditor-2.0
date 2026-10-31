@@ -11,74 +11,115 @@
 │  CONTRACT HEALTH SCORE                                       │
 │                                                              │
 │             ┌──────────────┐                                 │
-│             │    80.0      │   Rating: Moderate              │
+│             │    73.0      │   Rating: Moderate              │
 │             │   / 100      │                                 │
 │             │   HEALTH     │                                 │
 │             └──────────────┘                                 │
 │                                                              │
-│  🔴 1 Deal-Breakers    🟡 0 Watch Out    🟢 0 Protections   │
+│  🔴 1 Deal-Breakers    🟡 4 Watch Out    🟢 2 Protections   │
 └──────────────────────────────────────────────────────────────┘
 ```
-> **Summary:** Health Score: 80.0/100 (Moderate) — 1 Deal-Breakers, 0 Watch Out, 0 Protections
+> **Summary:** Health Score: 73.0/100 (Moderate) — 1 Deal-Breakers, 4 Watch Out, 2 Protections
 
 ## 2. 🔴 Deal-Breakers (1)
 ### 1. Asymmetric Termination Rights
 📖 **In Plain English:**  
-> The Provider can walk away from the contract at any time with only 15 days' notice, giving your business very little time to find an alternative vendor or migrate your data.
+> The Provider can end the contract quickly, while the Customer has to wait longer and give more notice, which is unfair.
 
 ⚠️ **Why It Matters:**  
-- 1. Provider has a unilateral convenience termination right.
-- 2. 15-day notice period is unusually short for enterprise software services.
-- 3. Customer's convenience termination right is locked for 12 months with a 60-day notice.
+- This imbalance could leave the Customer vulnerable if the Provider decides to terminate the agreement unexpectedly.
 
 📄 **Contract Evidence (Page 3):**  
 > "Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer."
 
 💡 **Suggested Negotiation Remedy:**  
 ```text
-Customer proposes modifying Section 10.3 to require at least 60 days' written notice for convenience termination, and granting Customer reciprocal convenience termination rights with the same notice.
+Change 'Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice' to 'Customer may terminate for convenience at any time upon 30 days’ written notice.'
 ```
 
-## 3. 🟡 Watch Out (0)
-✓ No secondary cautions identified.
-## 4. 🟢 Active Protections (0)
-No explicit protective covenants detected.
+## 3. 🟡 Watch Out (4)
+#### 1. Aggregate Liability Cap Analysis
+- **Impact:** If something goes wrong, the most you can get back is what you paid for the last three months, which might not be enough to cover your losses.
+- **Evidence (p. 3):** "EXCEPT FOR CUSTOMER’S PAYMENT OBLIGATIONS, EACH PARTY’S AGGREGATE LIABILITY ARISING OUT OF OR RELATING TO THIS AGREEMENT SHALL NOT EXCEED THE FEES PAID OR PAYABLE BY CUSTOMER TO PROVIDER DURING THE THREE MONTHS PRECEDING THE EVENT GIVING RISE TO THE CLAIM."
+- **Recommended Fix:** Change the liability cap to cover at least six months of fees or a percentage of total fees paid during the contract term.
+
+#### 2. Automatic Renewal Clause
+- **Impact:** If the Customer doesn't notify the Provider 90 days before the contract ends, it will automatically renew for another year.
+- **Evidence (p. 5):** "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods."
+- **Recommended Fix:** Change the notice period for non-renewal to 30 days instead of 90 days.
+
+#### 3. Data Retention After Deletion
+- **Impact:** The Provider can keep your data backups for up to 180 days even after you delete it, which could be a privacy concern.
+- **Evidence (p. 2):** "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems, provided such copies remain protected and are not restored except for disaster recovery purposes."
+- **Recommended Fix:** Limit the retention of backup copies of Customer Data to no more than 30 days after deletion from production systems.
+
+#### 4. Indemnification Obligations
+- **Impact:** The Customer has to defend the Provider against certain claims, which could expose them to significant liability, while the Provider's obligations are more limited.
+- **Evidence (p. 3):** "8.1 Provider shall defend Customer against a third-party claim alleging that the Services, when used as permitted by this Agreement, infringe a third party’s registered intellectual property right, and shall pay damages finally awarded or settlements approved by Provider."
+- **Recommended Fix:** Both parties shall indemnify and defend each other against third-party claims arising from their respective actions or data.
+
+## 4. 🟢 Active Protections (2)
+- ✓ **Bilateral Confidentiality Obligations**: Both parties must keep each other's confidential information safe, which is a good protection for the Customer. *(Page 2: "Each Party shall protect the other Party’s Confidential Information using at least reasonable care and shall use such information only to perform or receive rights under this Agreement.")*
+- ✓ **Ownership of Data and Intellectual Property**: The Customer owns its data, while the Provider owns its technology and services, which is a good protection for the Customer. *(Page 2: "Customer retains all right, title, and interest in Customer Data. Provider retains all right, title, and interest in the Services, software, models, templates, documentation, and Provider-developed technology.")*
 
 ## 5. ⚠️ What's Missing? (Protective Baseline Gap Analysis)
 | Status | Protection Requirement | Risk Impact | Recommended Action |
 | :--- | :--- | :--- | :--- |
-| ⚠️ MISSING | **Disaster Recovery SLA & RTO/RPO** | HIGH | The contract does not define explicit Recovery Time Objectives (RTO) or Recovery Point Objectives (R... |
-| ⚠️ VAGUE | **Maximum Security Incident Notification Window** | CRITICAL | Section 4.3 only requires notice 'without undue delay'. It lacks an explicit hour-based maximum wind... |
-| ⚠️ MISSING | **Affirmative Data Deletion & Certification** | HIGH | The agreement permits Provider to retain backups for up to 180 days, but lacks an affirmative obliga... |
-| ⚠️ MISSING | **Advance Notice of New Subprocessors** | MEDIUM | Section 4.2 allows Provider to use subcontractors without prior notification or opportunity for Cust... |
-| ⚠️ MISSING | **Termination Right for Extended Force Majeure** | MEDIUM | Section 15 suspends liability during Force Majeure events, but gives Customer no right to terminate ... |
-| ⚠️ MISSING | **Customer Convenience Termination Parity** | HIGH | Provider can terminate for convenience at any time upon 15 days' notice, but Customer is barred from... |
-| ⚠️ MISSING | **Cyber Liability & E&O Insurance Commitments** | MEDIUM | The agreement contains no requirement for Provider to maintain Technology Errors & Omissions or Cybe... |
-| ✓ PRESENT | **Confidentiality Clause** | NONE | Standard core protection exists in the contract.... |
-| ✓ PRESENT | **Limitation of Liability Clause** | NONE | Standard core protection exists in the contract.... |
-| ✓ PRESENT | **Termination Clause** | NONE | Standard core protection exists in the contract.... |
+| ⚠️ MISSING | **Disaster Recovery SLA & RTO/RPO** | HIGH | Without explicit Recovery Time / Recovery Point Objectives there is no contractual commitment for wh... |
+| ⚠️ VAGUE | **Maximum Security Incident Notification Window** | CRITICAL | Breach notification should have an hour-based maximum (e.g. 24-72 hours). Wording such as 'without u... |
+| ⚠️ MISSING | **Affirmative Data Deletion & Certification** | HIGH | The provider should be obliged to return or destroy all customer data at the end of the contract and... |
+| ⚠️ MISSING | **Advance Notice of New Subprocessors** | MEDIUM | Subcontractors processing customer data should require advance notice and a right to object, otherwi... |
+| ⚠️ MISSING | **Termination Right for Extended Force Majeure** | MEDIUM | If a force majeure event lasts a long time, the customer should be able to exit the contract instead... |
+| ⚠️ MISSING | **Customer Convenience Termination Parity** | HIGH | When only one side can walk away for convenience, or on much shorter notice, the other side carries ... |
+| ⚠️ MISSING | **Cyber Liability & E&O Insurance Commitments** | MEDIUM | Technology Errors & Omissions and Cyber Liability insurance backstop the provider's indemnification ... |
+| ✓ PRESENT | **Confidentiality Clause** | NONE | A confidentiality clause is a standard core protection for both parties.... |
+| ✓ PRESENT | **Limitation of Liability Clause** | NONE | A limitation of liability clause defines the maximum financial exposure of each party.... |
+| ✓ PRESENT | **Termination Clause** | NONE | A termination clause defines how and when either party can end the agreement.... |
 
 ## 6. ⚖️ Clause Balance & Asymmetry Analysis
 ### Asymmetric Termination Rights
-> **Asymmetry:** Severe asymmetry: Provider can exit after 15 days; Customer is locked in for 12 months with 60-day notice.
-- **Provider Terms:** Can terminate for convenience at any time upon 15 days' notice.
-- **Customer Terms:** Can terminate for convenience only after 12 months and upon 60 days' notice.
+> **Asymmetry:** The Provider has the right to terminate with shorter notice and without a waiting period, while the Customer faces longer notice and a waiting period.
+- **Provider Terms:** Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer.
+- **Customer Terms:** Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice.
+
+### Automatic Renewal Clause
+> **Asymmetry:** The Provider has a significant advantage as the Customer must remember to notify for non-renewal.
+- **Provider Terms:** The Provider benefits from automatic renewal, ensuring continued revenue.
+- **Customer Terms:** The Customer must actively manage their notice to avoid renewal.
+
+### Data Retention After Deletion
+> **Asymmetry:** The Provider has significant rights to retain Customer Data without equivalent rights for the Customer.
+- **Provider Terms:** The Provider can retain backups for up to 180 days.
+- **Customer Terms:** The Customer has no control over the retention period of backups.
+
+### Ownership of Data and Intellectual Property
+> **Asymmetry:** The Provider has broader rights over its own technology compared to the Customer's rights over its data.
+- **Provider Terms:** Provider retains all right, title, and interest in the Services, software, models, templates, documentation, and Provider-developed technology.
+- **Customer Terms:** Customer retains all right, title, and interest in Customer Data.
+
+### Indemnification Obligations
+> **Asymmetry:** The Provider's indemnification obligations are narrower than those of the Customer.
+- **Provider Terms:** Provider defends Customer against specific intellectual property claims.
+- **Customer Terms:** Customer defends Provider against claims related to Customer Data or unlawful use.
 
 ## 7. 📅 Obligations & Deadlines Timeline
 ```text
 TIMELINE
-  ├── 24 Hours               [Provider] Advance notification required for scheduled maintenance
-  ├── 15 Days                [Provider] Right to suspend service for invoices overdue by more than 15 days (with 7 days notice)
-  ├── 15 Days                [Provider] Can terminate agreement for convenience at any time upon 15 days' written notice
-  ├── 20 Business Days (~28 Days) [Customer] Prior written notice required to audit Provider's security compliance
-  ├── 30 Days                [Customer] Invoice payment due window from date of receipt
-  ├── 30 Days                [Mutual] Written cure period following notice of material breach before termination takes effect
-  ├── 30 Days                [Mutual] Mandatory executive negotiation window before dispute can be referred to arbitration
-  ├── 60 Days                [Customer] Convenience termination notice period (only exercisable after the first 12 months)
-  ├── 90 Days                [Either Party] Written non-renewal notice required to prevent automatic 12-month extension
-  ├── 180 Days               [Provider] Maximum retention period for Customer Data in disaster-recovery backups after deletion
-  ├── 24 Months              [Mutual] Initial contract term duration from the Agreement Date
-  ├── 24 Months (Post-Term)  [Customer] Employee non-solicitation restriction continues for 24 months post contract expiration
+  ├── 24 hours               [General] Scheduled maintenance will normally be communicated at least 24 hours in advance.
+  ├── 7 days                 [Provider] Provider may suspend access for invoices more than 15 days overdue after providing Customer with at least 7 days’ written notice and an opportunity to cure.
+  ├── 15 days                [Provider] Provider may suspend access for invoices more than 15 days overdue after providing Customer with at least 7 days’ written notice and an opportunity to cure.
+  ├── 15 days                [Provider] Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer.
+  ├── 20 business days       [Customer] Customer may, no more than once per calendar year and upon 20 business days’ prior written notice, audit Provider’s compliance with the security obligations in Section 4. Provider may satisfy the request by providing an…
+  ├── 30 days                [General] Invoices are payable within 30 days of receipt.
+  ├── 30 days                [Mutual] Either Party may terminate this Agreement for material breach if the breach remains uncured for 30 days after written notice describing the breach.
+  ├── 30 days                [General] If a dispute is not resolved within 30 days, it shall be finally resolved by arbitration in Bengaluru, India, by a sole arbitrator
+  ├── 60 days                [Customer] Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice.
+  ├── 90 days                [Mutual] Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods.
+  ├── THREE MONTHS           [Mutual] EXCEPT FOR CUSTOMER’S PAYMENT OBLIGATIONS, EACH PARTY’S AGGREGATE LIABILITY ARISING OUT OF OR RELATING TO THIS AGREEMENT SHALL NOT EXCEED THE FEES PAID OR PAYABLE BY CUSTOMER TO PROVIDER DURING THE THREE MONTHS…
+  ├── 180 days               [Provider] Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems, provided such copies remain protected and are not restored except for disaster recovery purposes.
+  ├── 12 months              [Customer] Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice.
+  ├── 12-month               [Mutual] Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods.
+  ├── 24 months              [Customer] During the Term and for 24 months thereafter, Customer shall not directly or indirectly solicit for employment any employee of Provider who materially participated in delivering the Services.
 ```
 
 ## 8. 📊 Structured Tables & Pricing Analysis
@@ -90,9 +131,9 @@ TIMELINE
 | Enterprise | Up to 150,000 documents | ₹5,50,000 | ₹5 / document |
 
 **Identified Table Risks:**
-- ⚠️ **Overage Fee Exposure**: Standard tier charges ₹12 per document overage, which is 140% higher than the Enterprise overage rate (₹5/doc). Unanticipated processing spikes could result in unpredictable monthly invoice surges.
-  - *Remedy:* Negotiate a monthly overage cap (e.g., maximum 20% over base fee) or an automatic tier bump mechanism when usage consistently exceeds included quota.
-- ⚠️ **Absence of Price Protection / Cap on Renewal**: The pricing table does not define annual fee adjustment limits (e.g. CPI or maximum 3-5% increase). Upon automatic renewal, Provider is not contractually restricted from raising monthly tier fees.
+- ⚠️ **Overage Fee Exposure**: The Standard tier overage rate (₹12 / document) is 140% higher than the Enterprise tier rate (₹5 / document). Usage spikes on a lower tier could cause unpredictable invoice increases.
+  - *Remedy:* Negotiate a monthly overage cap or an automatic tier upgrade when usage consistently exceeds the included quota.
+- ⚠️ **No Price Increase Cap**: Neither this pricing table nor the rest of the contract limits annual fee increases (e.g. a CPI link or a maximum percentage), so fees could rise on renewal.
   - *Remedy:* Insert a price escalation cap: 'Fees shall not increase by more than 3% annually upon renewal.'
 
 ### Table table-p4-1 (Page 4, Type: `notices_contacts`)

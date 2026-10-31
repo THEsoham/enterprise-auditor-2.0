@@ -18,6 +18,7 @@ from app.ingestion.table_extractor import TableExtractor
 from app.ingestion.signature_analyzer import SignatureAnalyzer
 from app.chunking.semantic_chunker import chunk_pages
 from app.retrieval.retriever import Retriever
+from app.retrieval.bm25 import BM25Index
 from app.auditing.audit_planner import AuditPlanner, AuditProbe
 from app.auditing.missing_clauses import MissingClauseDetector
 from app.auditing.obligation_extractor import ObligationExtractor
@@ -54,6 +55,37 @@ class AuditPipeline:
         self.json_exporter = JsonExporter()
         self.markdown_exporter = MarkdownExporter()
 
+    def index_document(self, pdf_path: str | Path) -> tuple[list[dict], list[dict]]:
+        """
+        Replace the retrieval indexes with this document's chunks, so audits and
+        debates search only this contract. Returns (pages, chunks).
+        """
+        # 0. Reset indexes to prevent cross-document contamination
+        print("[0/9] Clearing previous document indexes...")
+        try:
+            self.retriever.vector_store.reset()
+        except Exception:
+            pass
+        self.retriever.bm25 = BM25Index()
+        self.retriever._all_chunks = {}
+
+        # 1. Ingestion
+        print("[1/9] Ingesting PDF and mapping pages...")
+        pages = load_pdf(pdf_path)
+
+        # 3. Chunking & Indexing
+        print("[3/9] Creating section-aware semantic chunks...")
+        raw_chunks = [c.model_dump() for c in chunk_pages(pages)]
+
+        print("[4/9] Populating Hybrid Retrieval (BM25 + Vector embeddings)...")
+        # Upsert chunks into Chroma using fast batched embeddings
+        chunk_texts = [c["text"] for c in raw_chunks]
+        embeddings = self.retriever.embedding_service.embed_batch(chunk_texts)
+        self.retriever.vector_store.add_chunks(chunks=raw_chunks, embeddings=embeddings)
+        self.retriever.index_chunks(raw_chunks)
+
+        return pages, raw_chunks
+
     def audit(
         self,
         pdf_path: str | Path,
@@ -69,18 +101,7 @@ class AuditPipeline:
         print(f"[AUDIT] ENTERPRISE AUDITOR 2.0: AUDITING {document_name}")
         print("=" * 55 + "\n")
 
-        # 0. Reset indexes to prevent cross-document contamination
-        print("[0/9] Clearing previous document indexes...")
-        try:
-            self.retriever.vector_store.reset()
-        except Exception:
-            pass
-        self.retriever.bm25 = __import__('app.retrieval.bm25', fromlist=['BM25Index']).BM25Index()
-        self.retriever._all_chunks = {}
-
-        # 1. Ingestion
-        print("[1/9] Ingesting PDF and mapping pages...")
-        pages = load_pdf(pdf_path)
+        pages, raw_chunks = self.index_document(pdf_path)
         full_text = "\n".join(p["text"] for p in pages)
 
         # 2. Visual Scanner: Tables & Signatures
@@ -91,18 +112,6 @@ class AuditPipeline:
         signature_status = self.signature_analyzer.analyze(pdf_path)
         signature_data = signature_status.model_dump()
 
-        # 3. Chunking & Indexing
-        print("[3/9] Creating section-aware semantic chunks...")
-        doc_chunks = chunk_pages(pages)
-        raw_chunks = [c.model_dump() for c in doc_chunks]
-
-        print("[4/9] Populating Hybrid Retrieval (BM25 + Vector embeddings)...")
-        # Upsert chunks into Chroma using fast batched embeddings
-        chunk_texts = [c["text"] for c in raw_chunks]
-        embeddings = self.retriever.embedding_service.embed_batch(chunk_texts)
-        self.retriever.vector_store.add_chunks(chunks=raw_chunks, embeddings=embeddings)
-        self.retriever.index_chunks(raw_chunks)
-
         # 4. Document Planning & Baseline Checks
         print("[5/9] Formulating Audit Plan & Party Extraction...")
         plan = self.audit_planner.create_plan(raw_chunks, document_title=document_name)
@@ -112,7 +121,7 @@ class AuditPipeline:
         missing_clauses = self.missing_clause_detector.detect(full_text)
 
         print("[7/9] Extracting Obligations & Constructing Timeline Map...")
-        obligations_summary = self.obligation_extractor.extract(raw_chunks)
+        obligations_summary = self.obligation_extractor.extract(raw_chunks, parties=parties)
         obligations_data = obligations_summary.model_dump()
 
         # 5. Multi-Agent Courtroom Debate
@@ -153,8 +162,14 @@ class AuditPipeline:
                     return None
 
                 verdict = str(verification.get("verdict", "")).upper()
-                if verdict in {"REJECTED", "UNSUPPORTED"}:
+                if verdict in {"REJECTED", "UNSUPPORTED", "UNVERIFIED"}:
+                    print(f"  [DROPPED] '{target_area}': {verdict} ({verification.get('verifier_model', '')})")
                     return None
+
+                # Keep the Skeptic's verdict on the finding so reports can show it
+                finding["verdict"] = verdict
+                finding["verifier_model"] = verification.get("verifier_model", "")
+                finding["verification_reasoning"] = verification.get("reasoning", "")
 
                 risk_score = self.risk_scorer.score(
                     finding=finding,

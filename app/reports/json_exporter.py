@@ -1,12 +1,14 @@
 import json
 from pathlib import Path
 
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+
 
 class JsonExporter:
     """Exports structured audit reports to formatted JSON files."""
 
     def __init__(self, output_dir: str = "data/reports"):
-        self.output_dir = Path(output_dir)
+        self.output_dir = PROJECT_ROOT / output_dir
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
     def export(self, report_data: dict, filename: str | None = None) -> Path:

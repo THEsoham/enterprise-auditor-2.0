@@ -59,8 +59,8 @@ class SignatureAnalyzer:
 
                     # Detect party names: e.g. "For Northstar Analytics Pvt. Ltd."
                     for_matches = re.findall(r"For\s+([A-Za-z0-9\s,\.\-]{3,60}?)(?=\n|$)", signature_text)
-                    cust_name = for_matches[0].strip() if len(for_matches) > 0 else "Northstar Analytics Pvt. Ltd."
-                    prov_name = for_matches[1].strip() if len(for_matches) > 1 else "Meridian Cloud Systems Pvt. Ltd."
+                    cust_name = for_matches[0].strip() if len(for_matches) > 0 else "Name not detected"
+                    prov_name = for_matches[1].strip() if len(for_matches) > 1 else "Name not detected"
 
                     # Check if signature fields contain underscores (blank lines) vs real names
                     # In sample: Name: __________________________ Signature: ______________________

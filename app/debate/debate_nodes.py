@@ -1,9 +1,10 @@
+import copy
+
 from app.auditing.auditor import Auditor
 from app.verification.verifier import GeminiVerifier
-import os
-from dotenv import load_dotenv
+from app.verification.grounding import ground_evidence
+from app.verification.verification_models import VerificationResult
 
-load_dotenv()
 
 class DebateNodes:
 
@@ -28,24 +29,49 @@ class DebateNodes:
         finding = state.get("finding")
 
         if not finding:
-            state["verification"] = {
-                "status": "verified",
-                "verdict": "UNSUPPORTED",
-                "reasoning": (
-                    "The Auditor did not generate "
-                    "a supported finding."
+            state["verification"] = VerificationResult(
+                status="verified",
+                verdict="UNSUPPORTED",
+                reasoning="The Auditor did not generate a supported finding.",
+                verifier_model="none",
+            ).model_dump()
+
+            return state
+
+        # Deterministic check first: every quote must exist in the retrieved text.
+        evidence = state.get("evidence", [])
+        grounding = ground_evidence(finding, evidence)
+        finding["evidence"] = grounding["grounded"]
+
+        grounding_report = {
+            "grounded_quotes": len(grounding["grounded"]),
+            "ungrounded_quotes": [
+                item.get("quote", "") for item in grounding["ungrounded"]
+            ],
+        }
+
+        if not grounding["grounded"]:
+            # No quote survived. Ask for a rebuttal if rounds remain; otherwise reject.
+            final_round = state.get("round_number", 1) >= state.get("max_rounds", 3)
+            state["verification"] = VerificationResult(
+                status="verified",
+                verdict="UNSUPPORTED" if final_round else "AMBIGUOUS",
+                reasoning=(
+                    "None of the quoted evidence could be found verbatim in the "
+                    "retrieved contract text. Quotes must be copied exactly."
                 ),
-                "supporting_evidence": [],
-                "contradictions": [],
-                "confidence": 0.0,
-            }
+                contradictions=grounding_report["ungrounded_quotes"],
+                verifier_model="grounding-check",
+                grounding=grounding_report,
+            ).model_dump()
 
             return state
 
         verification = self.verifier.verify(
             finding=finding,
-            evidence=state.get("evidence", []),
+            evidence=evidence,
         )
+        verification["grounding"] = grounding_report
 
         state["verification"] = verification
 
@@ -53,130 +79,14 @@ class DebateNodes:
 
     def rebuttal(self, state: dict) -> dict:
 
-        finding = state.get("finding") or {}
-        verification = state.get("verification") or {}
-
-        evidence = state.get("evidence", [])
-
-        evidence_text = "\n\n".join(
-            [
-                (
-                    f"CHUNK ID: {item['chunk_id']}\n"
-                    f"PAGE: {item['metadata'].get('page_number')}\n"
-                    f"SECTION: {item['metadata'].get('section')}\n"
-                    f"TEXT:\n{item['text']}"
-                )
-                for item in evidence
-            ]
+        revised_finding = self.auditor.generator.revise(
+            query=state["query"],
+            finding=state.get("finding") or {},
+            verification=state.get("verification") or {},
+            evidence=state.get("evidence", []),
         )
 
-        query = f"""
-Re-evaluate the previous audit finding.
-
-ORIGINAL AUDIT QUESTION:
-{state["query"]}
-
-PREVIOUS FINDING:
-{finding}
-
-GEMINI SKEPTIC REVIEW:
-{verification}
-
-ORIGINAL CONTRACT EVIDENCE:
-{evidence_text}
-
-Your task is to produce a revised finding.
-
-Rules:
-
-1. Address Gemini's objections explicitly.
-2. Use ONLY the supplied contract evidence.
-3. Do not invent facts.
-4. Preserve valid parts of the previous finding.
-5. Correct unsupported claims.
-6. Every factual claim must have evidence.
-7. Every evidence item must contain an exact quote.
-8. Include the correct chunk ID and page.
-9. If the original finding cannot be supported, return
-   status "unsupported".
-10. Return ONLY valid JSON.
-
-Return:
-
-{{
-    "status": "supported|unsupported",
-    "title": "short finding title",
-    "category": "risk category",
-    "severity": "low|medium|high|critical",
-    "claim": "specific factual claim",
-    "evidence": [
-        {{
-            "chunk_id": "chunk-XXXX",
-            "page": 1,
-            "quote": "exact quote"
-        }}
-    ],
-    "reasoning": "reasoning based only on evidence",
-    "recommendation": "possible contractual improvement",
-    "confidence": 0.0
-}}
-"""
-
-        from openai import OpenAI
-        import json
-        import re
-
-        client = OpenAI()
-
-        response = client.chat.completions.create(
-            model=os.getenv(
-                "OPENAI_MODEL",
-                 "gpt-4o-mini"
-                ),
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You are the Auditor in a "
-                        "multi-agent contract audit debate. "
-                        "Return raw JSON matching the requested structure."
-                    ),
-                },
-                {
-                    "role": "user",
-                    "content": query,
-                },
-            ],
-            temperature=0,
-            response_format={"type": "json_object"},
-            timeout=20.0,
-        )
-
-        content = response.choices[0].message.content
-
-        if not content:
-            raise ValueError(
-                "OpenAI returned an empty rebuttal."
-            )
-
-        content = content.strip()
-        if content.startswith("```"):
-            content = re.sub(r"^```(?:json)?\s*", "", content)
-            content = re.sub(r"\s*```$", "", content)
-            content = content.strip()
-
-        try:
-            revised_finding = json.loads(content)
-        except Exception:
-            match = re.search(r"\{.*\}", content, re.DOTALL)
-            if match:
-                try:
-                    revised_finding = json.loads(match.group(0))
-                except Exception:
-                    revised_finding = finding
-            else:
-                revised_finding = finding
-
+        # None means the Auditor conceded the finding cannot be supported
         state["finding"] = revised_finding
 
         state["round_number"] = (
@@ -189,12 +99,13 @@ Return:
 
         history = state.get("history", [])
 
+        # Snapshot, so later rounds and scoring don't rewrite earlier rounds
         history.append(
-            {
+            copy.deepcopy({
                 "round": state.get("round_number", 1),
                 "finding": state.get("finding"),
                 "verification": state.get("verification"),
-            }
+            })
         )
 
         state["history"] = history

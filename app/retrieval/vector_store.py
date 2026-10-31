@@ -1,22 +1,29 @@
+import os
 from pathlib import Path
 
 import chromadb
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 
 class VectorStore:
 
     def __init__(
         self,
-        persist_directory: str = "data/indexes/chroma",
+        persist_directory: str | None = None,
         collection_name: str = "enterprise_auditor"
     ):
-        Path(persist_directory).mkdir(
+        # Resolve relative paths against the project root, not the current working directory
+        persist_directory = PROJECT_ROOT / (
+            persist_directory or os.getenv("CHROMA_PERSIST_DIRECTORY", "data/indexes/chroma")
+        )
+        persist_directory.mkdir(
             parents=True,
             exist_ok=True
         )
 
         self.client = chromadb.PersistentClient(
-            path=persist_directory
+            path=str(persist_directory)
         )
 
         self.collection = self.client.get_or_create_collection(

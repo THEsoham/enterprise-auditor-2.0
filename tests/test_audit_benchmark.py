@@ -13,9 +13,16 @@ from app.auditing.obligation_extractor import ObligationExtractor
 from app.scoring.risk_scorer import RiskScorer
 from app.scoring.health_score import HealthScore
 from app.graph.graph_builder import GraphBuilder
+from app.verification.grounding import ground_evidence, quote_in_text
+from app.verification.verifier import GeminiVerifier, parse_json_object
+from app.auditing.finding_generator import FindingGenerator
 
 
-PDF_PATH = Path("data/documents/sample_contract.pdf")
+PDF_PATH = Path(__file__).resolve().parent.parent / "data" / "documents" / "sample_contract.pdf"
+
+
+def _sample_chunks() -> list[dict]:
+    return [c.model_dump() for c in chunk_pages(load_pdf(PDF_PATH))]
 
 
 def test_pdf_loading():
@@ -38,6 +45,11 @@ def test_table_extraction_benchmark():
     assert "Standard" in str(pricing_table.rows)
     assert "Enterprise" in str(pricing_table.rows)
     assert len(pricing_table.risks) >= 1
+
+    # Overage comparison is computed from the table cells, not hardcoded
+    overage = next(r for r in pricing_table.risks if r["risk_title"] == "Overage Fee Exposure")
+    assert "Standard" in overage["observation"] and "Enterprise" in overage["observation"]
+    assert "140%" in overage["observation"]  # 12 vs 5 per document
 
 
 def test_signature_visual_benchmark():
@@ -71,11 +83,21 @@ def test_missing_clauses_benchmark():
 def test_obligation_timeline_benchmark():
     """Validates obligations extraction and chronological timeline ordering."""
     extractor = ObligationExtractor()
-    summary = extractor.extract([])
+    chunks = _sample_chunks()
+    summary = extractor.extract(chunks)
 
     assert len(summary.provider_obligations) >= 5
-    assert len(summary.customer_obligations) >= 3
+    assert len(summary.customer_obligations) >= 2
     assert len(summary.timeline) >= 10
+
+    # Every extracted item is quoted verbatim from the contract
+    full_text = " ".join(c["text"] for c in chunks)
+    for item in summary.timeline + summary.provider_obligations + summary.customer_obligations:
+        assert quote_in_text(item.quote, full_text)
+
+    labels = {(t.party, t.period_label) for t in summary.timeline}
+    assert ("Provider", "15 days") in labels  # 10.3 convenience termination
+    assert ("Customer", "60 days") in labels  # 10.4 convenience termination
 
     # Verify timeline is monotonically sorted by days
     days_list = [t.days for t in summary.timeline]
@@ -124,7 +146,8 @@ def test_risk_scorer_three_buckets():
     v_deal = {"verdict": "ACCEPTED", "confidence": 0.95}
     score_deal = scorer.score(f_deal, v_deal)
     assert score_deal["bucket"] == "deal_breaker"
-    assert "recover" in f_deal["plain_english"].lower()
+    # No canned text: plain English falls back to the finding's own claim
+    assert f_deal["plain_english"] == "Liability capped at 3 months fees"
 
     # Subcontractor finding -> Protection
     f_prot = {
@@ -151,6 +174,25 @@ def test_risk_scorer_three_buckets():
     v_watch = {"verdict": "ACCEPTED", "confidence": 0.85}
     score_watch = scorer.score(f_watch, v_watch)
     assert score_watch["bucket"] == "watch_out"
+
+    # The Auditor's own labels win over keyword heuristics
+    f_labeled = {
+        "title": "Unilateral publicity right",
+        "finding_type": "risk",
+        "severity": "high",
+        "claim": "Provider may use Customer's logo without consent",
+        "plain_english": "They can put your logo on their website without asking.",
+        "clause_balance": {"is_asymmetric": True, "asymmetry_summary": "Only Provider gets publicity rights."},
+        "evidence": [{"quote": "without obtaining additional approval"}],
+        "confidence": 0.9,
+    }
+    scorer.score(f_labeled, {"verdict": "ACCEPTED", "confidence": 0.9})
+    assert f_labeled["bucket"] == "deal_breaker"
+    assert f_labeled["plain_english"] == "They can put your logo on their website without asking."
+    assert f_labeled["clause_balance"]["is_asymmetric"] is True
+
+    # Unverified findings never count
+    assert scorer.score(dict(f_labeled), {"verdict": "UNVERIFIED"})["risk_level"] == "unverified"
 
 
 def test_health_score_100_point_scale():
@@ -185,6 +227,9 @@ def test_health_score_100_point_scale():
 
 def test_knowledge_graph_evidence_grounding():
     """Validates that all knowledge graph edges retain evidence quotes and page numbers."""
+    chunks = _sample_chunks()
+    obligations = ObligationExtractor().extract(chunks).model_dump()
+
     gb = GraphBuilder()
     graph = gb.build(
         findings=[{
@@ -194,15 +239,79 @@ def test_knowledge_graph_evidence_grounding():
             "bucket": "deal_breaker",
             "evidence": [{"chunk_id": "chunk-0012", "page": 3, "quote": "15 days written notice"}],
         }],
-        parties={"customer": "Northstar", "provider": "Meridian"}
+        parties={"customer": "Northstar", "provider": "Meridian"},
+        obligations=obligations,
     )
     serialized = gb.serialize(graph)
 
     assert serialized["total_nodes"] >= 15
     assert serialized["total_links"] >= 12
 
-    # Check that core relationships have quotes and page numbers
+    # Every quoted edge comes from the contract text (no hardcoded sample quotes)
+    full_text = " ".join(c["text"] for c in chunks)
     for link in serialized["links"]:
-        if link["relationship"] in {"TERMINATES_CONVENIENCE", "RETAINS_BACKUP", "MAY_AUDIT", "COMMITS_SLA"}:
+        if link["relationship"] in {"TERMINATES_CONVENIENCE", "RETAINS_BACKUP", "MAY_AUDIT", "COMMITS_SLA", "OBLIGATED_TO"}:
             assert link["page_number"] is not None
-            assert len(link["quote"]) > 0
+            assert quote_in_text(link["quote"], full_text)
+
+    # Without obligations the graph contains nothing invented
+    empty = gb.serialize(gb.build(findings=[], parties={}))
+    assert all(not link["quote"] for link in empty["links"])
+
+
+def test_quote_grounding_rejects_paraphrases():
+    """Quotes must exist verbatim in the retrieved chunks; chunk/page are corrected."""
+    evidence = [{
+        "chunk_id": "chunk-0007",
+        "text": "10.3 Provider may terminate this Agreement for convenience at any time upon 15 days’\nwritten notice to Customer.",
+        "metadata": {"page_number": 3, "section": "10. TERMINATION"},
+    }]
+    finding = {"evidence": [
+        {"chunk_id": "chunk-9999", "page": 1, "quote": "Provider may terminate this Agreement for convenience at any time upon 15 days' written notice"},
+        {"chunk_id": "chunk-0007", "page": 3, "quote": "Provider may terminate on 10 days notice"},
+        {"chunk_id": "chunk-0007", "page": 3, "quote": "Provider may terminate ... upon 15 days"},
+    ]}
+
+    result = ground_evidence(finding, evidence)
+    assert len(result["grounded"]) == 2
+    assert result["grounded"][0]["chunk_id"] == "chunk-0007"
+    assert result["grounded"][0]["page"] == 3
+    assert [u["quote"] for u in result["ungrounded"]] == ["Provider may terminate on 10 days notice"]
+
+
+def test_verifier_never_fabricates_acceptance(monkeypatch):
+    """When every verifier model fails, the verdict is UNVERIFIED, not ACCEPTED."""
+    verifier = GeminiVerifier()
+    monkeypatch.setattr(verifier, "_gemini_verify", lambda prompt: (None, ""))
+    monkeypatch.setattr(verifier, "_openai_verify", lambda prompt: (None, ""))
+
+    result = verifier.verify(
+        finding={"claim": "x"},
+        evidence=[{"chunk_id": "c1", "text": "t", "metadata": {"page_number": 1, "section": ""}}],
+    )
+    assert result["verdict"] == "UNVERIFIED"
+    assert result["confidence"] == 0.0
+
+    # Garbage replies are also not treated as acceptance
+    monkeypatch.setattr(verifier, "_openai_verify", lambda prompt: ("not json at all", "openai:test"))
+    assert verifier.verify(finding={"claim": "x"}, evidence=[])["verdict"] == "UNVERIFIED"
+
+    assert parse_json_object('```json\n{"verdict": "ACCEPTED"}\n```') == {"verdict": "ACCEPTED"}
+
+
+def test_finding_generator_returns_none_instead_of_inventing(monkeypatch):
+    """An unreadable or 'unsupported' LLM reply produces no finding."""
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    generator = FindingGenerator()
+
+    for reply in ["sorry, I cannot help", '{"status": "unsupported"}']:
+        class FakeCompletions:
+            @staticmethod
+            def create(**kwargs):
+                message = type("M", (), {"content": reply})
+                choice = type("C", (), {"message": message})
+                return type("R", (), {"choices": [choice]})
+
+        monkeypatch.setattr(generator.client.chat, "completions", FakeCompletions)
+        evidence = [{"chunk_id": "c1", "text": "t", "metadata": {"page_number": 1, "section": ""}}]
+        assert generator.generate(query="q", evidence=evidence) is None

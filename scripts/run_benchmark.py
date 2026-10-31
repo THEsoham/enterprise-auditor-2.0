@@ -28,6 +28,10 @@ if sys.platform == "win32":
 console = Console(force_terminal=True)
 
 
+def _colored(status: str) -> str:
+    return f"[green]{status}[/green]" if status == "PASS" else f"[red]{status}[/red]"
+
+
 def run_benchmark():
     pdf_path = PROJECT_ROOT / "data" / "documents" / "sample_contract.pdf"
     if not pdf_path.exists():
@@ -47,19 +51,19 @@ def run_benchmark():
     # 1. PDF Loader
     pages = load_pdf(pdf_path)
     p_status = "PASS" if len(pages) == 6 else "FAIL"
-    results_table.add_row("1. PDF Ingestion", "6 pages preserved with numbers", f"{len(pages)} pages extracted", f"[green]{p_status}[/green]")
+    results_table.add_row("1. PDF Ingestion", "6 pages preserved with numbers", f"{len(pages)} pages extracted", _colored(p_status))
 
     # 2. Table Extractor
     te = TableExtractor()
     tables = te.extract_tables(pdf_path)
     t_status = "PASS" if len(tables) >= 3 and any(t.table_type == "pricing_tiers" for t in tables) else "FAIL"
-    results_table.add_row("2. Table Extraction", "3 structured tables (pricing tiers)", f"{len(tables)} tables ({sum(len(t.risks) for t in tables)} risks)", f"[green]{t_status}[/green]")
+    results_table.add_row("2. Table Extraction", "3 structured tables (pricing tiers)", f"{len(tables)} tables ({sum(len(t.risks) for t in tables)} risks)", _colored(t_status))
 
     # 3. Visual Signature Analysis
     sa = SignatureAnalyzer()
     sig_rep = sa.analyze(pdf_path)
     s_status = "PASS" if sig_rep.overall_status == "UNEXECUTED_DRAFT" and sig_rep.signature_page == 5 else "FAIL"
-    results_table.add_row("3. Visual Scanner (Signatures)", "Draft status on p.5 (2 unsigned)", f"{sig_rep.overall_status} (p.{sig_rep.signature_page})", f"[green]{s_status}[/green]")
+    results_table.add_row("3. Visual Scanner (Signatures)", "Draft status on p.5 (2 unsigned)", f"{sig_rep.overall_status} (p.{sig_rep.signature_page})", _colored(s_status))
 
     # 4. Hybrid Retrieval / BM25
     chunks = [c.model_dump() for c in chunk_pages(pages)]
@@ -67,13 +71,13 @@ def run_benchmark():
     bm25.index(chunks)
     search_hits = bm25.search("liability cap", top_k=3)
     b_status = "PASS" if len(search_hits) > 0 and "LIMITATION" in search_hits[0]["text"] else "FAIL"
-    results_table.add_row("4. Hybrid Retrieval (BM25)", "Exact keyword match for liability", f"Rank 1 hit in chunk {search_hits[0]['chunk_id']}", f"[green]{b_status}[/green]")
+    results_table.add_row("4. Hybrid Retrieval (BM25)", "Exact keyword match for liability", f"Rank 1 hit in chunk {search_hits[0]['chunk_id']}", _colored(b_status))
 
     # 5. Audit Planner
     planner = AuditPlanner()
     plan = planner.create_plan(chunks)
     pl_status = "PASS" if len(plan.probes) >= 10 and "Northstar" in plan.parties["customer"] else "FAIL"
-    results_table.add_row("5. Autonomous Planner", "Parties + >=10 domain probes", f"{len(plan.probes)} probes ({plan.parties['customer'][:12]}...)", f"[green]{pl_status}[/green]")
+    results_table.add_row("5. Autonomous Planner", "Parties + >=10 domain probes", f"{len(plan.probes)} probes ({plan.parties['customer'][:12]}...)", _colored(pl_status))
 
     # 6. Missing Protections
     full_text = "\n".join(p["text"] for p in pages)
@@ -81,13 +85,13 @@ def run_benchmark():
     missing_res = md.detect(full_text)
     missing_count = sum(1 for m in missing_res if m["status"] in {"MISSING", "VAGUE"})
     m_status = "PASS" if missing_count >= 5 else "FAIL"
-    results_table.add_row("6. Missing-Clause Detector", "Spot DR SLA & Incident SLA gaps", f"{missing_count} baseline gaps flagged", f"[green]{m_status}[/green]")
+    results_table.add_row("6. Missing-Clause Detector", "Spot DR SLA & Incident SLA gaps", f"{missing_count} baseline gaps flagged", _colored(m_status))
 
     # 7. Obligations & Timeline
     oe = ObligationExtractor()
     obls = oe.extract(chunks)
     o_status = "PASS" if len(obls.timeline) >= 10 and obls.timeline[0].days <= 1.0 else "FAIL"
-    results_table.add_row("7. Obligations & Timeline", "Chronological map (24h to 24m)", f"{len(obls.timeline)} milestones sorted", f"[green]{o_status}[/green]")
+    results_table.add_row("7. Obligations & Timeline", "Chronological map (24h to 24m)", f"{len(obls.timeline)} milestones sorted", _colored(o_status))
 
     # 8. 3-Bucket Scoring
     scorer = RiskScorer()
@@ -101,22 +105,28 @@ def run_benchmark():
     }
     score_res = scorer.score(sample_finding, {"verdict": "ACCEPTED", "confidence": 0.95})
     sc_status = "PASS" if score_res["bucket"] == "deal_breaker" else "FAIL"
-    results_table.add_row("8. Plain-English Bucketing", "Deal-Breaker / Watch Out / Protection", f"Bucket: {score_res['bucket'].upper()}", f"[green]{sc_status}[/green]")
+    results_table.add_row("8. Plain-English Bucketing", "Deal-Breaker / Watch Out / Protection", f"Bucket: {score_res['bucket'].upper()}", _colored(sc_status))
 
     # 9. 100-Point Health Score
     he = HealthScore()
     health_res = he.calculate([sample_finding], [score_res], missing_res)
     h_status = "PASS" if 0.0 <= health_res["health_score"] <= 100.0 and health_res["rating"] else "FAIL"
-    results_table.add_row("9. Contract Health Engine", "100-pt score with transparent deductions", f"Score: {health_res['health_score']}/100 ({health_res['rating']})", f"[green]{h_status}[/green]")
+    results_table.add_row("9. Contract Health Engine", "100-pt score with transparent deductions", f"Score: {health_res['health_score']}/100 ({health_res['rating']})", _colored(h_status))
 
     # 10. Real Knowledge Graph
     gb = GraphBuilder()
-    graph = gb.build([sample_finding], plan.parties)
+    graph = gb.build([sample_finding], plan.parties, obligations=obls.model_dump())
     ser_graph = gb.serialize(graph)
     g_status = "PASS" if ser_graph["total_nodes"] >= 15 and ser_graph["total_links"] >= 12 else "FAIL"
-    results_table.add_row("10. Grounded Knowledge Graph", "Entity-relationship network with quotes", f"{ser_graph['total_nodes']} nodes, {ser_graph['total_links']} links", f"[green]{g_status}[/green]")
+    results_table.add_row("10. Grounded Knowledge Graph", "Entity-relationship network with quotes", f"{ser_graph['total_nodes']} nodes, {ser_graph['total_links']} links", _colored(g_status))
 
     console.print(results_table)
+
+    statuses = [p_status, t_status, s_status, b_status, pl_status, m_status, o_status, sc_status, h_status, g_status]
+    failed = statuses.count("FAIL")
+    if failed:
+        console.print(f"\n[bold red]✗ {failed} OF 10 BACKEND MODULES FAILED[/bold red]\n")
+        sys.exit(1)
     console.print("\n[bold green]✓ ALL 10 PHASE A BACKEND MODULES VERIFIED SUCCESSFULLY![/bold green]\n")
 
 
