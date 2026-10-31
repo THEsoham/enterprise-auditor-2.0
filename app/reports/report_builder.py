@@ -29,6 +29,7 @@ class ReportBuilder:
         graph_data: Optional[dict] = None,
         parties: Optional[dict] = None,
         pages: Optional[list[dict]] = None,
+        sections: Optional[list[str]] = None,
     ) -> dict:
         debate_histories = debate_histories or []
         missing_clauses = missing_clauses or []
@@ -73,6 +74,7 @@ class ReportBuilder:
                 "verdict": finding.get("verdict", ""),
                 "verifier_model": finding.get("verifier_model", ""),
                 "verification_reasoning": finding.get("verification_reasoning", ""),
+                "verification_confidence": finding.get("verification_confidence", 0.0),
                 "evidence": finding.get("evidence", []),
                 "risk_score": score_data,
                 "debate_history": history,
@@ -101,4 +103,5 @@ class ReportBuilder:
             "graph": graph_data or {},
             "pages": pages or [],
             "num_pages": len(pages) if pages else 0,
+            "num_sections": len(sections) if sections else 0,
         }

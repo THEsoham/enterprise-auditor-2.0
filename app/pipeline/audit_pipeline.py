@@ -170,6 +170,7 @@ class AuditPipeline:
                 finding["verdict"] = verdict
                 finding["verifier_model"] = verification.get("verifier_model", "")
                 finding["verification_reasoning"] = verification.get("reasoning", "")
+                finding["verification_confidence"] = verification.get("confidence", 0.0)
 
                 risk_score = self.risk_scorer.score(
                     finding=finding,
@@ -225,6 +226,7 @@ class AuditPipeline:
             graph_data=serialized_graph,
             parties=parties,
             pages=pages,
+            sections=plan.detected_sections,
         )
 
         # Export report artifacts

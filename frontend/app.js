@@ -469,7 +469,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const msCount = data.health?.missing_protections_count || (data.missing_clauses || []).length || 0;
       const dateCount = (data.obligations?.timeline_items || []).length || 0;
 
-      if (navCountRisks) navCountRisks.textContent = dbCount + woCount;
+      const prCount = data.health?.protections_count || (data.health?.protections || []).length || 0;
+      if (navCountRisks) navCountRisks.textContent = dbCount + woCount + prCount;
       if (navCountMissing) navCountMissing.textContent = msCount;
       if (navCountDates) navCountDates.textContent = dateCount;
     } catch (_) {}
@@ -524,7 +525,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const wo = health.watch_out_count ?? (health.watch_out?.length || 0);
     const pr = health.protections_count ?? (health.protections?.length || 0);
     const ms = health.missing_protections_count ?? (data.missing_clauses?.length || 0);
-    const total = db + wo + pr + ms;
+    // Missing protections are listed separately, so they are not counted as findings
+    const total = db + wo + pr;
 
     // Score Circle & Assessment Text
     if (kpiScoreNumber) kpiScoreNumber.textContent = score;
@@ -558,10 +560,40 @@ document.addEventListener("DOMContentLoaded", () => {
     if (tierCountMissing) tierCountMissing.textContent = ms;
 
     // Intelligence Metrics
-    if (intelStatPages) intelStatPages.textContent = data.num_pages || (data.pages?.length || 1);
-    if (intelStatSections) intelStatSections.textContent = data.num_sections || (data.findings?.length || 0);
+    const citedChunks = new Set((data.findings || []).flatMap((f) => (f.evidence || []).map((e) => e.chunk_id)).filter(Boolean));
+    if (intelStatPages) intelStatPages.textContent = data.num_pages || (data.pages?.length || 0);
+    if (intelStatSections) intelStatSections.textContent = data.num_sections || "—";
     if (intelStatEntities) intelStatEntities.textContent = data.graph?.nodes?.length || 0;
-    if (intelStatClauses) intelStatClauses.textContent = data.findings?.length || 0;
+    if (intelStatClauses) intelStatClauses.textContent = citedChunks.size;
+  }
+
+  // Severity pill straight from the finding's own severity
+  function severityPill(finding) {
+    // Severity measures risk, so a protective clause is labelled as such instead
+    if (finding.bucket === "protection") return { cls: "pill-medium", label: "Protection" };
+    const severity = String(finding.severity || "").toLowerCase();
+    if (severity === "critical") return { cls: "pill-critical", label: "Critical" };
+    if (severity === "high") return { cls: "pill-high", label: "High" };
+    if (severity === "medium") return { cls: "pill-medium", label: "Medium" };
+    if (severity === "low") return { cls: "pill-medium", label: "Low" };
+    return { cls: "pill-medium", label: "Unrated" };
+  }
+
+  // "10. TERMINATION" -> "§10"; falls back to the section text, never to an invented number
+  function clauseRef(finding) {
+    const section = finding.evidence?.[0]?.section || finding.section || "";
+    const number = section.match(/^(\d+(?:\.\d+)*)\./);
+    if (number) return `§${number[1]}`;
+    return section ? section.slice(0, 24) : "—";
+  }
+
+  // Skeptic's verdict and confidence, e.g. "Accepted 95%"
+  function verificationLabel(finding) {
+    const verdict = String(finding.verdict || "").toUpperCase();
+    if (!verdict) return "Not verified";
+    const word = verdict.charAt(0) + verdict.slice(1).toLowerCase();
+    const conf = finding.verification_confidence;
+    return typeof conf === "number" && conf > 0 ? `${word} ${Math.round(conf * 100)}%` : word;
   }
 
   // 3. Top Findings Table (Overview Lower Left)
@@ -569,35 +601,25 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!topFindingsTbody) return;
     topFindingsTbody.innerHTML = "";
 
-    const all = [
-      ...(data.health?.deal_breakers || []),
-      ...(data.health?.watch_out || []),
-      ...(data.findings || [])
-    ];
+    // Risks first (deal-breakers, then watch-outs), then protections
+    const bucketOrder = { deal_breaker: 0, watch_out: 1, protection: 2 };
+    const topItems = [...(data.findings || [])]
+      .sort((a, b) => (bucketOrder[a.bucket] ?? 3) - (bucketOrder[b.bucket] ?? 3))
+      .slice(0, 5);
 
-    // Deduplicate by title
-    const seen = new Set();
-    const topItems = [];
-    for (const item of all) {
-      const key = item.title || item.claim;
-      if (!seen.has(key)) {
-        seen.add(key);
-        topItems.push(item);
-      }
-      if (topItems.length >= 5) break;
+    if (!topItems.length) {
+      topFindingsTbody.innerHTML = `<tr><td colspan="6" style="color: var(--text-muted);">No verified findings for this contract.</td></tr>`;
+      return;
     }
 
-    topItems.forEach((finding, idx) => {
+    topItems.forEach((finding) => {
       const tr = document.createElement("tr");
 
-      const isCritical = finding.bucket === "deal_breaker" || finding.severity === "critical" || idx < 3;
-      const sevClass = isCritical ? "pill-critical" : "pill-high";
-      const sevLabel = isCritical ? "Critical" : "High";
-
+      const { cls: sevClass, label: sevLabel } = severityPill(finding);
       const ev = finding.evidence?.[0] || {};
-      const sectionCode = ev.chunk_id ? (ev.chunk_id.replace("chunk-", "§")) : `§${idx + 7}.${idx + 1}`;
-      const pageNum = ev.page || (idx * 4 + 11);
-      const confPct = Math.round((finding.confidence || 0.88 - idx * 0.03) * 100);
+      const sectionCode = clauseRef(finding);
+      const pageNum = ev.page ?? "—";
+      const verifiedText = verificationLabel(finding);
 
       tr.innerHTML = `
         <td>
@@ -622,7 +644,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5">
               <polyline points="20 6 9 17 4 12"/>
             </svg>
-            Verified ${confPct}%
+            ${escapeHtml(verifiedText)}
           </span>
         </td>
         <td>
@@ -634,7 +656,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       tr.querySelectorAll(".btn-trace-trigger").forEach((btn) => {
         btn.addEventListener("click", () => {
-          openEvidenceTraceModal(finding, sectionCode, pageNum, confPct);
+          openEvidenceTraceModal(finding, sectionCode, pageNum);
         });
       });
 
@@ -647,19 +669,21 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!overviewDatesList) return;
     overviewDatesList.innerHTML = "";
 
-    const defaultDates = [
-      { label: "Initial Term", value: "1 Jan 2025 – 31 Dec 2026", color: "dates-dot-green" },
-      { label: "Auto-Renewal", value: "1 Jan 2027 (1 year)", color: "dates-dot-blue" },
-      { label: "Termination Notice", value: "60 days' written notice", color: "dates-dot-amber" },
-      { label: "Data Retention Period", value: "Not explicitly defined", color: "dates-dot-red" }
-    ];
-
     const rawTimeline = data.obligations?.timeline_items || data.obligations?.timeline || [];
-    const itemsToUse = rawTimeline.length >= 3 ? rawTimeline.slice(0, 4).map((item, i) => ({
-      label: item.timeframe_label || item.period_label || "Milestone",
-      value: (item.duty || item.action || "Contract duty").slice(0, 45) + "...",
-      color: i === 0 ? "dates-dot-green" : i === 1 ? "dates-dot-blue" : i === 2 ? "dates-dot-amber" : "dates-dot-red"
-    })) : defaultDates;
+    if (!rawTimeline.length) {
+      overviewDatesList.innerHTML = `<div class="dates-item-row"><div class="dates-item-details"><span class="dates-item-date">No deadlines or notice periods found in this contract.</span></div></div>`;
+      return;
+    }
+
+    const colors = ["dates-dot-green", "dates-dot-blue", "dates-dot-amber", "dates-dot-red"];
+    const itemsToUse = rawTimeline.slice(0, 4).map((item, i) => {
+      const text = item.duty || item.action || "";
+      return {
+        label: item.timeframe_label || item.period_label || "Milestone",
+        value: text.length > 45 ? text.slice(0, 45) + "..." : text,
+        color: colors[i],
+      };
+    });
 
     itemsToUse.forEach((d) => {
       const row = document.createElement("div");
@@ -678,14 +702,23 @@ document.addEventListener("DOMContentLoaded", () => {
   // 5. Overview AI Insight
   function renderOverviewAiInsight(data) {
     if (!overviewAiInsightText) return;
-    const dbCount = data.health?.deal_breakers_count || (data.health?.deal_breakers || []).length || 0;
-    const woCount = data.health?.watch_out_count || (data.health?.watch_out || []).length || 0;
+    // Summarise this contract's own verified findings
+    const findings = data.findings || [];
+    const dealBreakers = findings.filter((f) => f.bucket === "deal_breaker");
+    const watchOuts = findings.filter((f) => f.bucket === "watch_out");
+    const protections = findings.filter((f) => f.bucket === "protection");
+    const titles = (list) => list.map((f) => f.title).filter(Boolean).join("; ");
 
-    if (dbCount > 0) {
-      overviewAiInsightText.textContent = `This agreement gives the provider asymmetric termination rights while imposing a restrictive liability cap. Consider negotiating clearer service level commitments and mutual 30-day notice provisions prior to signing.`;
-    } else {
-      overviewAiInsightText.textContent = `Standard commercial software terms identified with balanced mutual protections. Focus negotiation efforts on clarifying data retention windows and annual audit cadence.`;
-    }
+    const parts = [];
+    if (dealBreakers.length) parts.push(`Negotiate before signing: ${titles(dealBreakers)}.`);
+    if (watchOuts.length) parts.push(`Review closely: ${titles(watchOuts)}.`);
+    if (protections.length) parts.push(`Keep as drafted: ${titles(protections)}.`);
+    const firstRedline = dealBreakers[0]?.suggested_negotiation || watchOuts[0]?.suggested_negotiation;
+    if (firstRedline) parts.push(`Suggested first redline: ${firstRedline}`);
+
+    overviewAiInsightText.textContent = parts.length
+      ? parts.join(" ")
+      : "No verified risks or protections were found for the audited topics.";
   }
 
   // 6. Comprehensive Findings Screen
@@ -711,16 +744,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!findingsFullStack || !auditData) return;
     findingsFullStack.innerHTML = "";
 
-    const all = [
-      ...(auditData.health?.deal_breakers || []),
-      ...(auditData.health?.watch_out || []),
-      ...(auditData.health?.protections || [])
-    ];
+    // Full findings carry the Skeptic's verdict; keep the same bucket order as before
+    const bucketOrder = { deal_breaker: 0, watch_out: 1, protection: 2 };
+    const all = (auditData.findings || [])
+      .filter((f) => f.bucket in bucketOrder)
+      .sort((a, b) => bucketOrder[a.bucket] - bucketOrder[b.bucket]);
+    const countBucket = (bucket) => all.filter((f) => f.bucket === bucket).length;
 
     if (countPillAll) countPillAll.textContent = all.length;
-    if (countPillDb) countPillDb.textContent = (auditData.health?.deal_breakers || []).length;
-    if (countPillWo) countPillWo.textContent = (auditData.health?.watch_out || []).length;
-    if (countPillPr) countPillPr.textContent = (auditData.health?.protections || []).length;
+    if (countPillDb) countPillDb.textContent = countBucket("deal_breaker");
+    if (countPillWo) countPillWo.textContent = countBucket("watch_out");
+    if (countPillPr) countPillPr.textContent = countBucket("protection");
 
     const findingsCountTab = document.getElementById("findings-count-tab");
     if (findingsCountTab) findingsCountTab.textContent = all.length;
@@ -749,8 +783,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const sevText = isDb ? "Deal-Breaker (Critical)" : isWo ? "Watch-Out Warning" : "Protective Clause";
 
       const ev = finding.evidence?.[0] || {};
-      const clauseStr = ev.chunk_id ? ev.chunk_id.replace("chunk-", "Section ") : "Clause Body";
-      const pageStr = ev.page ? `Page ${ev.page}` : "Main Agreement";
+      const clauseStr = ev.section || "Section not identified";
+      const pageStr = ev.page ? `Page ${ev.page}` : "Page not identified";
       const quoteStr = ev.quote || finding.claim || "";
       const remedyStr = finding.suggested_negotiation || finding.recommendation || "";
 
@@ -767,7 +801,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <h3 class="finding-h3-title">${escapeHtml(finding.title || finding.claim)}</h3>
           </div>
           <span class="badge-ai-verified">
-            ✓ AI Verified 91%
+            ✓ ${escapeHtml(verificationLabel(finding))}${finding.verifier_model ? ` • ${escapeHtml(describeVerifier(finding.verifier_model))}` : ""}
           </span>
         </div>
 
@@ -805,7 +839,7 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
 
       card.querySelector(".btn-open-trace")?.addEventListener("click", () => {
-        openEvidenceTraceModal(finding, clauseStr, pageStr, 91);
+        openEvidenceTraceModal(finding, clauseRef(finding), pageStr);
       });
 
       card.querySelector(".btn-copy-redline")?.addEventListener("click", (e) => {
@@ -903,7 +937,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const fid = el.getAttribute("data-finding-id");
         const found = (auditData?.findings || []).find((f) => f.id === fid) || auditData?.health?.deal_breakers?.[0];
         if (found) {
-          openEvidenceTraceModal(found, found.clause_reference || `Page ${pageNum}`, pageNum, Math.round((found.confidence || 0.95) * 100));
+          openEvidenceTraceModal(found, clauseRef(found), pageNum);
         } else {
           showToast("Verbatim evidence selected: Finding cross-referenced", "info");
         }
@@ -2372,13 +2406,17 @@ document.addEventListener("DOMContentLoaded", () => {
   // =========================================================================
   // MODALS & TRACE CONTROLLERS
   // =========================================================================
-  function openEvidenceTraceModal(finding, clauseStr, pageStr, confPct) {
+  function openEvidenceTraceModal(finding, clauseStr, pageStr) {
     if (!modalEvidenceTrace) return;
 
     if (modalTraceTitle) modalTraceTitle.textContent = finding.title || finding.claim;
-    if (modalTraceClause) modalTraceClause.textContent = clauseStr || "Clause Reference";
-    const verifiedPct = confPct || (finding.confidence ? Math.round(finding.confidence * 100) : 95);
-    if (modalTraceVerified) modalTraceVerified.textContent = `✓ Verified ${verifiedPct}%`;
+    if (modalTraceClause) modalTraceClause.textContent = clauseStr || clauseRef(finding);
+    if (modalTraceSeverity) {
+      const { cls, label } = severityPill(finding);
+      modalTraceSeverity.className = `pill-severity ${cls}`;
+      modalTraceSeverity.textContent = label.toUpperCase();
+    }
+    if (modalTraceVerified) modalTraceVerified.textContent = `✓ ${verificationLabel(finding)}`;
     if (modalTracePlain) modalTracePlain.textContent = finding.plain_english || finding.claim || "";
     if (modalTraceWhy) modalTraceWhy.textContent = finding.why_flagged || "This provision creates significant legal or financial exposure.";
 

@@ -34,7 +34,7 @@
 
 💡 **Suggested Negotiation Remedy:**  
 ```text
-Change 'Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice' to 'Customer may terminate for convenience at any time upon 30 days’ written notice.'
+Change the termination notice period for the Customer to match the Provider's 15 days.
 ```
 
 ## 3. 🟡 Watch Out (4)
@@ -44,23 +44,23 @@ Change 'Customer may terminate for convenience only after the first 12 months of
 - **Recommended Fix:** Change the liability cap to cover at least six months of fees or a percentage of total fees paid during the contract term.
 
 #### 2. Automatic Renewal Clause
-- **Impact:** If the Customer doesn't notify the Provider 90 days before the contract ends, it will automatically renew for another year.
+- **Impact:** The contract will keep renewing automatically unless you tell them not to at least 90 days in advance.
 - **Evidence (p. 5):** "Unless either Party gives written notice of non-renewal at least 90 days before expiration, the Agreement will automatically renew for successive 12-month periods."
 - **Recommended Fix:** Change the notice period for non-renewal to 30 days instead of 90 days.
 
 #### 3. Data Retention After Deletion
-- **Impact:** The Provider can keep your data backups for up to 180 days even after you delete it, which could be a privacy concern.
+- **Impact:** The Provider can keep your data backups for up to 180 days after you delete them, which could be risky.
 - **Evidence (p. 2):** "Provider may retain backup copies of Customer Data for up to 180 days after deletion from production systems, provided such copies remain protected and are not restored except for disaster recovery purposes."
-- **Recommended Fix:** Limit the retention of backup copies of Customer Data to no more than 30 days after deletion from production systems.
+- **Recommended Fix:** Limit the retention period of backup copies to 30 days after deletion from production systems.
 
 #### 4. Indemnification Obligations
-- **Impact:** The Customer has to defend the Provider against certain claims, which could expose them to significant liability, while the Provider's obligations are more limited.
-- **Evidence (p. 3):** "8.1 Provider shall defend Customer against a third-party claim alleging that the Services, when used as permitted by this Agreement, infringe a third party’s registered intellectual property right, and shall pay damages finally awarded or settlements approved by Provider."
-- **Recommended Fix:** Both parties shall indemnify and defend each other against third-party claims arising from their respective actions or data.
+- **Impact:** The Customer has to defend the Provider in certain legal situations, which could lead to high costs for the Customer.
+- **Evidence (p. 3):** "Customer shall defend Provider against third-party claims arising from Customer Data or Customer’s unlawful use of the Services, and shall pay damages finally awarded or settlements approved by Customer."
+- **Recommended Fix:** Customer shall defend Provider against third-party claims only to the extent arising from Customer's negligence or willful misconduct.
 
 ## 4. 🟢 Active Protections (2)
 - ✓ **Bilateral Confidentiality Obligations**: Both parties must keep each other's confidential information safe, which is a good protection for the Customer. *(Page 2: "Each Party shall protect the other Party’s Confidential Information using at least reasonable care and shall use such information only to perform or receive rights under this Agreement.")*
-- ✓ **Ownership of Data and Intellectual Property**: The Customer owns its data, while the Provider owns its technology and services, which is a good protection for the Customer. *(Page 2: "Customer retains all right, title, and interest in Customer Data. Provider retains all right, title, and interest in the Services, software, models, templates, documentation, and Provider-developed technology.")*
+- ✓ **Ownership of Data and Intellectual Property**: The Customer owns its data, while the Provider owns its technology, which is a good protection for the Customer. *(Page 2: "Customer retains all right, title, and interest in Customer Data. Provider retains all right, title, and interest in the Services, software, models, templates, documentation, and Provider-developed technology.")*
 
 ## 5. ⚠️ What's Missing? (Protective Baseline Gap Analysis)
 | Status | Protection Requirement | Risk Impact | Recommended Action |
@@ -78,29 +78,29 @@ Change 'Customer may terminate for convenience only after the first 12 months of
 
 ## 6. ⚖️ Clause Balance & Asymmetry Analysis
 ### Asymmetric Termination Rights
-> **Asymmetry:** The Provider has the right to terminate with shorter notice and without a waiting period, while the Customer faces longer notice and a waiting period.
-- **Provider Terms:** Provider may terminate this Agreement for convenience at any time upon 15 days’ written notice to Customer.
-- **Customer Terms:** Customer may terminate for convenience only after the first 12 months of the Term and upon 60 days’ written notice.
+> **Asymmetry:** The Provider has a significantly shorter notice period for termination compared to the Customer.
+- **Provider Terms:** Can terminate for convenience with 15 days' notice.
+- **Customer Terms:** Can only terminate for convenience after 12 months with 60 days' notice.
 
 ### Automatic Renewal Clause
-> **Asymmetry:** The Provider has a significant advantage as the Customer must remember to notify for non-renewal.
-- **Provider Terms:** The Provider benefits from automatic renewal, ensuring continued revenue.
-- **Customer Terms:** The Customer must actively manage their notice to avoid renewal.
+> **Asymmetry:** The Customer has a longer obligation to notify for non-renewal compared to the Provider's rights.
+- **Provider Terms:** 
+- **Customer Terms:** The Customer must provide a 90-day notice to avoid automatic renewal.
 
 ### Data Retention After Deletion
-> **Asymmetry:** The Provider has significant rights to retain Customer Data without equivalent rights for the Customer.
-- **Provider Terms:** The Provider can retain backups for up to 180 days.
-- **Customer Terms:** The Customer has no control over the retention period of backups.
+> **Asymmetry:** The Provider has significant rights to retain data without the Customer's control.
+- **Provider Terms:** The Provider can retain backups for 180 days.
+- **Customer Terms:** The Customer does not have control over the retention period of backups.
 
 ### Ownership of Data and Intellectual Property
-> **Asymmetry:** The Provider has broader rights over its own technology compared to the Customer's rights over its data.
+> **Asymmetry:** The Provider has broader rights over its technology compared to the Customer's rights over its data.
 - **Provider Terms:** Provider retains all right, title, and interest in the Services, software, models, templates, documentation, and Provider-developed technology.
 - **Customer Terms:** Customer retains all right, title, and interest in Customer Data.
 
 ### Indemnification Obligations
-> **Asymmetry:** The Provider's indemnification obligations are narrower than those of the Customer.
-- **Provider Terms:** Provider defends Customer against specific intellectual property claims.
-- **Customer Terms:** Customer defends Provider against claims related to Customer Data or unlawful use.
+> **Asymmetry:** The Customer bears the burden of defense for claims related to its own data, while the Provider is shielded from such obligations.
+- **Provider Terms:** Provider is defended against claims related to Customer Data.
+- **Customer Terms:** Customer must defend Provider against claims related to Customer Data.
 
 ## 7. 📅 Obligations & Deadlines Timeline
 ```text
