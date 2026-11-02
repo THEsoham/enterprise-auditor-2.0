@@ -1,5 +1,6 @@
 import re
 
+from app.auditing.obligation_extractor import merge_abbreviations
 from app.chunking.chunk_models import DocumentChunk
 
 
@@ -10,12 +11,45 @@ from app.chunking.chunk_models import DocumentChunk
 #
 # It intentionally does NOT match:
 # 10.3 Provider may terminate...
+
+
 SECTION_PATTERN = re.compile(
     r"(?<![\d.])"
     r"(\d{1,2})\.\s+"
     r"([A-Z][A-Z &\-]{2,})"
     r"(?=\s|$)"
 )
+
+# A page ending in one of these words has clearly not finished its sentence
+UNFINISHED_ENDING = re.compile(r"(?:,|\b(?:the|a|an|of|to|and|or|by|for|in|on|upon|with|at|from|that|its))$", re.IGNORECASE)
+SENTENCE_START = re.compile(r"[.;:!?]\s+")
+
+
+def rejoin_split_sentences(pages: list[dict]) -> list[dict]:
+    """
+    Chunks are made page by page, so a sentence running onto the next page would
+    be cut in two, and a quote of it could never pass the exact quote check.
+    Move the unfinished start of such a sentence onto the page where it ends.
+    """
+    pages = [dict(page) for page in pages]
+
+    for page, next_page in zip(pages, pages[1:]):
+        text = page["text"].rstrip()
+        following = next_page["text"].lstrip()
+        if not text or not following or text[-1] in ".;:!?)":
+            continue
+
+        continues = following[0].islower() or UNFINISHED_ENDING.search(text)
+        if not continues or SECTION_PATTERN.match(following):
+            continue
+
+        # The unfinished part starts after the last sentence ending or line of its own clause
+        starts = [m.end() for m in SENTENCE_START.finditer(text)]
+        start = starts[-1] if starts else 0
+        page["text"] = text[:start].rstrip()
+        next_page["text"] = f"{text[start:].strip()} {following}"
+
+    return pages
 
 
 def split_large_text(text: str, max_chars: int) -> list[str]:
@@ -24,7 +58,7 @@ def split_large_text(text: str, max_chars: int) -> list[str]:
     if len(text) <= max_chars:
         return [text.strip()]
 
-    sentences = re.split(r"(?<=[.!?])\s+", text)
+    sentences = merge_abbreviations(re.split(r"(?<=[.!?])\s+", text))
 
     pieces = []
     current = ""
@@ -34,6 +68,16 @@ def split_large_text(text: str, max_chars: int) -> list[str]:
 
         if not sentence:
             continue
+
+        # A single sentence over the limit can only be split between words
+        while len(sentence) > max_chars:
+            if current:
+                pieces.append(current.strip())
+                current = ""
+            cut = sentence.rfind(" ", 0, max_chars)
+            cut = cut if cut > 0 else max_chars
+            pieces.append(sentence[:cut].strip())
+            sentence = sentence[cut:].strip()
 
         if current and len(current) + len(sentence) + 1 > max_chars:
             pieces.append(current.strip())
@@ -109,7 +153,7 @@ def chunk_pages(
 
     active_section = None
 
-    for page in pages:
+    for page in rejoin_split_sentences(pages):
 
         page_number = page["page_number"]
         text = page["text"].strip()

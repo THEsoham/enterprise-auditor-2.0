@@ -27,10 +27,27 @@ STOPWORDS = {
 }
 
 
+SUFFIXES = ("ations", "ation", "ating", "ated", "ates", "ate", "ings", "ing", "ies", "ied", "ed", "es")
+
+
+def stem(word: str) -> str:
+    """Light stemmer, so "terminate", "terminated" and "termination" count as one word."""
+    if any(ch.isdigit() for ch in word):
+        return word
+    for suffix in SUFFIXES:
+        if word.endswith(suffix) and len(word) - len(suffix) >= 4:
+            return word[: -len(suffix)]
+    if word.endswith("s") and not word.endswith("ss") and len(word) >= 4:
+        word = word[:-1]
+    if word.endswith("e") and len(word) >= 5:
+        word = word[:-1]
+    return word
+
+
 def tokenize(text: str) -> list[str]:
-    """Tokenize text into lowercase alphanumeric words, filtering stopwords."""
+    """Tokenize text into lowercase stemmed words, filtering stopwords."""
     words = re.findall(r"\b[a-zA-Z0-9_\-\.]{2,}\b", text.lower())
-    return [w for w in words if w not in STOPWORDS]
+    return [stem(w) for w in words if w not in STOPWORDS]
 
 
 class BM25Index:

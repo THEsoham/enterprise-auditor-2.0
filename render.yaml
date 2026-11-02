@@ -21,6 +21,10 @@ services:
         value: gemini-3.8-flash
       - key: GEMINI_FALLBACK_MODELS
         value: gemini-3.6-flash
+      - key: OPENAI_VERIFIER_MODEL
+        value: gpt-4o
+      - key: UPLOAD_MAX_PROBES
+        value: "12"
       - key: USE_GEMINI
         value: "true"
       - key: CHROMA_PERSIST_DIRECTORY

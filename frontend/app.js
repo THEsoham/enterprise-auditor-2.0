@@ -478,8 +478,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 1. Contract Header Banner
   function renderBanner(data) {
+    const contractName = data.display_name || data.document_name;
     if (bannerContractTitle) {
-      bannerContractTitle.textContent = data.document_name ? formatDocumentTitle(data.document_name) : "Audited Agreement";
+      bannerContractTitle.textContent = contractName ? formatDocumentTitle(contractName) : "Audited Agreement";
     }
 
     if (bannerPartiesSubtitle) {
@@ -500,7 +501,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (miniPageHeader) {
-      miniPageHeader.textContent = data.document_name ? formatDocumentTitle(data.document_name) : "Audited Agreement";
+      miniPageHeader.textContent = contractName ? formatDocumentTitle(contractName) : "Audited Agreement";
+    }
+
+    const miniPageSub = document.getElementById("mini-page-sub");
+    if (miniPageSub) {
+      const p = data.num_pages || (data.pages ? data.pages.length : 0);
+      miniPageSub.textContent = p > 0 ? `${p} ${p === 1 ? "page" : "pages"} audited` : "Audited document";
     }
   }
 
@@ -1151,7 +1158,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (model === "grounding-check") return "Automatic quote check";
     const [provider, name] = model.split(":");
     if (!name) return model;
-    return name.toLowerCase().startsWith(provider) ? name : `${provider === "gemini" ? "Gemini" : "OpenAI"} ${name}`;
+    // OpenAI also writes the findings, so its verdicts are labelled as the backup check
+    if (provider === "openai") return `OpenAI ${name} (backup verifier)`;
+    return name.toLowerCase().startsWith(provider) ? name : `Gemini ${name}`;
   }
 
   function auditorTurnText(finding, roundIndex) {
@@ -1511,6 +1520,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  function executionLabel(signatures) {
+    const status = signatures?.overall_status;
+    if (status === "FULLY_EXECUTED") return "Fully Executed";
+    if (status === "PARTIALLY_EXECUTED") return "Partially Executed";
+    return "Unexecuted Draft";
+  }
+
   // 11. Signatures & Fee Schedule (Integrated in Overview & Reader Sidebar)
   function renderScanner(signatures, tables) {
     const readerTablesCount = document.getElementById("reader-tables-count");
@@ -1524,23 +1540,35 @@ document.addEventListener("DOMContentLoaded", () => {
     const sigModalCustName = document.getElementById("sig-modal-cust-name");
 
     if (signatures) {
-      const isExecuted = signatures.execution_status === "EXECUTED";
-      const sigPage = signatures.page ? ` (Page ${signatures.page})` : "";
+      const isExecuted = signatures.overall_status === "FULLY_EXECUTED";
+      const label = executionLabel(signatures);
+      const sigPage = signatures.signature_page ? ` (Page ${signatures.signature_page})` : "";
       if (cardSigStatusText) {
-        cardSigStatusText.textContent = isExecuted ? "✓ Executed Contract" : `⚠️ Unexecuted Draft${sigPage}`;
+        cardSigStatusText.textContent = `${isExecuted ? "✓" : "⚠️"} ${label}${sigPage}`;
       }
       if (sigModalHeadline) {
-        sigModalHeadline.textContent = isExecuted ? "EXECUTED CONTRACT" : "UNEXECUTED DRAFT";
+        sigModalHeadline.textContent = label.toUpperCase();
       }
-      if (sigModalSubnotes && signatures.subnotes) {
-        sigModalSubnotes.textContent = signatures.subnotes;
+      if (sigModalSubnotes && signatures.visual_notes) {
+        sigModalSubnotes.textContent = signatures.visual_notes;
       }
+      const partyStatus = (role) => {
+        const party = (signatures.parties || []).find((p) => p.party_role === role);
+        if (!party) return "Status: No signing block found";
+        return `Status: ${party.signature_detected ? "Signed" : "Not signed"}`;
+      };
+      const sigModalProvStatus = document.getElementById("sig-modal-prov-status");
+      const sigModalCustStatus = document.getElementById("sig-modal-cust-status");
+      if (sigModalProvStatus) sigModalProvStatus.textContent = partyStatus("Provider");
+      if (sigModalCustStatus) sigModalCustStatus.textContent = partyStatus("Customer");
+      const sigModalRisk = document.getElementById("sig-modal-risk-note");
+      if (sigModalRisk) sigModalRisk.style.display = isExecuted ? "none" : "block";
       if (auditData?.parties) {
         if (sigModalProvName) sigModalProvName.textContent = auditData.parties.provider || "—";
         if (sigModalCustName) sigModalCustName.textContent = auditData.parties.customer || "—";
       }
       if (scannerSigStatus) {
-        scannerSigStatus.textContent = isExecuted ? "EXECUTED CONTRACT" : "UNEXECUTED DRAFT";
+        scannerSigStatus.textContent = label.toUpperCase();
         scannerSigStatus.className = `pill-severity ${isExecuted ? "pill-critical" : "pill-high"}`;
       }
     }
@@ -1550,7 +1578,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tables.forEach((t, i) => {
         const btn = document.createElement("button");
         btn.className = `table-subtab-btn ${i === activeTableIndex ? "active" : ""}`;
-        btn.textContent = `Table ${t.table_number || i + 1} (p. ${t.page || 1})`;
+        btn.textContent = `Table ${i + 1} (p. ${t.page_number || 1})`;
         btn.addEventListener("click", () => {
           activeTableIndex = i;
           renderScanner(signatures, tables);
@@ -1560,7 +1588,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const activeTable = tables[activeTableIndex] || tables[0];
       if (activeTable) {
-        scannerTableRender.innerHTML = formatMarkdownTable(activeTable.markdown_table || "");
+        const risks = (activeTable.risks || []).map((r) => `
+          <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 6px; padding: 10px; margin-top: 10px; font-size: 12.5px; line-height: 1.45;">
+            <strong>${escapeHtml(r.risk_title)}:</strong> ${escapeHtml(r.observation)}
+            <div style="margin-top: 4px;"><strong>Suggested fix:</strong> ${escapeHtml(r.recommendation)}</div>
+          </div>
+        `).join("");
+        scannerTableRender.innerHTML = formatMarkdownTable(activeTable.markdown || "") + risks;
+      } else {
+        scannerTableRender.innerHTML = formatMarkdownTable("");
       }
     }
   }
@@ -2314,17 +2350,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const score = typeof data.health?.health_score === "number" ? Math.round(data.health.health_score) : 100;
     const dbCount = (data.health?.deal_breakers || []).length;
     const woCount = (data.health?.watch_out || []).length;
+    const baseline = data.missing_clauses || [];
+    const missingGaps = baseline.filter((m) => m.status === "MISSING");
+    const vagueGaps = baseline.filter((m) => m.status === "VAGUE");
+    const gapList = [...missingGaps, ...vagueGaps];
+    const oneSided = data.clause_balance || [];
 
     const memoMetaLine = document.getElementById("memo-meta-line");
     if (memoMetaLine) {
-      memoMetaLine.textContent = `Prepared for Executive Review • ${cust !== "First Party" ? cust : (data.document_name || "Contract Audit")}`;
+      memoMetaLine.textContent = `Prepared for Executive Review • ${cust !== "First Party" ? cust : (data.display_name || data.document_name || "Contract Audit")}`;
     }
 
     const html = `
       <h2>1. Executive Summary & Verdict</h2>
-      <p>This audit evaluates the commercial contract <strong>${escapeHtml(data.document_name || "Commercial Agreement")}</strong> executed between <strong>${escapeHtml(cust)}</strong> and <strong>${escapeHtml(prov)}</strong>.</p>
+      <p>This audit evaluates the commercial contract <strong>${escapeHtml(data.display_name || data.document_name || "Commercial Agreement")}</strong> between <strong>${escapeHtml(cust)}</strong> and <strong>${escapeHtml(prov)}</strong>. Execution status: <strong>${escapeHtml(executionLabel(data.signature_status))}</strong>.</p>
       <blockquote>
-        <strong>Final Contract Safety Score: ${score}/100</strong> — ${score < 65 ? "High Risk Profile" : "Moderate Risk Profile"}. Detected ${dbCount} deal-breaker terms and ${woCount} watch-out warning items requiring contractual alignment prior to execution.
+        <strong>Final Contract Safety Score: ${score}/100</strong> — ${escapeHtml(data.health?.rating || "Unrated")}. Detected ${dbCount} deal-breaker terms and ${woCount} watch-out warning items to resolve.
       </blockquote>
 
       <h2>2. Key Deal-Breakers Requiring Revision</h2>
@@ -2340,7 +2381,9 @@ document.addEventListener("DOMContentLoaded", () => {
       `).join("")}
 
       <h2>3. Protective Baseline Gap Analysis</h2>
-      <p>The contract was scanned against 12 standard enterprise protections. Unilateral terms were identified in termination notice and liability coverage.</p>
+      <p>The contract was scanned against ${baseline.length} standard enterprise protections: ${baseline.filter((m) => m.status === "PRESENT").length} present, ${vagueGaps.length} vague and ${missingGaps.length} missing.</p>
+      ${gapList.length ? `<ul>${gapList.map((m) => `<li><strong>${escapeHtml(m.status)}:</strong> ${escapeHtml(m.title)}</li>`).join("")}</ul>` : ""}
+      ${oneSided.length ? `<p>One-sided terms were identified in: ${oneSided.map((c) => escapeHtml(c.title)).join("; ")}.</p>` : ""}
     `;
 
     executiveMemoRendered.innerHTML = html;
@@ -2353,7 +2396,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   btnDownloadMemoFile?.addEventListener("click", () => {
-    window.open("/api/download/memo", "_blank");
+    if (!auditData?.document_name) {
+      showToast("No audit memo available to download", "error");
+      return;
+    }
+    window.open(`/api/download/memo?document=${encodeURIComponent(auditData.document_name)}`, "_blank");
   });
 
   btnBannerViewOriginal?.addEventListener("click", () => {
@@ -2366,18 +2413,24 @@ document.addEventListener("DOMContentLoaded", () => {
       showToast("No audit findings available to export", "error");
       return;
     }
+    const exportTitle = auditData.display_name || auditData.document_name || "Contract Audit";
     const exportPayload = {
-      contract_title: auditData.contract_metadata?.contract_title || "Contract Audit",
+      contract_title: exportTitle,
       audit_date: new Date().toISOString(),
-      safety_score: auditData.executive_kpis?.safety_score ?? 72,
-      findings_breakdown: auditData.findings_breakdown || {},
+      safety_score: auditData.health?.health_score ?? null,
+      findings_breakdown: {
+        deal_breakers: auditData.health?.deal_breakers_count ?? 0,
+        watch_out: auditData.health?.watch_out_count ?? 0,
+        protections: auditData.health?.protections_count ?? 0,
+        missing_protections: auditData.health?.missing_protections_count ?? 0
+      },
       findings: auditData.findings || []
     };
     const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `contract_findings_${(auditData.contract_metadata?.contract_title || "audit").toLowerCase().replace(/[^a-z0-9]+/g, "_")}.json`;
+    a.download = `contract_findings_${exportTitle.toLowerCase().replace(/[^a-z0-9]+/g, "_")}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

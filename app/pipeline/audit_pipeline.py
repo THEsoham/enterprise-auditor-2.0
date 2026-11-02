@@ -90,6 +90,7 @@ class AuditPipeline:
         pdf_path: str | Path,
         custom_queries: Optional[list[str]] = None,
         max_probes: Optional[int] = None,
+        display_name: Optional[str] = None,
     ) -> dict:
         pdf_path = Path(pdf_path)
         if not pdf_path.exists():
@@ -108,13 +109,14 @@ class AuditPipeline:
         extracted_tables = self.table_extractor.extract_tables(pdf_path)
         tables_data = [t.model_dump() for t in extracted_tables]
 
-        signature_status = self.signature_analyzer.analyze(pdf_path)
-        signature_data = signature_status.model_dump()
-
         # 4. Document Planning & Baseline Checks
         print("[5/9] Formulating Audit Plan & Party Extraction...")
         plan = self.audit_planner.create_plan(raw_chunks, document_title=document_name)
         parties = plan.parties
+
+        # Needs the parties, to tell whose signature block is whose
+        signature_status = self.signature_analyzer.analyze(pdf_path, parties=parties)
+        signature_data = signature_status.model_dump()
 
         print("[6/9] Running Missing-Protection Baseline Scanner...")
         missing_clauses = self.missing_clause_detector.detect(full_text)
@@ -168,6 +170,7 @@ class AuditPipeline:
                 # Keep the Skeptic's verdict on the finding so reports can show it
                 finding["verdict"] = verdict
                 finding["verifier_model"] = verification.get("verifier_model", "")
+                finding["verifier_is_fallback"] = verification.get("verifier_is_fallback", False)
                 finding["verification_reasoning"] = verification.get("reasoning", "")
                 finding["verification_confidence"] = verification.get("confidence", 0.0)
 
@@ -214,6 +217,7 @@ class AuditPipeline:
 
         report = self.report_builder.build(
             document_name=document_name,
+            display_name=display_name,
             findings=findings,
             risk_scores=risk_scores,
             health_score=health_score,

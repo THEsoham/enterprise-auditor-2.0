@@ -30,6 +30,7 @@ class ReportBuilder:
         parties: Optional[dict] = None,
         pages: Optional[list[dict]] = None,
         sections: Optional[list[str]] = None,
+        display_name: Optional[str] = None,
     ) -> dict:
         debate_histories = debate_histories or []
         missing_clauses = missing_clauses or []
@@ -73,6 +74,7 @@ class ReportBuilder:
                 "confidence": finding.get("confidence", 0.0),
                 "verdict": finding.get("verdict", ""),
                 "verifier_model": finding.get("verifier_model", ""),
+                "verifier_is_fallback": finding.get("verifier_is_fallback", False),
                 "verification_reasoning": finding.get("verification_reasoning", ""),
                 "verification_confidence": finding.get("verification_confidence", 0.0),
                 "evidence": finding.get("evidence", []),
@@ -82,6 +84,8 @@ class ReportBuilder:
 
         return {
             "document_name": document_name,
+            # The name the user uploaded; document_name is the stored file
+            "display_name": display_name or document_name,
             "parties": parties,
             "health": health_score,
             "summary": {

@@ -3,6 +3,8 @@ from pathlib import Path
 import pdfplumber
 from pydantic import BaseModel, Field
 
+from app.auditing.obligation_extractor import split_sentences
+
 
 class TableData(BaseModel):
     table_id: str
@@ -110,10 +112,13 @@ class TableExtractor:
                         ),
                     })
 
-        has_price_cap = re.search(
-            r"(?:increase|escalat|adjust)\w*.{0,100}(?:\d+(?:\.\d+)?\s*%|cpi|consumer price index)",
-            document_text,
-            re.IGNORECASE | re.DOTALL,
+        # A cap must be one sentence that links prices, an increase, and a limit,
+        # so an unrelated percentage elsewhere in the contract does not count
+        has_price_cap = any(
+            re.search(r"\b(?:fees?|prices?|pricing|charges?|rates?)\b", sentence, re.IGNORECASE)
+            and re.search(r"\b(?:increas|escalat|adjust|rais)\w*", sentence, re.IGNORECASE)
+            and re.search(r"\d+(?:\.\d+)?\s*(?:%|percent)|\bcpi\b|consumer price index", sentence, re.IGNORECASE)
+            for sentence in split_sentences(document_text)
         )
         if document_text and not has_price_cap:
             risks.append({

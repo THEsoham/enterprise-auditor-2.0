@@ -168,7 +168,8 @@ enterprise-auditor/
 
 ## 🔒 Security & Privacy
 
-* Contracts uploaded to Enterprise Auditor are processed in your local or private cloud environment.
+* Contract text is sent to OpenAI and Google Gemini for embeddings, findings and verification, so do not upload confidential contracts without an appropriate agreement with those providers.
+* On hosts without a persistent disk, such as Render's free plan, uploads and reports are lost on restart or redeploy.
 * API keys and secrets are never committed to version control (`.env` is excluded in `.gitignore`).
 * Embeddings and index files are stored in local storage and excluded from public git history.
 

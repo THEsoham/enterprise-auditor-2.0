@@ -585,7 +585,7 @@
               <div class="doc-preview-widget">
                 <div class="doc-preview-paper-box" id="doc-preview-mini-page">
                   <div class="doc-paper-header" id="mini-page-header">Contract Document</div>
-                  <div class="doc-paper-sub">No document loaded</div>
+                  <div class="doc-paper-sub" id="mini-page-sub">Audited document</div>
                   <div class="doc-paper-line" style="width: 90%;"></div>
                   <div class="doc-paper-line" style="width: 100%;"></div>
                   <div class="doc-paper-line" style="width: 75%;"></div>
@@ -917,7 +917,7 @@
                   </div>
                   <h4 class="topic-card-title">Termination for Convenience Parity</h4>
                   <p class="topic-card-desc">
-                    Can the provider terminate for convenience upon 15 days' notice while locking customer in for 12 months with 60-day notice?
+                    Can the provider terminate for convenience on shorter notice or fewer conditions than the customer?
                   </p>
                   <div class="topic-card-action">
                     <button class="btn-debate-topic" data-query="Can the provider terminate for convenience without reciprocal rights?">
@@ -934,7 +934,7 @@
                   </div>
                   <h4 class="topic-card-title">Aggregate Liability Cap Limits</h4>
                   <p class="topic-card-desc">
-                    Is provider aggregate liability capped at only 3 months of fees and does it exclude data breach losses or confidentiality?
+                    How low is the provider's aggregate liability cap, and does it exclude data breach or confidentiality losses?
                   </p>
                   <div class="topic-card-action">
                     <button class="btn-debate-topic" data-query="What is the liability cap and does it cover data breach?">
@@ -951,7 +951,7 @@
                   </div>
                   <h4 class="topic-card-title">Customer Backup &amp; Data Retention</h4>
                   <p class="topic-card-desc">
-                    Can provider retain backup copies of sensitive customer data for up to 180 days after termination or deletion request?
+                    How long can the provider retain backup copies of customer data after termination or a deletion request?
                   </p>
                   <div class="topic-card-action">
                     <button class="btn-debate-topic" data-query="How long are deleted customer backups retained?">
@@ -968,7 +968,7 @@
                   </div>
                   <h4 class="topic-card-title">Automatic Renewal &amp; Non-Renewal Trap</h4>
                   <p class="topic-card-desc">
-                    Does the contract automatically renew for 12 months unless written notice of non-renewal is delivered 90 days before expiry?
+                    Does the contract automatically renew, and how early must notice of non-renewal be given?
                   </p>
                   <div class="topic-card-action">
                     <button class="btn-debate-topic" data-query="Does the contract automatically renew and what is the notice window?">
@@ -985,7 +985,7 @@
                   </div>
                   <h4 class="topic-card-title">Unilateral Service &amp; SLA Modifications</h4>
                   <p class="topic-card-desc">
-                    Can the provider modify SLAs, security practices, or core specifications unilaterally upon posting changes online?
+                    Can the provider change service levels, security practices, or core terms on its own?
                   </p>
                   <div class="topic-card-action">
                     <button class="btn-debate-topic" data-query="Can the provider unilaterally change service terms or SLAs?">
@@ -1002,7 +1002,7 @@
                   </div>
                   <h4 class="topic-card-title">Personnel Non-Solicitation Penalties</h4>
                   <p class="topic-card-desc">
-                    Are customer personnel restricted from hiring or contracting under asymmetric liquidated damage penalties?
+                    Are there limits on hiring the other party's staff, and do they apply to both sides equally?
                   </p>
                   <div class="topic-card-action">
                     <button class="btn-debate-topic" data-query="Are there non-solicitation restrictions or hiring penalties?">
@@ -1036,7 +1036,7 @@
                   </div>
                   <h4 class="topic-card-title">SLA Outage Credits as Exclusive Remedy</h4>
                   <p class="topic-card-desc">
-                    Are fractional fee credits designated as customer's sole and exclusive remedy for catastrophic cloud service downtime?
+                    Are service credits the customer's only remedy if the service goes down?
                   </p>
                   <div class="topic-card-action">
                     <button class="btn-debate-topic" data-query="Are service level credits customer's exclusive remedy for downtime?">
@@ -1492,7 +1492,7 @@
               style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px;">
               Provider Party</div>
             <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);" id="sig-modal-prov-name">—</div>
-            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Status: Pending audit</div>
+            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;" id="sig-modal-prov-status">Status: Pending audit</div>
           </div>
           <div
             style="background: #F8FAFC; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px;">
@@ -1500,11 +1500,11 @@
               style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px;">
               Customer Party</div>
             <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);" id="sig-modal-cust-name">—</div>
-            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Status: Pending audit</div>
+            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;" id="sig-modal-cust-status">Status: Pending audit</div>
           </div>
         </div>
 
-        <div
+        <div id="sig-modal-risk-note"
           style="background: var(--bg-subtle); border-radius: var(--radius-md); padding: 12px; font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
           <strong>Legal Risk Assessment:</strong> Operating under an unexecuted agreement means dispute resolution,
           limitation of liability, and indemnity clauses may not be legally enforceable until properly countersigned.

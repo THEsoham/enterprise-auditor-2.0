@@ -6,6 +6,27 @@ from app.retrieval.vector_store import VectorStore
 
 load_dotenv()
 
+# Everyday wording mapped to the words contracts actually use, for the keyword search
+QUERY_SYNONYMS = {
+    "walk away": "terminate convenience",
+    "get out of": "terminate convenience",
+    "pull out": "terminate convenience",
+    "cancel": "terminate",
+    "exit": "terminate",
+    "quit": "terminate",
+    "keep our data": "retain customer data",
+    "sued": "indemnify claim",
+    "pay us": "liability damages",
+    "logo": "publicity marketing",
+}
+
+
+def expand_query(query: str) -> str:
+    """Append contract vocabulary for any everyday phrases in the question."""
+    lowered = query.lower()
+    extra = [terms for phrase, terms in QUERY_SYNONYMS.items() if phrase in lowered]
+    return " ".join([query, *extra])
+
 
 class Retriever:
     """
@@ -91,7 +112,7 @@ class Retriever:
             except Exception:
                 pass
 
-        bm25_results = self.bm25_search(query=query, n_results=n_results * 2)
+        bm25_results = self.bm25_search(query=expand_query(query), n_results=n_results * 2)
 
         # If BM25 has no results or failed, return vector results directly
         if not bm25_results:

@@ -1,12 +1,13 @@
 import pytest
+import pymupdf
 from pathlib import Path
 
 from app.ingestion.pdf_loader import load_pdf
 from app.ingestion.table_extractor import TableExtractor
 from app.ingestion.signature_analyzer import SignatureAnalyzer
-from app.chunking.semantic_chunker import chunk_pages
+from app.chunking.semantic_chunker import chunk_pages, split_large_text
 from app.retrieval.bm25 import BM25Index
-from app.retrieval.retriever import Retriever
+from app.retrieval.retriever import Retriever, expand_query
 from app.auditing.audit_planner import AuditPlanner
 from app.auditing.missing_clauses import MissingClauseDetector
 from app.auditing.obligation_extractor import ObligationExtractor
@@ -297,6 +298,130 @@ def test_verifier_never_fabricates_acceptance(monkeypatch):
     assert verifier.verify(finding={"claim": "x"}, evidence=[])["verdict"] == "UNVERIFIED"
 
     assert parse_json_object('```json\n{"verdict": "ACCEPTED"}\n```') == {"verdict": "ACCEPTED"}
+
+
+def _signed_pdf(path, customer_ink=None, provider_ink=None, logo=False):
+    """A one-page contract signature block with optional ink for each party."""
+    doc = pymupdf.open()
+    page = doc.new_page()
+    page.insert_text((72, 60), "IN WITNESS WHEREOF, the Parties have signed.")
+    page.insert_text((72, 120), "For Acme Retail Inc.")
+    page.insert_text((72, 140), f"Signature: {customer_ink if customer_ink else '__________'}")
+    page.insert_text((72, 320), "For Zenith Cloud LLC")
+    page.insert_text((72, 340), f"Signature: {provider_ink if provider_ink else '__________'}")
+    if logo:
+        pixmap = pymupdf.Pixmap(pymupdf.csRGB, pymupdf.IRect(0, 0, 8, 8))
+        pixmap.clear_with(120)
+        page.insert_image(pymupdf.Rect(400, 20, 440, 50), pixmap=pixmap)
+    doc.save(path)
+    doc.close()
+    return path
+
+
+def test_signature_checks_each_party_separately(tmp_path):
+    """One party can sign without the other, and a page logo is not a signature."""
+    analyzer = SignatureAnalyzer()
+    parties = {"customer": "Acme Retail Inc.", "provider": "Zenith Cloud LLC"}
+
+    partial = analyzer.analyze(_signed_pdf(tmp_path / "a.pdf", provider_ink="/s/ Jane Doe"), parties=parties)
+    assert partial.overall_status == "PARTIALLY_EXECUTED"
+    status = {p.party_role: p.signature_detected for p in partial.parties}
+    assert status == {"Customer": False, "Provider": True}
+
+    full = analyzer.analyze(_signed_pdf(tmp_path / "b.pdf", "/s/ Ann Lee", "/s/ Jane Doe"), parties=parties)
+    assert full.overall_status == "FULLY_EXECUTED"
+
+    logo_only = analyzer.analyze(_signed_pdf(tmp_path / "c.pdf", logo=True), parties=parties)
+    assert logo_only.overall_status == "UNEXECUTED_DRAFT"
+
+    # Roles come from the party names, not from which block is first on the page
+    swapped = analyzer.analyze(tmp_path / "a.pdf", parties={"customer": "Zenith Cloud LLC", "provider": "Acme Retail Inc."})
+    assert {p.party_name: p.party_role for p in swapped.parties} == {"Acme Retail Inc.": "Provider", "Zenith Cloud LLC": "Customer"}
+
+
+def test_signature_detects_hand_drawn_ink(tmp_path):
+    """A signature drawn as curves counts; straight lines do not."""
+    path = _signed_pdf(tmp_path / "ink.pdf")
+    doc = pymupdf.open(path)
+    page = doc[0]
+    page.draw_bezier((80, 345), (120, 300), (160, 390), (220, 340))
+    doc.saveIncr()
+    doc.close()
+
+    result = SignatureAnalyzer().analyze(path)
+    assert {p.party_name: p.signature_detected for p in result.parties} == {"Acme Retail Inc.": False, "Zenith Cloud LLC": True}
+
+
+def test_chunks_respect_limit_and_abbreviations():
+    """No chunk passes the limit, and "Pvt. Ltd." does not end a sentence."""
+    long_sentence = "Provider shall deliver " + "the services " * 300 + "on time."
+    pieces = split_large_text(long_sentence, 1800)
+    assert len(pieces) > 1
+    assert all(len(p) <= 1800 for p in pieces)
+    assert " ".join(pieces).split() == long_sentence.split()
+
+    filler = "Provider shall deliver the services on time. " * 45
+    text = f"{filler}Payment goes to Lumenfield Pvt. Ltd. within thirty days. {filler}"
+    joined = split_large_text(text, 1800)
+    assert any("Lumenfield Pvt. Ltd. within thirty days." in p for p in joined)
+
+
+def test_sentence_across_pages_stays_in_one_chunk():
+    """A sentence running onto the next page is kept whole, so its quote can pass the check."""
+    pages = [
+        {"page_number": 1, "text": "4. TERMINATION\n4.1 Either Party may end this. 4.2 Provider may terminate this Agreement upon"},
+        {"page_number": 2, "text": "fifteen days' written notice to Customer. 4.3 Customer may terminate later."},
+    ]
+    chunks = chunk_pages(pages)
+    quote = "Provider may terminate this Agreement upon fifteen days' written notice to Customer."
+    assert any(quote_in_text(quote, c.text) for c in chunks)
+    assert all(c.section == "4. TERMINATION" for c in chunks)
+
+    # A finished page is left alone
+    finished = [{"page_number": 1, "text": "Done here."}, {"page_number": 2, "text": "new sentence."}]
+    assert chunk_pages(finished)[0].text == "Done here."
+
+
+def test_keyword_search_handles_word_forms_and_everyday_wording():
+    """terminate/terminated/termination match, and everyday wording finds contract terms."""
+    bm25 = BM25Index()
+    bm25.index([
+        {"chunk_id": "a", "text": "Either party may seek termination of this Agreement for convenience.", "metadata": {}},
+        {"chunk_id": "b", "text": "Provider will host the application in a secure data centre.", "metadata": {}},
+        {"chunk_id": "c", "text": "Customer shall not solicit employees of Provider.", "metadata": {}},
+    ])
+    assert bm25.search("terminated", top_k=1)[0]["chunk_id"] == "a"
+    assert bm25.search(expand_query("Can they walk away?"), top_k=1)[0]["chunk_id"] == "a"
+
+
+def test_price_cap_needs_a_real_price_sentence():
+    """An unrelated percentage does not count as a cap on fees; a real cap does."""
+    extractor = TableExtractor()
+    headers = ["Tier", "Fee"]
+    rows = [["Basic", "$10"]]
+
+    unrelated = "Uptime will increase to 99.5% next year. Provider may change the fees at any time."
+    titles = [r["risk_title"] for r in extractor._analyze_pricing_risks(headers, rows, 1, unrelated)]
+    assert "No Price Increase Cap" in titles
+
+    capped = "Fees shall not increase by more than 3% annually upon renewal."
+    titles = [r["risk_title"] for r in extractor._analyze_pricing_risks(headers, rows, 1, capped)]
+    assert "No Price Increase Cap" not in titles
+
+
+def test_verifier_fallback_is_flagged_and_uses_a_different_model(monkeypatch):
+    """A verdict from the OpenAI backup is labelled, and is not from the Auditor's model."""
+    monkeypatch.setenv("OPENAI_MODEL", "gpt-4o-mini")
+    monkeypatch.delenv("OPENAI_VERIFIER_MODEL", raising=False)
+    verifier = GeminiVerifier()
+    assert verifier.openai_model != "gpt-4o-mini"
+
+    monkeypatch.setattr(verifier, "_gemini_verify", lambda prompt: (None, ""))
+    monkeypatch.setattr(verifier, "_openai_verify", lambda prompt: ('{"verdict": "ACCEPTED"}', "openai:gpt-4o"))
+    assert verifier.verify(finding={"claim": "x"}, evidence=[])["verifier_is_fallback"] is True
+
+    monkeypatch.setattr(verifier, "_gemini_verify", lambda prompt: ('{"verdict": "ACCEPTED"}', "gemini:test"))
+    assert verifier.verify(finding={"claim": "x"}, evidence=[])["verifier_is_fallback"] is False
 
 
 def test_finding_generator_returns_none_instead_of_inventing(monkeypatch):

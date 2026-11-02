@@ -59,7 +59,8 @@ class GeminiVerifier:
         self.models = list(dict.fromkeys(
             m.strip() for m in [primary, *fallbacks] if m.strip()
         ))
-        self.openai_model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+        # Deliberately not the Auditor's model, so a model never marks its own work
+        self.openai_model = os.getenv("OPENAI_VERIFIER_MODEL", "gpt-4o")
 
         api_key = os.getenv("GEMINI_API_KEY")
         use_gemini = os.getenv("USE_GEMINI", "true").lower() == "true"
@@ -115,13 +116,17 @@ RULES:
 2. Do not invent contractual language.
 3. Check the Auditor's claim against the actual text.
 4. Check whether the quoted evidence actually exists.
-5. Check whether the page number is correct.
-6. Check whether the chunk ID is correct.
-7. Check whether the severity is proportionate to the text.
-8. Identify contradictions or unsupported claims.
-9. Do not perform a new independent audit.
-10. Do not provide legal advice.
-11. Return ONLY valid JSON.
+5. Check whether each quote is actually about what the claim says. A real
+   quote from a clause on a different topic does not support the claim, so
+   the verdict is UNSUPPORTED. Example: a clause about hiring employees
+   does not support a claim about ending the contract.
+6. Check whether the page number is correct.
+7. Check whether the chunk ID is correct.
+8. Check whether the severity is proportionate to the text.
+9. Identify contradictions or unsupported claims.
+10. Do not perform a new independent audit.
+11. Do not provide legal advice.
+12. Return ONLY valid JSON.
 
 Possible verdicts:
 
@@ -180,6 +185,7 @@ Return exactly this structure:
             contradictions=[str(c) for c in result.get("contradictions") or []],
             confidence=max(0.0, min(confidence, 1.0)),
             verifier_model=used_model,
+            verifier_is_fallback=used_model.startswith("openai:"),
         ).model_dump()
 
     def _gemini_verify(self, prompt: str) -> tuple[str | None, str]:

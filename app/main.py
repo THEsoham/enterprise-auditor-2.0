@@ -1,9 +1,9 @@
 import asyncio
+import hashlib
 import json
 import os
 import sys
 import textwrap
-import time
 from pathlib import Path
 from typing import Optional
 
@@ -52,7 +52,8 @@ app = FastAPI(
 # CORS = Cross-Origin Resource Sharing.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    # The frontend is served from this same app, so no other site needs access by default
+    allow_origins=[o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -73,9 +74,10 @@ async def health_check():
             "auditor": f"OpenAI {os.getenv('OPENAI_MODEL', 'gpt-4o-mini')}",
             "verifier": (
                 f"Gemini {os.getenv('GEMINI_MODEL', 'gemini-3.8-flash')} "
-                f"(fallbacks: {os.getenv('GEMINI_FALLBACK_MODELS', 'gemini-3.6-flash')}, then OpenAI)"
+                f"(fallbacks: {os.getenv('GEMINI_FALLBACK_MODELS', 'gemini-3.6-flash')}, "
+                f"then OpenAI {os.getenv('OPENAI_VERIFIER_MODEL', 'gpt-4o')})"
                 if os.getenv("GEMINI_API_KEY") and os.getenv("USE_GEMINI", "true").lower() == "true"
-                else f"OpenAI {os.getenv('OPENAI_MODEL', 'gpt-4o-mini')}"
+                else f"OpenAI {os.getenv('OPENAI_VERIFIER_MODEL', 'gpt-4o')}"
             ),
         }
     }
@@ -127,11 +129,37 @@ def _text_to_pdf(text: str, pdf_path: Path) -> None:
     doc.close()
 
 
-async def _run_pipeline(pdf_path: Path, max_probes: int) -> dict:
+def _pdf_has_text(content: bytes) -> bool:
+    """False for corrupt PDFs and for image-only PDFs such as scans."""
+    try:
+        import pymupdf as fitz
+    except ImportError:
+        import fitz
+
+    try:
+        with fitz.open(stream=content, filetype="pdf") as doc:
+            return any(page.get_text("text").strip() for page in doc)
+    except Exception:
+        return False
+
+
+def _saved_report(pdf_path: Path) -> Optional[dict]:
+    """A previous audit of this exact file, unless it found nothing (e.g. an API outage)."""
+    report_path = REPORTS_DIR / f"{pdf_path.stem}_audit.json"
+    if not report_path.exists():
+        return None
+    with open(report_path, "r", encoding="utf-8") as f:
+        report = json.load(f)
+    return report if report.get("findings") else None
+
+
+async def _run_pipeline(pdf_path: Path, max_probes: int, display_name: Optional[str] = None) -> dict:
     global indexed_document
     async with AUDIT_LOCK:
         pipeline = AuditPipeline(max_debate_rounds=int(os.getenv("MAX_DEBATE_ROUNDS", "2")))
-        result = await asyncio.to_thread(pipeline.audit, pdf_path=pdf_path, max_probes=max_probes)
+        result = await asyncio.to_thread(
+            pipeline.audit, pdf_path=pdf_path, max_probes=max_probes, display_name=display_name
+        )
         indexed_document = pdf_path
         return result
 
@@ -184,11 +212,24 @@ async def upload_document(file: UploadFile = File(...)):
     stem = Path(original_name).stem
     content = await file.read()
 
+    # Identical uploads share one stored file, so their audit can be reused
+    content_id = hashlib.sha256(content).hexdigest()[:12]
+
     if ext == ".pdf":
+        if not _pdf_has_text(content):
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    f"{original_name} contains no readable text. Scanned PDFs are not supported yet; "
+                    "please upload a PDF with selectable text."
+                ),
+            )
+
         dest_path = _safe_document_path(original_name)
-        if dest_path.exists():
-            dest_path = _safe_document_path(f"{stem}_{int(time.time())}{ext}")
-        dest_path.write_bytes(content)
+        if dest_path.exists() and dest_path.read_bytes() != content:
+            dest_path = _safe_document_path(f"{stem}_{content_id}{ext}")
+        if not dest_path.exists():
+            dest_path.write_bytes(content)
     else:
         # The pipeline reads PDFs, so convert text/markdown/docx first
         try:
@@ -199,11 +240,27 @@ async def upload_document(file: UploadFile = File(...)):
         if not text_str.strip():
             raise HTTPException(status_code=400, detail=f"{original_name} contains no readable text.")
 
-        dest_path = _safe_document_path(f"{stem}_{int(time.time())}_converted.pdf")
-        _text_to_pdf(text_str, dest_path)
+        dest_path = _safe_document_path(f"{stem}_{content_id}_converted.pdf")
+        if not dest_path.exists():
+            _text_to_pdf(text_str, dest_path)
+
+    saved_report = _saved_report(dest_path)
+    if saved_report:
+        # Debates must search this contract, even though the audit is not re-run
+        await _ensure_indexed(dest_path)
+        return {
+            "status": "success",
+            "filename": original_name,
+            "report": saved_report,
+            "message": f"Loaded the saved audit of {original_name}",
+        }
 
     try:
-        result = await _run_pipeline(dest_path, max_probes=4)
+        result = await _run_pipeline(
+            dest_path,
+            max_probes=int(os.getenv("UPLOAD_MAX_PROBES", "12")),
+            display_name=original_name,
+        )
         return {
             "status": "success",
             "filename": original_name,
@@ -257,18 +314,15 @@ async def run_courtroom_debate(req: DebateRequest):
 
 
 @app.get("/api/download/memo")
-async def download_audit_memo():
-    """Download the executive Markdown audit memo for the latest audited contract."""
-    memo_files = list(REPORTS_DIR.glob("*_audit_memo.md"))
-    if not memo_files:
-        raise HTTPException(status_code=404, detail="No audit memo found. Please audit a contract first.")
-
-    memo_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
-    latest_memo = memo_files[0]
+async def download_audit_memo(document: str):
+    """Download the executive Markdown audit memo for the named contract."""
+    memo_path = REPORTS_DIR / f"{Path(Path(document).name).stem}_audit_memo.md"
+    if not memo_path.exists():
+        raise HTTPException(status_code=404, detail="No audit memo found for this contract.")
 
     return FileResponse(
-        path=latest_memo,
-        filename=latest_memo.name,
+        path=memo_path,
+        filename=memo_path.name,
         media_type="text/markdown",
     )
 

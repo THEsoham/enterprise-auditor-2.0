@@ -71,6 +71,8 @@ MODAL_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+ABBREVIATION_END = re.compile(r"\b(?:Pvt|Ltd|Inc|Corp|Co|LLC|No|Sec|Mr|Mrs|Ms|Dr|vs|e\.g|i\.e|etc)\.$", re.IGNORECASE)
+
 CLAUSE_NUMBER = re.compile(r"^\d+(?:\.\d+)*\s+")
 # Split after sentence punctuation (but not after a bare heading number like "2."),
 # before numbered clauses like "10.3 Provider ...", and before headings like "9. LIMITATION"
@@ -129,10 +131,21 @@ def find_durations(sentence: str) -> list[tuple[str, float]]:
     return durations
 
 
+def merge_abbreviations(pieces: list[str]) -> list[str]:
+    """Rejoin pieces wrongly split after an abbreviation such as "Pvt." or "e.g."."""
+    merged: list[str] = []
+    for piece in pieces:
+        if merged and ABBREVIATION_END.search(merged[-1]):
+            merged[-1] = f"{merged[-1]} {piece}"
+        else:
+            merged.append(piece)
+    return merged
+
+
 def split_sentences(text: str) -> list[str]:
     text = re.sub(r"\s+", " ", text).strip()
     sentences = []
-    for sentence in SENTENCE_SPLIT.split(text):
+    for sentence in merge_abbreviations(SENTENCE_SPLIT.split(text)):
         # Drop a leading section heading such as "15. FORCE MAJEURE Neither Party ..."
         sentence = re.sub(r"^\d{1,2}\.\s+[A-Z][A-Z &\-]{2,}(?=\s[A-Z][a-z])", "", sentence.strip())
         sentence = CLAUSE_NUMBER.sub("", sentence.strip())
