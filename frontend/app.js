@@ -541,12 +541,18 @@ document.addEventListener("DOMContentLoaded", () => {
     let scoreColor = "#059669";
     let assessHtml = `<strong>Safe and balanced.</strong> Terms conform to standard enterprise baselines.`;
 
-    if (score < 65 || db >= 2) {
+    // The wording follows the rating calculated by the backend's health score
+    const issues = db
+      ? `${db} deal-breaker ${db === 1 ? "issue requires" : "issues require"}`
+      : `${wo} watch-out ${wo === 1 ? "term requires" : "terms require"}`;
+    if (health.rating === "Critical" || health.rating === "High Risk") {
       scoreColor = "#DC2626";
-      assessHtml = `<strong>Critical risk.</strong> ${db} deal-breaker issues require immediate renegotiation.`;
-    } else if (score < 80 || db >= 1 || wo >= 3) {
+      assessHtml = `<strong>${health.rating}.</strong> ${issues} renegotiation before signing.`;
+    } else if (health.rating === "Moderate") {
       scoreColor = "#D97706";
-      assessHtml = `<strong>Moderate risk.</strong> ${db ? `${db} critical issues` : `${wo} watch-out terms`} require attention before signing.`;
+      assessHtml = `<strong>Moderate risk.</strong> ${issues} attention before signing.`;
+    } else if (db || wo) {
+      assessHtml = `<strong>Strong.</strong> ${issues} a review before signing.`;
     }
 
     if (kpiScoreAssessment) kpiScoreAssessment.innerHTML = assessHtml;
