@@ -25,7 +25,5 @@ services:
         value: "true"
       - key: CHROMA_PERSIST_DIRECTORY
         value: data/indexes/chroma
-      - key: DATA_DIRECTORY
-        value: data
       - key: MAX_DEBATE_ROUNDS
         value: "2"

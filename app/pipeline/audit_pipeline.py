@@ -67,7 +67,6 @@ class AuditPipeline:
         except Exception:
             pass
         self.retriever.bm25 = BM25Index()
-        self.retriever._all_chunks = {}
 
         # 1. Ingestion
         print("[1/9] Ingesting PDF and mapping pages...")

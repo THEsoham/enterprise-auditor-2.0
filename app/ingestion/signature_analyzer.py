@@ -53,9 +53,8 @@ class SignatureAnalyzer:
                     found_page_num = page_index + 1
                     signature_text = text
 
-                    # Check for images or vector ink drawings in this page
+                    # Check for signature images in this page
                     images = page.get_images()
-                    drawings = page.get_drawings()
 
                     # Detect party names: e.g. "For Northstar Analytics Pvt. Ltd."
                     for_matches = re.findall(r"For\s+([A-Za-z0-9\s,\.\-]{3,60}?)(?=\n|$)", signature_text)

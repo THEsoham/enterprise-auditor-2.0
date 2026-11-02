@@ -64,11 +64,6 @@ class DebateRequest(BaseModel):
     max_rounds: Optional[int] = None
 
 
-class AuditRequest(BaseModel):
-    filename: Optional[str] = "sample_contract.pdf"
-    max_probes: Optional[int] = 7
-
-
 @app.get("/api/health")
 async def health_check():
     return {
@@ -150,17 +145,6 @@ async def _ensure_indexed(pdf_path: Path) -> None:
             indexed_document = pdf_path
 
 
-@app.get("/api/report/latest")
-async def get_latest_report():
-    """Retrieve the most recently generated audit report JSON."""
-    report_files = sorted(REPORTS_DIR.glob("*_audit.json"), key=lambda p: p.stat().st_mtime, reverse=True)
-    if report_files:
-        with open(report_files[0], "r", encoding="utf-8") as f:
-            return json.load(f)
-
-    raise HTTPException(status_code=404, detail="No audit report found.")
-
-
 @app.get("/api/sample/demo")
 async def get_sample_demo_report():
     """Load the pre-computed sample contract audit on demand for demonstration."""
@@ -230,17 +214,6 @@ async def upload_document(file: UploadFile = File(...)):
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Audit failed for {original_name}: {str(e)}")
-
-
-@app.post("/api/audit")
-async def run_audit(req: AuditRequest):
-    """Execute autonomous audit pipeline on the specified contract PDF."""
-    pdf_path = _safe_document_path(req.filename or "")
-    if not pdf_path.exists():
-        raise HTTPException(status_code=404, detail=f"Contract not found: {req.filename}")
-
-    result = await _run_pipeline(pdf_path, max_probes=req.max_probes)
-    return result["report"]
 
 
 @app.post("/api/debate")

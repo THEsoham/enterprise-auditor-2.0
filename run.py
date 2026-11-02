@@ -18,6 +18,7 @@ if sys.stderr and hasattr(sys.stderr, "reconfigure"):
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 os.environ.setdefault("PYTHONUNBUFFERED", "1")
 
+# Adds the project folder to Python's search path
 PROJECT_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(PROJECT_ROOT))
 

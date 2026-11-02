@@ -136,7 +136,6 @@ class TableExtractor:
             raise FileNotFoundError(f"PDF not found: {pdf_path}")
 
         extracted_tables: list[TableData] = []
-        table_counter = 1
 
         with pdfplumber.open(pdf_path) as pdf:
             document_text = "\n".join(page.extract_text() or "" for page in pdf.pages)
@@ -179,7 +178,5 @@ class TableExtractor:
                         markdown=markdown_str,
                         risks=risks,
                     ))
-
-                    table_counter += 1
 
         return extracted_tables

@@ -7,19 +7,15 @@ __pycache__/
 .idea/
 .claude/
 .impeccable/
+study/
+presentation/
 
 data/documents/*
-data/extracted/*
-data/chunks/*
-data/graphs/*
 data/reports/*
 data/indexes/*
 
 !data/documents/.gitkeep
 !data/documents/sample_contract.pdf
-!data/extracted/.gitkeep
-!data/chunks/.gitkeep
-!data/graphs/.gitkeep
 !data/reports/.gitkeep
 !data/reports/sample_contract_audit.json
 !data/reports/sample_contract_audit_memo.md

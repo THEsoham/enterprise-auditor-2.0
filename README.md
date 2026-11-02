@@ -131,11 +131,6 @@ Open your browser at:
   python scripts/run_audit.py
   ```
 
-* **Run Backend Benchmark Suite:**
-  ```bash
-  python scripts/run_benchmark.py
-  ```
-
 ---
 
 ## 📁 Repository Structure
@@ -158,8 +153,9 @@ enterprise-auditor/
 │   ├── documents/          # Uploaded contract PDFs
 │   ├── indexes/            # Local Chroma vector databases
 │   └── reports/            # Generated audit JSON reports & memos
+├── demo/                   # Demo contract for live presentations
 ├── frontend/               # Single-page web dashboard (HTML, CSS, JS)
-├── scripts/                # CLI test & benchmarking scripts
+├── scripts/                # CLI audit script
 ├── tests/                  # Pytest automated test suite
 ├── .env.example            # Sanitized environment template
 ├── .gitignore              # Production gitignore rules

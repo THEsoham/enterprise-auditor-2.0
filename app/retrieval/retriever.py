@@ -20,13 +20,9 @@ class Retriever:
         self.embedding_service = EmbeddingService()
         self.vector_store = VectorStore()
         self.bm25 = BM25Index()
-        self._all_chunks: dict[str, dict] = {}
 
     def index_chunks(self, chunks: list[dict]) -> None:
-        """Indexes chunks into the in-memory BM25 index and memory cache."""
-        self._all_chunks = {
-            c["chunk_id"]: c for c in chunks
-        }
+        """Indexes chunks into the in-memory BM25 index."""
         self.bm25.index(chunks)
 
     def vector_search(self, query: str, n_results: int = 8) -> list[dict]:
