@@ -156,6 +156,20 @@ class MissingClauseDetector:
                 "Either Party may terminate this Agreement for material breach that remains uncured 30 days after written notice."
             ),
         },
+        {
+            "id": "price-increase-cap",
+            "title": "Cap on Price Increases",
+            "category": "commercial",
+            "risk_level": "medium",
+            "why_it_matters": (
+                "Without a limit on fee increases (a maximum percentage or a CPI link), the provider can raise "
+                "prices by any amount at renewal, whether the fees are listed in a table or in a sentence."
+            ),
+            "recommended_clause": (
+                "Fees shall not increase by more than 3% (or the change in the Consumer Price Index, if lower) "
+                "in any 12-month period, with at least 60 days' written notice of any increase."
+            ),
+        },
     ]
 
     def detect(self, full_text: str) -> list[dict]:
@@ -166,7 +180,11 @@ class MissingClauseDetector:
 
         for check in self.BASELINE_CHECKS:
             handler = getattr(self, "_check_" + check["id"].replace("-", "_"))
-            status, snippet = handler(sentences, text_lower)
+            outcome = handler(sentences, text_lower)
+            if outcome is None:
+                # Not applicable to this contract (e.g. no fees at all)
+                continue
+            status, snippet = outcome
 
             results.append(MissingClauseCheck(
                 check_id=check["id"],
@@ -322,3 +340,28 @@ class MissingClauseDetector:
             r"\bterminat\w*\b.{0,40}\bagreement\b",
             "No termination clause found.",
         )
+
+    def _check_price_increase_cap(self, sentences, text_lower):
+        fee_pattern = r"\b(?:fees?|prices?|pricing|charges?|rates?|subscription)\b"
+        money_pattern = r"(?:[$€£₹]|\b(?:inr|usd|rs\.?|eur|gbp)\b)\s?\d|\d[\d,]*(?:\.\d+)?\s?(?:per|/)\s?(?:month|year|annum|user|document)"
+        charges_fees = any(
+            re.search(fee_pattern, s, re.IGNORECASE) and re.search(money_pattern, s, re.IGNORECASE)
+            for s in sentences
+        )
+        if not charges_fees:
+            return None
+
+        # A cap must be one sentence that links prices, an increase, and a limit,
+        # so an unrelated percentage elsewhere in the contract does not count
+        cap = next(
+            (
+                s for s in sentences
+                if re.search(fee_pattern, s, re.IGNORECASE)
+                and re.search(r"\b(?:increas|escalat|adjust|rais)\w*", s, re.IGNORECASE)
+                and re.search(r"\d+(?:\.\d+)?\s*(?:%|percent)|\bcpi\b|consumer price index", s, re.IGNORECASE)
+            ),
+            None,
+        )
+        if cap:
+            return "PRESENT", self._quote(cap)
+        return "MISSING", "The contract charges fees but nothing limits how much they can rise."

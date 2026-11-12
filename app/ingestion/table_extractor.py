@@ -3,7 +3,9 @@ from pathlib import Path
 import pdfplumber
 from pydantic import BaseModel, Field
 
-from app.auditing.obligation_extractor import split_sentences
+
+# Fonts that hold symbols rather than letters
+SYMBOL_FONTS = ("dingbat", "symbol", "rupee", "wingding")
 
 
 class TableData(BaseModel):
@@ -57,9 +59,25 @@ class TableExtractor:
     def _clean_cell(value) -> str:
         if value is None:
             return ""
-        cell_val = str(value).replace("\n", " ").strip()
-        # Some PDF fonts lose the Rupee glyph and render it as "n" or "I": n85,000 -> ₹85,000
-        return re.sub(r"(?:(?<=^)|(?<=\s))[nI]([0-9]+(?:,[0-9]+)*)", r"₹\1", cell_val)
+        return str(value).replace("\n", " ").strip()
+
+    @staticmethod
+    def _restore_rupee_signs(page) -> None:
+        """
+        Some PDFs draw the ₹ sign with a symbol font (e.g. ZapfDingbats), so the
+        text comes out as "n85,000". Swap the character back to ₹ only when it
+        really is a symbol-font glyph sitting right before a number, so a normal
+        letter "n" or "I" in the contract is never touched.
+        """
+        chars = page.chars
+        for current, following in zip(chars, chars[1:]):
+            font = str(current.get("fontname", "")).lower()
+            if (
+                current.get("text") in {"n", "I"}
+                and any(name in font for name in SYMBOL_FONTS)
+                and str(following.get("text", "")).isdigit()
+            ):
+                current["text"] = "₹"
 
     @staticmethod
     def _parse_amount(cell: str) -> float | None:
@@ -76,9 +94,12 @@ class TableExtractor:
         headers: list[str],
         rows: list[list[str]],
         page_number: int,
-        document_text: str = "",
     ) -> list[dict]:
-        """Identifies financial and operational risks embedded within pricing tables."""
+        """
+        Identifies financial and operational risks embedded within pricing tables.
+        (The "no price increase cap" check lives in MissingClauseDetector, so it
+        also runs on contracts that state their fees in sentences, not tables.)
+        """
         risks = []
         headers_lower = [str(h).lower() if h else "" for h in headers]
 
@@ -112,26 +133,6 @@ class TableExtractor:
                         ),
                     })
 
-        # A cap must be one sentence that links prices, an increase, and a limit,
-        # so an unrelated percentage elsewhere in the contract does not count
-        has_price_cap = any(
-            re.search(r"\b(?:fees?|prices?|pricing|charges?|rates?)\b", sentence, re.IGNORECASE)
-            and re.search(r"\b(?:increas|escalat|adjust|rais)\w*", sentence, re.IGNORECASE)
-            and re.search(r"\d+(?:\.\d+)?\s*(?:%|percent)|\bcpi\b|consumer price index", sentence, re.IGNORECASE)
-            for sentence in split_sentences(document_text)
-        )
-        if document_text and not has_price_cap:
-            risks.append({
-                "risk_title": "No Price Increase Cap",
-                "severity": "medium",
-                "page_number": page_number,
-                "observation": (
-                    "Neither this pricing table nor the rest of the contract limits annual fee increases "
-                    "(e.g. a CPI link or a maximum percentage), so fees could rise on renewal."
-                ),
-                "recommendation": "Insert a price escalation cap: 'Fees shall not increase by more than 3% annually upon renewal.'",
-            })
-
         return risks
 
     def extract_tables(self, pdf_path: str | Path) -> list[TableData]:
@@ -143,9 +144,8 @@ class TableExtractor:
         extracted_tables: list[TableData] = []
 
         with pdfplumber.open(pdf_path) as pdf:
-            document_text = "\n".join(page.extract_text() or "" for page in pdf.pages)
-
             for page_index, page in enumerate(pdf.pages, start=1):
+                self._restore_rupee_signs(page)
                 raw_tables = page.extract_tables()
                 if not raw_tables:
                     continue
@@ -172,7 +172,7 @@ class TableExtractor:
 
                     risks = []
                     if table_type == "pricing_tiers":
-                        risks = self._analyze_pricing_risks(headers, body_rows, page_index, document_text)
+                        risks = self._analyze_pricing_risks(headers, body_rows, page_index)
 
                     extracted_tables.append(TableData(
                         table_id=f"table-p{page_index}-{t_idx}",
