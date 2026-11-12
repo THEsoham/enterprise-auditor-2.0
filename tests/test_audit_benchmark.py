@@ -394,19 +394,75 @@ def test_keyword_search_handles_word_forms_and_everyday_wording():
     assert bm25.search(expand_query("Can they walk away?"), top_k=1)[0]["chunk_id"] == "a"
 
 
+def _price_cap_status(text: str):
+    results = MissingClauseDetector().detect(text)
+    return next((r["status"] for r in results if r["check_id"] == "price-increase-cap"), None)
+
+
 def test_price_cap_needs_a_real_price_sentence():
     """An unrelated percentage does not count as a cap on fees; a real cap does."""
-    extractor = TableExtractor()
-    headers = ["Tier", "Fee"]
-    rows = [["Basic", "$10"]]
+    unrelated = "Customer shall pay fees of $100 per month. Uptime will increase to 99.5% next year."
+    assert _price_cap_status(unrelated) == "MISSING"
 
-    unrelated = "Uptime will increase to 99.5% next year. Provider may change the fees at any time."
-    titles = [r["risk_title"] for r in extractor._analyze_pricing_risks(headers, rows, 1, unrelated)]
-    assert "No Price Increase Cap" in titles
+    capped = "Customer shall pay fees of $100 per month. Fees shall not increase by more than 3% annually upon renewal."
+    assert _price_cap_status(capped) == "PRESENT"
 
-    capped = "Fees shall not increase by more than 3% annually upon renewal."
-    titles = [r["risk_title"] for r in extractor._analyze_pricing_risks(headers, rows, 1, capped)]
-    assert "No Price Increase Cap" not in titles
+
+def test_price_cap_checked_without_a_pricing_table():
+    """Fees written in a sentence are still checked; a contract with no fees skips the check."""
+    assert _price_cap_status("The subscription fee is INR 50,000 per year, payable in advance.") == "MISSING"
+    assert _price_cap_status("Each Party shall keep the other's Confidential Information secret.") is None
+
+
+def test_rupee_sign_restored_only_from_symbol_font():
+    """The sample PDF draws ₹ with a symbol font; those cells read ₹, not n."""
+    tables = TableExtractor().extract_tables(PDF_PATH)
+    pricing = next(t for t in tables if t.table_type == "pricing_tiers")
+    assert "₹85,000" in str(pricing.rows)
+    assert "n85,000" not in str(pricing.rows)
+    # Ordinary text in other tables is untouched
+    notices = next(t for t in tables if t.table_type == "notices_contacts")
+    assert "Bengaluru" in str(notices.rows)
+
+
+def test_footer_logo_is_not_a_signature(tmp_path):
+    """An image at the bottom of the signing page sits outside every block."""
+    path = _signed_pdf(tmp_path / "footer.pdf")
+    doc = pymupdf.open(path)
+    pixmap = pymupdf.Pixmap(pymupdf.csRGB, pymupdf.IRect(0, 0, 8, 8))
+    pixmap.clear_with(120)
+    doc[0].insert_image(pymupdf.Rect(60, 760, 140, 800), pixmap=pixmap)
+    doc.saveIncr()
+    doc.close()
+
+    result = SignatureAnalyzer().analyze(path)
+    assert result.overall_status == "UNEXECUTED_DRAFT"
+
+
+def test_signing_page_found_with_any_wording_and_all_parties_read(tmp_path):
+    """Lower-case headings and "Executed by" are found, and a third signer is not dropped."""
+    doc = pymupdf.open()
+    page = doc.new_page()
+    page.insert_text((72, 60), "Signatures")
+    page.insert_text((72, 120), "Executed by Acme Retail Inc.")
+    page.insert_text((72, 140), "Signature: /s/ Ann Lee")
+    page.insert_text((72, 260), "For Zenith Cloud LLC")
+    page.insert_text((72, 280), "Signature: __________")
+    page.insert_text((72, 400), "SIGNED FOR Orbit Guarantee Ltd")
+    page.insert_text((72, 420), "Signature: /s/ Raj Mehta")
+    path = tmp_path / "three.pdf"
+    doc.save(path)
+    doc.close()
+
+    result = SignatureAnalyzer().analyze(path)
+    assert result.signature_page == 1
+    assert {p.party_name: p.signature_detected for p in result.parties} == {
+        "Acme Retail Inc.": True,
+        "Zenith Cloud LLC": False,
+        "Orbit Guarantee Ltd": True,
+    }
+    assert result.overall_status == "PARTIALLY_EXECUTED"
+    assert result.parties[2].party_role == "Other Party"
 
 
 def test_verifier_fallback_is_flagged_and_uses_a_different_model(monkeypatch):
