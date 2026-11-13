@@ -496,3 +496,38 @@ def test_finding_generator_returns_none_instead_of_inventing(monkeypatch):
         monkeypatch.setattr(generator.client.chat, "completions", FakeCompletions)
         evidence = [{"chunk_id": "c1", "text": "t", "metadata": {"page_number": 1, "section": ""}}]
         assert generator.generate(query="q", evidence=evidence) is None
+
+
+def test_signature_status_not_assessed_for_converted_files():
+    """A DOCX/TXT/MD upload has no signature images, so it must not be reported as an unsigned draft."""
+    from app.ingestion.signature_analyzer import SignatureAnalyzer
+
+    report = SignatureAnalyzer.not_assessed(".docx")
+    assert report.overall_status == "NOT_ASSESSED"
+    assert "DOCX" in report.headline
+    assert report.parties == [] and report.signature_page is None
+
+
+def test_report_flags_page_numbers_as_unreliable_for_converted_files():
+    from app.reports.report_builder import ReportBuilder
+    from app.reports.markdown_exporter import MarkdownExporter
+
+    findings = [{
+        "title": "Termination", "category": "termination", "severity": "high", "bucket": "deal_breaker",
+        "claim": "c", "evidence": [{"quote": "q", "page": 3, "section": "10. TERMINATION", "chunk_id": "chunk-0001"}],
+    }]
+    health = {"health_score": 50.0, "rating": "Risky", "headline": "h", "deal_breakers": findings}
+
+    def build(source_format):
+        return ReportBuilder().build(
+            document_name="x.pdf", findings=findings, risk_scores=[{}], health_score=health, source_format=source_format
+        )
+
+    converted, real = build(".txt"), build(None)
+    assert converted["page_numbers_reliable"] is False and converted["source_format"] == ".txt"
+    assert real["page_numbers_reliable"] is True
+
+    memo_converted = MarkdownExporter().generate_markdown(converted)
+    memo_real = MarkdownExporter().generate_markdown(real)
+    assert "(10. TERMINATION)" in memo_converted and "Page 3" not in memo_converted
+    assert "Page 3" in memo_real

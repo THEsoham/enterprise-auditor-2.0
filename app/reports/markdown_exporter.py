@@ -3,6 +3,14 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 
+def _where(evidence: list, pages_reliable: bool) -> str:
+    """Where a quote sits. Files converted from DOCX/TXT/MD have no real pages, so name the section."""
+    first = evidence[0] if evidence else {}
+    if pages_reliable:
+        return f"Page {first.get('page', '?')}"
+    return first.get("section") or "converted file"
+
+
 class MarkdownExporter:
     """
     Exports executive-ready, boardroom-grade Markdown Audit Memos.
@@ -47,6 +55,7 @@ class MarkdownExporter:
         obligations = report.get("obligations", {})
         tables = report.get("tables", [])
         sig_status = report.get("signature_status", {})
+        pages_reliable = report.get("page_numbers_reliable", True)
 
         md = []
 
@@ -88,7 +97,7 @@ class MarkdownExporter:
                 why = db.get("why_flagged", "")
                 remedy = db.get("suggested_negotiation", "")
                 evidence = db.get("evidence", [])
-                page = evidence[0].get("page", "?") if evidence else "?"
+                where = _where(evidence, pages_reliable)
                 quote = evidence[0].get("quote", "") if evidence else ""
 
                 md.append(f"### {idx}. {title}")
@@ -100,7 +109,7 @@ class MarkdownExporter:
                     if line.strip():
                         md.append(f"- {line.strip()}")
                 md.append("")
-                md.append(f"📄 **Contract Evidence (Page {page}):**  ")
+                md.append(f"📄 **Contract Evidence ({where}):**  ")
                 md.append(f"> \"{quote}\"")
                 md.append("")
                 md.append(f"💡 **Suggested Negotiation Remedy:**  ")
@@ -118,12 +127,12 @@ class MarkdownExporter:
                 why = wo.get("why_flagged", "")
                 remedy = wo.get("suggested_negotiation", "")
                 evidence = wo.get("evidence", [])
-                page = evidence[0].get("page", "?") if evidence else "?"
+                where = _where(evidence, pages_reliable)
                 quote = evidence[0].get("quote", "") if evidence else ""
 
                 md.append(f"#### {idx}. {title}")
                 md.append(f"- **Impact:** {plain}")
-                md.append(f"- **Evidence (p. {page}):** \"{quote}\"")
+                md.append(f"- **Evidence ({where}):** \"{quote}\"")
                 if remedy:
                     md.append(f"- **Recommended Fix:** {remedy}")
                 md.append("")
@@ -137,9 +146,9 @@ class MarkdownExporter:
                 title = p.get("title", "")
                 plain = p.get("plain_english", "")
                 evidence = p.get("evidence", [])
-                page = evidence[0].get("page", "?") if evidence else "?"
+                where = _where(evidence, pages_reliable)
                 quote = evidence[0].get("quote", "") if evidence else ""
-                md.append(f"- ✓ **{title}**: {plain} *(Page {page}: \"{quote}\")*")
+                md.append(f"- ✓ **{title}**: {plain} *({where}: \"{quote}\")*")
         md.append("")
 
         # 5. What's Missing?

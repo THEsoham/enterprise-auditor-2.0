@@ -91,7 +91,10 @@ class AuditPipeline:
         custom_queries: Optional[list[str]] = None,
         max_probes: Optional[int] = None,
         display_name: Optional[str] = None,
+        source_format: Optional[str] = None,
     ) -> dict:
+        # source_format is the original extension (".docx", ".txt", ".md") when the PDF was converted
+        # from another file type, and None for a real PDF.
         pdf_path = Path(pdf_path)
         if not pdf_path.exists():
             raise FileNotFoundError(f"PDF file not found: {pdf_path}")
@@ -105,9 +108,14 @@ class AuditPipeline:
         full_text = "\n".join(p["text"] for p in pages)
 
         # 2. Visual Scanner: Tables & Signatures
-        print("[2/9] Running Visual Scanner (tables & signature blocks)...")
-        extracted_tables = self.table_extractor.extract_tables(pdf_path)
-        tables_data = [t.model_dump() for t in extracted_tables]
+        # A converted file has lost its tables and signature images, so reporting "none found" would mislead
+        if source_format:
+            print(f"[2/9] Skipping tables & signatures: {source_format} file was converted to text...")
+            tables_data = []
+        else:
+            print("[2/9] Running Visual Scanner (tables & signature blocks)...")
+            extracted_tables = self.table_extractor.extract_tables(pdf_path)
+            tables_data = [t.model_dump() for t in extracted_tables]
 
         # 4. Document Planning & Baseline Checks
         print("[5/9] Formulating Audit Plan & Party Extraction...")
@@ -115,7 +123,10 @@ class AuditPipeline:
         parties = plan.parties
 
         # Needs the parties, to tell whose signature block is whose
-        signature_status = self.signature_analyzer.analyze(pdf_path, parties=parties)
+        if source_format:
+            signature_status = self.signature_analyzer.not_assessed(source_format)
+        else:
+            signature_status = self.signature_analyzer.analyze(pdf_path, parties=parties)
         signature_data = signature_status.model_dump()
 
         print("[6/9] Running Missing-Protection Baseline Scanner...")
@@ -230,6 +241,7 @@ class AuditPipeline:
             parties=parties,
             pages=pages,
             sections=plan.detected_sections,
+            source_format=source_format,
         )
 
         # Export report artifacts

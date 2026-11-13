@@ -31,6 +31,7 @@ class ReportBuilder:
         pages: Optional[list[dict]] = None,
         sections: Optional[list[str]] = None,
         display_name: Optional[str] = None,
+        source_format: Optional[str] = None,
     ) -> dict:
         debate_histories = debate_histories or []
         missing_clauses = missing_clauses or []
@@ -106,6 +107,9 @@ class ReportBuilder:
             "signature_status": signature_status or {},
             "graph": graph_data or {},
             "pages": pages or [],
+            # Files converted from DOCX/TXT/MD have no real pages, so citations should name the section instead
+            "source_format": source_format,
+            "page_numbers_reliable": not source_format,
             "num_pages": len(pages) if pages else 0,
             "num_sections": len(sections) if sections else 0,
         }

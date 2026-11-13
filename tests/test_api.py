@@ -17,9 +17,11 @@ def client(tmp_path, monkeypatch):
     monkeypatch.setattr(main, "REPORTS_DIR", reports)
 
     audits = []
+    formats = []
 
-    async def fake_pipeline(pdf_path, max_probes, display_name=None):
+    async def fake_pipeline(pdf_path, max_probes, display_name=None, source_format=None):
         audits.append(pdf_path)
+        formats.append(source_format)
         report = {"document_name": pdf_path.name, "display_name": display_name, "findings": [{"title": "x"}]}
         (reports / f"{pdf_path.stem}_audit.json").write_text(json.dumps(report), encoding="utf-8")
         return {"report": report}
@@ -32,6 +34,7 @@ def client(tmp_path, monkeypatch):
 
     test_client = TestClient(main.app)
     test_client.audits = audits
+    test_client.formats = formats
     test_client.reports = reports
     return test_client
 
@@ -107,3 +110,44 @@ def test_memo_download_blocks_path_traversal(client, tmp_path):
     (tmp_path / "secret_audit_memo.md").write_text("secret", encoding="utf-8")
     response = client.get("/api/download/memo", params={"document": "../secret.pdf"})
     assert response.status_code == 404
+
+
+def _upload_as(client, name, content, content_type):
+    return client.post("/api/upload", files={"file": (name, content, content_type)})
+
+
+def test_converted_files_tell_the_pipeline_their_original_format(client):
+    """Tables and signatures are skipped for converted files, so the pipeline must know."""
+    _upload(client, "contract.pdf", _pdf("A real contract."))
+    _upload_as(client, "notes.txt", b"A plain text contract.", "text/plain")
+
+    assert client.formats == [None, ".txt"]
+
+
+def test_windows_text_file_keeps_its_special_characters(client):
+    """A Notepad file saved as Windows-1252 must not lose euro signs, dashes or curly quotes."""
+    text = "Fee: \u20ac100 \u2013 \u201cnet 30\u201d caf\u00e9"
+    response = _upload_as(client, "terms.txt", text.encode("cp1252"), "text/plain")
+    assert response.status_code == 200
+
+    converted = next(client.audits[0].parent.glob("terms_*_converted.pdf"))
+    with pymupdf.open(converted) as doc:
+        extracted = doc[0].get_text("text")
+    assert "\u20ac100" in extracted and "\u201cnet 30\u201d" in extracted and "caf\u00e9" in extracted
+
+
+def test_rupee_sign_survives_conversion(client):
+    response = _upload_as(client, "fees.txt", "Monthly fee: \u20b95,000".encode("utf-8"), "text/plain")
+    assert response.status_code == 200
+
+    converted = next(client.audits[0].parent.glob("fees_*_converted.pdf"))
+    with pymupdf.open(converted) as doc:
+        assert "\u20b95,000" in doc[0].get_text("text")
+
+
+def test_utf16_text_file_is_read(client):
+    response = _upload_as(client, "wide.txt", "Fee: \u20b95,000".encode("utf-16"), "text/plain")
+    assert response.status_code == 200
+    converted = next(client.audits[0].parent.glob("wide_*_converted.pdf"))
+    with pymupdf.open(converted) as doc:
+        assert "\u20b95,000" in doc[0].get_text("text")

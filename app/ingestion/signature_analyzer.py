@@ -5,7 +5,7 @@ import pymupdf
 from pydantic import BaseModel, Field
 
 
-ExecutionState = Literal["FULLY_EXECUTED", "PARTIALLY_EXECUTED", "UNEXECUTED_DRAFT"]
+ExecutionState = Literal["FULLY_EXECUTED", "PARTIALLY_EXECUTED", "UNEXECUTED_DRAFT", "NOT_ASSESSED"]
 
 # A party's signing block starts with a line such as "For Northstar Analytics Pvt. Ltd."
 # or "SIGNED BY ACME LTD". The lead-in words can be in any case; the name must start with a capital.
@@ -54,6 +54,21 @@ class SignatureAnalyzer:
     signed when it contains a signature image, hand-drawn ink, or text typed on
     the signature line. Anything outside the blocks, such as a logo, is ignored.
     """
+
+    @staticmethod
+    def not_assessed(source_format: str) -> DocumentExecutionReport:
+        """For files converted to PDF, where signature images and layout no longer exist."""
+        label = source_format.lstrip(".").upper()
+        return DocumentExecutionReport(
+            overall_status="NOT_ASSESSED",
+            headline=f"SIGNATURE STATUS NOT ASSESSED — {label} files are converted to text, so signatures cannot be checked",
+            signature_page=None,
+            parties=[],
+            visual_notes=(
+                f"This contract was uploaded as a {label} file. Signature images and layout are not kept when it is "
+                "converted, so execution status was not checked. Upload the signed PDF to check it."
+            ),
+        )
 
     def analyze(self, pdf_path: str | Path, parties: Optional[dict[str, str]] = None) -> DocumentExecutionReport:
         pdf_path = Path(pdf_path)

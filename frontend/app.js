@@ -12,6 +12,19 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentDocPage = 1;
   let totalDocPages = 5;
 
+  // Files converted from DOCX/TXT/MD have no real pages, so their citations name the section instead
+  function pagesAreReal() {
+    return !auditData || auditData.page_numbers_reliable !== false;
+  }
+  function pageText(page, fallback = "Page not identified") {
+    if (!pagesAreReal()) return "No page numbers (converted file)";
+    return page ? `Page ${page}` : fallback;
+  }
+  function citeWhere(page, section) {
+    if (!pagesAreReal()) return section || "Converted file";
+    return `Page ${page ?? "?"}`;
+  }
+
   // Cached debate items
   let cachedDebateFindings = [];
 
@@ -631,7 +644,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const { cls: sevClass, label: sevLabel } = severityPill(finding);
       const ev = finding.evidence?.[0] || {};
       const sectionCode = clauseRef(finding);
-      const pageNum = ev.page ?? "—";
+      const pageNum = pagesAreReal() ? (ev.page ?? "—") : "—";
       const verifiedText = verificationLabel(finding);
 
       tr.innerHTML = `
@@ -797,7 +810,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const ev = finding.evidence?.[0] || {};
       const clauseStr = ev.section || "Section not identified";
-      const pageStr = ev.page ? `Page ${ev.page}` : "Page not identified";
+      const pageStr = pageText(ev.page);
       const quoteStr = ev.quote || finding.claim || "";
       const remedyStr = finding.suggested_negotiation || finding.recommendation || "";
 
@@ -1192,7 +1205,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function citationHtml(finding) {
     const items = (finding?.evidence || []).filter((e) => e.quote);
     return items
-      .map((e) => `<strong>Verbatim text (${escapeHtml(e.chunk_id || "chunk")} • Page ${escapeHtml(String(e.page ?? "?"))}):</strong><br>"${escapeHtml(e.quote)}"`)
+      .map((e) => `<strong>Verbatim text (${escapeHtml(e.chunk_id || "chunk")} • ${escapeHtml(citeWhere(e.page, e.section))}):</strong><br>"${escapeHtml(e.quote)}"`)
       .join("<br><br>");
   }
 
@@ -1498,10 +1511,10 @@ document.addEventListener("DOMContentLoaded", () => {
       node.innerHTML = `
         <div class="timeline-dot"></div>
         <div class="timeline-time-badge">${escapeHtml(item.timeframe_label || "Milestone")}</div>
-        <div class="timeline-content-card" style="cursor: pointer;" title="Click to view Page ${item.page || 1} in Reader">
+        <div class="timeline-content-card" style="cursor: pointer;" title="${pagesAreReal() ? `Click to view Page ${item.page || 1} in Reader` : "Click to view in Reader"}">
           <div class="timeline-row-top">
             <span class="timeline-party-tag ${partyClass}">${tagText}</span>
-            <span class="timeline-section-cite">p. ${item.page || 1} • ${escapeHtml(item.section || "Clause")}</span>
+            <span class="timeline-section-cite">${pagesAreReal() ? `p. ${item.page || 1} • ` : ""}${escapeHtml(item.section || "Clause")}</span>
           </div>
           <div class="timeline-duty">${escapeHtml(item.duty)}</div>
         </div>
@@ -1530,6 +1543,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const status = signatures?.overall_status;
     if (status === "FULLY_EXECUTED") return "Fully Executed";
     if (status === "PARTIALLY_EXECUTED") return "Partially Executed";
+    if (status === "NOT_ASSESSED") return "Not Assessed (converted file)";
     return "Unexecuted Draft";
   }
 
@@ -1550,7 +1564,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const label = executionLabel(signatures);
       const sigPage = signatures.signature_page ? ` (Page ${signatures.signature_page})` : "";
       if (cardSigStatusText) {
-        cardSigStatusText.textContent = `${isExecuted ? "✓" : "⚠️"} ${label}${sigPage}`;
+        cardSigStatusText.textContent = `${isExecuted ? "✓" : (signatures.overall_status === "NOT_ASSESSED" ? "ℹ️" : "⚠️")} ${label}${sigPage}`;
       }
       if (sigModalHeadline) {
         sigModalHeadline.textContent = label.toUpperCase();
@@ -1568,7 +1582,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (sigModalProvStatus) sigModalProvStatus.textContent = partyStatus("Provider");
       if (sigModalCustStatus) sigModalCustStatus.textContent = partyStatus("Customer");
       const sigModalRisk = document.getElementById("sig-modal-risk-note");
-      if (sigModalRisk) sigModalRisk.style.display = isExecuted ? "none" : "block";
+      if (sigModalRisk) sigModalRisk.style.display = (isExecuted || signatures.overall_status === "NOT_ASSESSED") ? "none" : "block";
       if (auditData?.parties) {
         if (sigModalProvName) sigModalProvName.textContent = auditData.parties.provider || "—";
         if (sigModalCustName) sigModalCustName.textContent = auditData.parties.customer || "—";
@@ -2257,7 +2271,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const p = node.properties || {};
         let d = p.quote ? `"${p.quote}"` : (p.description || p.role || "Governed contract element.");
         if (p.section) d = `[${p.section}] ${d}`;
-        if (p.page_number) d += ` (Page ${p.page_number})`;
+        if (p.page_number && pagesAreReal()) d += ` (Page ${p.page_number})`;
         desc.textContent = d;
       }
 
@@ -2486,7 +2500,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (modalTraceRemedy) modalTraceRemedy.textContent = remedy;
 
     if (traceStep1Desc) {
-      const pageLabel = ev.page ? `Page ${ev.page}` : (pageStr ? `Page ${pageStr}` : "Document Clause");
+      const pageLabel = pagesAreReal()
+        ? (ev.page ? `Page ${ev.page}` : (pageStr ? `Page ${pageStr}` : "Document Clause"))
+        : citeWhere(ev.page, ev.section);
       traceStep1Desc.textContent = `Extracted from document coordinates (${pageLabel}, Chunk ${ev.chunk_id || "indexed"}).`;
     }
 
@@ -2807,7 +2823,7 @@ document.addEventListener("DOMContentLoaded", () => {
       div.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <h4 style="font-size: 14px; font-weight: 700; color: var(--text-primary);">${escapeHtml(b.title)}</h4>
-          <span class="clause-ref-code">${b.page ? `Page ${b.page}` : "Clause Matrix"}</span>
+          <span class="clause-ref-code">${b.page && pagesAreReal() ? `Page ${b.page}` : "Clause Matrix"}</span>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
           <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: var(--radius-sm); padding: 10px;">
