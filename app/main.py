@@ -3,7 +3,6 @@ import hashlib
 import json
 import os
 import sys
-import textwrap
 from pathlib import Path
 from typing import Optional
 
@@ -26,6 +25,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from app.ingestion.docx_reader import docx_to_text, extract_docx_tables
 from app.pipeline.audit_pipeline import AuditPipeline
 from app.debate.debate_graph import DebateEngine
 from app.scoring.risk_scorer import RiskScorer
@@ -33,8 +33,6 @@ from app.scoring.risk_scorer import RiskScorer
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DOCUMENTS_DIR = PROJECT_ROOT / "data" / "documents"
 REPORTS_DIR = PROJECT_ROOT / "data" / "reports"
-# Unicode font for the PDFs made from text files; the built-in PDF fonts lose symbols such as ₹ and curly quotes
-CONVERSION_FONT = PROJECT_ROOT / "app" / "assets" / "fonts" / "DejaVuSans.ttf"
 
 load_dotenv(PROJECT_ROOT / ".env")
 
@@ -93,24 +91,6 @@ def _safe_document_path(filename: str) -> Path:
     return path
 
 
-def _docx_to_text(content: bytes) -> str:
-    import io
-    import zipfile
-    import xml.etree.ElementTree as ET
-
-    with zipfile.ZipFile(io.BytesIO(content)) as z:
-        tree = ET.fromstring(z.read("word/document.xml"))
-
-    # One line per paragraph (<w:p>), joining its text runs (<w:t>)
-    paragraphs = []
-    for node in tree.iter():
-        if node.tag.endswith("}p"):
-            text = "".join(t.text or "" for t in node.iter() if t.tag.endswith("}t"))
-            if text.strip():
-                paragraphs.append(text)
-    return "\n".join(paragraphs)
-
-
 def _decode_text(content: bytes) -> str:
     """
     Decode an uploaded text file without silently dropping characters.
@@ -126,28 +106,33 @@ def _decode_text(content: bytes) -> str:
 
 
 def _text_to_pdf(text: str, pdf_path: Path) -> None:
-    """Render plain text into a paginated PDF, wrapping long lines instead of truncating."""
+    """
+    Render plain text into a paginated PDF. Long lines wrap and pages break on their own.
+    PyMuPDF's Story layout switches to a built-in fallback font for any character the
+    main font lacks, so symbols (₹, curly quotes) and other scripts (Hindi, Chinese,
+    Arabic) are drawn instead of being replaced by dots.
+    """
     try:
         import pymupdf as fitz
     except ImportError:
         import fitz
+    import html
 
-    lines = []
-    for raw_line in text.splitlines() or [""]:
-        lines.extend(textwrap.wrap(raw_line, width=95) or [""])
+    body = html.escape(text or " ")
+    story = fitz.Story(
+        html=f"<p style='font-family: sans-serif; font-size: 10pt; white-space: pre-wrap;'>{body}</p>"
+    )
+    page_rect = fitz.paper_rect("a4")
+    text_area = page_rect + (50, 50, -50, -50)
 
-    # Falls back to the built-in font if the bundled one is missing
-    font_args = {}
-    if CONVERSION_FONT.exists():
-        font_args = {"fontname": "dejavu", "fontfile": str(CONVERSION_FONT)}
-
-    lines_per_page = 60
-    doc = fitz.open()
-    for i in range(0, max(len(lines), 1), lines_per_page):
-        page = doc.new_page()
-        page.insert_text((50, 50), "\n".join(lines[i : i + lines_per_page]), fontsize=10, **font_args)
-    doc.save(pdf_path)
-    doc.close()
+    writer = fitz.DocumentWriter(str(pdf_path))
+    more = True
+    while more:
+        device = writer.begin_page(page_rect)
+        more, _ = story.place(text_area)
+        story.draw(device)
+        writer.end_page()
+    writer.close()
 
 
 def _pdf_has_text(content: bytes) -> bool:
@@ -179,6 +164,7 @@ async def _run_pipeline(
     max_probes: int,
     display_name: Optional[str] = None,
     source_format: Optional[str] = None,
+    tables: Optional[list] = None,
 ) -> dict:
     global indexed_document
     async with AUDIT_LOCK:
@@ -189,6 +175,7 @@ async def _run_pipeline(
             max_probes=max_probes,
             display_name=display_name,
             source_format=source_format,
+            tables=tables,
         )
         indexed_document = pdf_path
         return result
@@ -263,7 +250,7 @@ async def upload_document(file: UploadFile = File(...)):
     else:
         # The pipeline reads PDFs, so convert text/markdown/docx first
         try:
-            text_str = _docx_to_text(content) if ext == ".docx" else _decode_text(content)
+            text_str = docx_to_text(content) if ext == ".docx" else _decode_text(content)
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Could not read {original_name}: {e}")
 
@@ -285,13 +272,22 @@ async def upload_document(file: UploadFile = File(...)):
             "message": f"Loaded the saved audit of {original_name}",
         }
 
+    # DOCX tables are read straight from the file, since conversion flattens them
+    docx_tables = None
+    if ext == ".docx":
+        try:
+            docx_tables = [t.model_dump() for t in extract_docx_tables(content)]
+        except Exception:
+            docx_tables = None
+
     try:
         result = await _run_pipeline(
             dest_path,
             max_probes=int(os.getenv("UPLOAD_MAX_PROBES", "12")),
             display_name=original_name,
-            # Converted files have no real pages, tables or signature images to analyse
+            # Converted files have no real pages or signature images to analyse
             source_format=None if ext == ".pdf" else ext,
+            tables=docx_tables,
         )
         return {
             "status": "success",

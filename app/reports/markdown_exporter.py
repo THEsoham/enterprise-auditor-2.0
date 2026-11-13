@@ -197,7 +197,8 @@ class MarkdownExporter:
                 md_repr = t.get("markdown") if isinstance(t, dict) else getattr(t, "markdown", "")
                 risks = t.get("risks", []) if isinstance(t, dict) else getattr(t, "risks", [])
 
-                md.append(f"### Table {table_id} (Page {page}, Type: `{ttype}`)")
+                where = f"Page {page}, " if page else ""
+                md.append(f"### Table {table_id} ({where}Type: `{ttype}`)")
                 md.append(md_repr)
                 md.append("")
                 if risks:

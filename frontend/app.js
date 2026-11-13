@@ -20,6 +20,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!pagesAreReal()) return "No page numbers (converted file)";
     return page ? `Page ${page}` : fallback;
   }
+  // Converted files are split into fixed-size parts for viewing; they are not the original's pages
+  function pageWord() {
+    return pagesAreReal() ? "Page" : "Part";
+  }
   function citeWhere(page, section) {
     if (!pagesAreReal()) return section || "Converted file";
     return `Page ${page ?? "?"}`;
@@ -893,14 +897,14 @@ document.addEventListener("DOMContentLoaded", () => {
       pages.forEach((p, i) => {
         const pageNum = p.page_number || (i + 1);
         const lines = (p.text || "").split("\n").map(l => l.trim()).filter(l => l.length > 3);
-        const firstLine = lines[0] || `Section / Page ${pageNum}`;
+        const firstLine = lines[0] || `${pageWord()} ${pageNum}`;
         const titleSnippet = firstLine.length > 40 ? firstLine.slice(0, 38) + "..." : firstLine;
 
         const btn = document.createElement("button");
         btn.className = `outline-item-btn ${pageNum === currentDocPage ? "active" : ""}`;
         btn.innerHTML = `
           <span>${escapeHtml(titleSnippet)}</span>
-          <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-dim);">p. ${pageNum}</span>
+          <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-dim);">${pagesAreReal() ? "p." : "part"} ${pageNum}</span>
         `;
         btn.addEventListener("click", () => {
           currentDocPage = pageNum;
@@ -927,8 +931,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderContractPage(pageNum) {
     if (!docVerbatimContent) return;
-    if (docviewPageTitle) docviewPageTitle.textContent = `Page ${pageNum} of ${totalDocPages}`;
-    if (previewPageCounter) previewPageCounter.textContent = `Page ${pageNum} of ${totalDocPages}`;
+    if (docviewPageTitle) docviewPageTitle.textContent = `${pageWord()} ${pageNum} of ${totalDocPages}`;
+    if (previewPageCounter) previewPageCounter.textContent = `${pageWord()} ${pageNum} of ${totalDocPages}`;
 
     const pages = auditData?.pages || [];
     const targetPage = pages.find((p) => p.page_number === pageNum) || pages[pageNum - 1];
@@ -1598,7 +1602,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tables.forEach((t, i) => {
         const btn = document.createElement("button");
         btn.className = `table-subtab-btn ${i === activeTableIndex ? "active" : ""}`;
-        btn.textContent = `Table ${i + 1} (p. ${t.page_number || 1})`;
+        btn.textContent = pagesAreReal() && t.page_number ? `Table ${i + 1} (p. ${t.page_number})` : `Table ${i + 1}`;
         btn.addEventListener("click", () => {
           activeTableIndex = i;
           renderScanner(signatures, tables);

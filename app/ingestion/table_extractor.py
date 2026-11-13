@@ -32,7 +32,7 @@ class TableExtractor:
             return "pricing_tiers"
         if "party" in h_str and ("email" in h_str or "address" in h_str):
             return "notices_contacts"
-        if "signature" in h_str or "for " in h_str:
+        if "signature" in h_str or any(h.startswith("for ") for h in headers_lower):
             return "signature_block"
         return "general"
 
@@ -135,6 +135,23 @@ class TableExtractor:
 
         return risks
 
+    # A table whose last row is this close to the bottom of the page may continue on the next page
+    PAGE_BOTTOM_MARGIN = 0.2
+
+    @classmethod
+    def _reaches_page_bottom(cls, page, found_table) -> bool:
+        return found_table.bbox[3] >= page.height * (1 - cls.PAGE_BOTTOM_MARGIN)
+
+    @staticmethod
+    def _continues(previous: TableData, rows: list[list[str]], page, raw_table) -> bool:
+        """True when this table, the first on its page, carries on the previous page's table."""
+        columns = max(len(previous.headers), max((len(r) for r in previous.rows), default=0))
+        if not rows or max(len(r) for r in rows) != columns:
+            return False
+        found = page.find_tables()
+        # It must start near the top of the page, with no text of its own above it
+        return bool(found) and found[0].bbox[1] <= page.height * 0.2
+
     def extract_tables(self, pdf_path: str | Path) -> list[TableData]:
         """Extracts and parses all tables from the PDF document."""
         pdf_path = Path(pdf_path)
@@ -142,9 +159,12 @@ class TableExtractor:
             raise FileNotFoundError(f"PDF not found: {pdf_path}")
 
         extracted_tables: list[TableData] = []
+        # The last table on the previous page, if it ran to the bottom of that page
+        open_table: TableData | None = None
 
         with pdfplumber.open(pdf_path) as pdf:
             for page_index, page in enumerate(pdf.pages, start=1):
+                previous_open, open_table = open_table, None
                 self._restore_rupee_signs(page)
                 raw_tables = page.extract_tables()
                 if not raw_tables:
@@ -164,6 +184,22 @@ class TableExtractor:
                     if not cleaned_rows:
                         continue
 
+                    # A table at the top of a page with the same columns as a table that ran off the
+                    # previous page is that table continuing, not a new one whose first row is a header
+                    if t_idx == 1 and previous_open is not None and self._continues(
+                        previous_open, cleaned_rows, page, raw_tables[0]
+                    ):
+                        continued = cleaned_rows[1:] if cleaned_rows[0] == previous_open.headers else cleaned_rows
+                        previous_open.rows.extend(continued)
+                        previous_open.markdown = self._to_markdown(previous_open.headers, previous_open.rows)
+                        if previous_open.table_type == "pricing_tiers":
+                            previous_open.risks = self._analyze_pricing_risks(
+                                previous_open.headers, previous_open.rows, previous_open.page_number
+                            )
+                        if self._reaches_page_bottom(page, page.find_tables()[0]):
+                            open_table = previous_open
+                        continue
+
                     headers = cleaned_rows[0]
                     body_rows = cleaned_rows[1:] if len(cleaned_rows) > 1 else []
 
@@ -174,7 +210,7 @@ class TableExtractor:
                     if table_type == "pricing_tiers":
                         risks = self._analyze_pricing_risks(headers, body_rows, page_index)
 
-                    extracted_tables.append(TableData(
+                    table = TableData(
                         table_id=f"table-p{page_index}-{t_idx}",
                         page_number=page_index,
                         table_type=table_type,
@@ -182,6 +218,11 @@ class TableExtractor:
                         rows=body_rows,
                         markdown=markdown_str,
                         risks=risks,
-                    ))
+                    )
+                    extracted_tables.append(table)
+
+                    found = page.find_tables()
+                    if t_idx == len(raw_tables) and found and self._reaches_page_bottom(page, found[-1]):
+                        open_table = table
 
         return extracted_tables

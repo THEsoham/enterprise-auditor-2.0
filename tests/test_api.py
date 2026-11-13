@@ -19,9 +19,12 @@ def client(tmp_path, monkeypatch):
     audits = []
     formats = []
 
-    async def fake_pipeline(pdf_path, max_probes, display_name=None, source_format=None):
+    tables_seen = []
+
+    async def fake_pipeline(pdf_path, max_probes, display_name=None, source_format=None, tables=None):
         audits.append(pdf_path)
         formats.append(source_format)
+        tables_seen.append(tables)
         report = {"document_name": pdf_path.name, "display_name": display_name, "findings": [{"title": "x"}]}
         (reports / f"{pdf_path.stem}_audit.json").write_text(json.dumps(report), encoding="utf-8")
         return {"report": report}
@@ -35,6 +38,7 @@ def client(tmp_path, monkeypatch):
     test_client = TestClient(main.app)
     test_client.audits = audits
     test_client.formats = formats
+    test_client.tables_seen = tables_seen
     test_client.reports = reports
     return test_client
 
@@ -151,3 +155,35 @@ def test_utf16_text_file_is_read(client):
     converted = next(client.audits[0].parent.glob("wide_*_converted.pdf"))
     with pymupdf.open(converted) as doc:
         assert "\u20b95,000" in doc[0].get_text("text")
+
+
+def test_hindi_and_chinese_survive_conversion(client):
+    response = _upload_as(client, "intl.txt", "Fee \u20b95,000 \u65e5\u672c\u8a9e \u0939\u093f\u0928\u094d\u0926\u0940".encode("utf-8"), "text/plain")
+    assert response.status_code == 200
+    converted = next(client.audits[0].parent.glob("intl_*_converted.pdf"))
+    with pymupdf.open(converted) as doc:
+        text = doc[0].get_text("text")
+        fonts = " ".join(f[3] for f in doc[0].get_fonts())
+    assert "\u65e5\u672c\u8a9e" in text and "\u20b95,000" in text
+    assert "Devanagari" in fonts  # Hindi drawn with a real Hindi font, not dots
+
+
+def test_docx_tables_are_read_from_the_original_file(client):
+    from tests.docx_fixture import make_docx
+
+    content = make_docx(
+        ["MASTER SERVICES AGREEMENT", "1. FEES"],
+        [["Service Tier", "Monthly Fee", "Overage"], ["Basic", "5,000", "2.00"], ["Pro", "20,000", "3.50"]],
+    )
+    response = _upload_as(client, "msa.docx", content, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+    assert response.status_code == 200
+
+    tables = client.tables_seen[0]
+    assert len(tables) == 1
+    assert tables[0]["table_type"] == "pricing_tiers"
+    assert tables[0]["rows"] == [["Basic", "5,000", "2.00"], ["Pro", "20,000", "3.50"]]
+    assert tables[0]["risks"], "the overage gap between tiers should be flagged"
+
+    converted = next(client.audits[0].parent.glob("msa_*_converted.pdf"))
+    with pymupdf.open(converted) as doc:
+        assert "Basic | 5,000 | 2.00" in doc[0].get_text("text")

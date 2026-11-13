@@ -92,9 +92,11 @@ class AuditPipeline:
         max_probes: Optional[int] = None,
         display_name: Optional[str] = None,
         source_format: Optional[str] = None,
+        tables: Optional[list] = None,
     ) -> dict:
         # source_format is the original extension (".docx", ".txt", ".md") when the PDF was converted
-        # from another file type, and None for a real PDF.
+        # from another file type, and None for a real PDF. tables, when given, were read from the
+        # original file (DOCX) and are used instead of scanning the converted PDF.
         pdf_path = Path(pdf_path)
         if not pdf_path.exists():
             raise FileNotFoundError(f"PDF file not found: {pdf_path}")
@@ -109,7 +111,10 @@ class AuditPipeline:
 
         # 2. Visual Scanner: Tables & Signatures
         # A converted file has lost its tables and signature images, so reporting "none found" would mislead
-        if source_format:
+        if tables is not None:
+            print(f"[2/9] Using {len(tables)} table(s) read from the original {source_format or ''} file...")
+            tables_data = tables
+        elif source_format:
             print(f"[2/9] Skipping tables & signatures: {source_format} file was converted to text...")
             tables_data = []
         else:
