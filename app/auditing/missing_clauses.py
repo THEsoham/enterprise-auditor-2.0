@@ -172,13 +172,124 @@ class MissingClauseDetector:
         },
     ]
 
-    def detect(self, full_text: str) -> list[dict]:
-        """Analyze full document text against baseline checks and return structured results."""
+    # Protections a buyer of goods (a car, equipment, stock) should look for
+    SALE_OF_GOODS_CHECKS = [
+        {
+            "id": "goods-condition-warranty",
+            "title": "Warranty on Condition of the Goods",
+            "category": "warranties",
+            "risk_level": "critical",
+            "why_it_matters": (
+                "If the goods are sold 'as is' with all warranties disclaimed, the Buyer has no claim when "
+                "hidden defects appear after delivery, even ones the Seller knew about."
+            ),
+            "recommended_clause": (
+                "Seller warrants that the goods are free from material defects known to Seller, that all known "
+                "defects have been disclosed in writing, and that the goods will be in the same condition at "
+                "delivery as when inspected by Buyer."
+            ),
+        },
+        {
+            "id": "clear-title-warranty",
+            "title": "Clear Title, Free of Liens",
+            "category": "title",
+            "risk_level": "high",
+            "why_it_matters": (
+                "A promise to transfer title is not a promise that the title is clean. Without a warranty that the "
+                "goods are free of liens, loans or other claims, the Buyer can lose them to the Seller's lender."
+            ),
+            "recommended_clause": (
+                "Seller warrants that it holds good and marketable title to the goods, free and clear of all liens, "
+                "encumbrances and security interests, and will indemnify Buyer against any such claim."
+            ),
+        },
+        {
+            "id": "inspection-rejection-right",
+            "title": "Buyer's Right to Inspect and Reject",
+            "category": "acceptance",
+            "risk_level": "medium",
+            "why_it_matters": (
+                "The Buyer should be able to inspect the goods before or at delivery and refuse them, with a refund, "
+                "if they do not match the description."
+            ),
+            "recommended_clause": (
+                "Buyer may inspect the goods at delivery and may reject them, with a full refund of all amounts paid, "
+                "if they do not conform to the description in this Agreement."
+            ),
+        },
+        {
+            "id": "risk-of-loss",
+            "title": "Risk of Loss Before Delivery",
+            "category": "delivery",
+            "risk_level": "medium",
+            "why_it_matters": (
+                "The contract should say who bears the loss if the goods are damaged, destroyed or stolen "
+                "before the Buyer takes them."
+            ),
+            "recommended_clause": "Risk of loss remains with Seller until the goods are delivered to and accepted by Buyer.",
+        },
+        {
+            "id": "deposit-refund",
+            "title": "Refund of Deposit if the Seller Fails to Deliver",
+            "category": "payment",
+            "risk_level": "high",
+            "why_it_matters": (
+                "Money paid before delivery is at risk. The contract should promise it back if the Seller "
+                "does not deliver on time or the sale falls through."
+            ),
+            "recommended_clause": (
+                "If Seller fails to deliver the goods by the Delivery Date, Buyer may cancel this Agreement and Seller "
+                "shall refund all amounts paid within seven (7) days."
+            ),
+        },
+        {
+            "id": "seller-default-remedy",
+            "title": "Buyer's Remedy if the Seller Does Not Deliver",
+            "category": "remedies",
+            "risk_level": "medium",
+            "why_it_matters": (
+                "The contract should give the Buyer a clear right to cancel, get a refund or demand delivery if the "
+                "Seller does not perform, instead of leaving the Buyer to sue for damages."
+            ),
+            "recommended_clause": (
+                "If Seller fails to deliver the goods by the Delivery Date, Buyer may, at its option, cancel this "
+                "Agreement with a full refund or require delivery within a further reasonable period."
+            ),
+        },
+        {
+            "id": "governing-law",
+            "title": "Governing Law & Dispute Forum",
+            "category": "disputes",
+            "risk_level": "low",
+            "why_it_matters": "The contract should name which law applies and where disputes are heard.",
+            "recommended_clause": "This Agreement is governed by the laws of [State], and its courts have exclusive jurisdiction.",
+        },
+    ]
+
+    # Which checks apply to which kind of contract (see contract_profile.py)
+    CHECKS_BY_TYPE = {
+        "services": None,  # every BASELINE_CHECKS item
+        "sale_of_goods": "SALE_OF_GOODS_CHECKS",
+        "general": ["termination-clause-present", "liability-clause-present", "confidentiality-clause-present", "governing-law"],
+        "not_a_contract": [],
+    }
+
+    def checks_for(self, contract_type: str = "services") -> list[dict]:
+        selection = self.CHECKS_BY_TYPE.get(contract_type)
+        if selection is None:
+            return self.BASELINE_CHECKS
+        if isinstance(selection, str):
+            return getattr(self, selection)
+        every = {c["id"]: c for c in self.BASELINE_CHECKS + self.SALE_OF_GOODS_CHECKS}
+        return [every[check_id] for check_id in selection]
+
+    def detect(self, full_text: str, contract_type: str = "services") -> list[dict]:
+        """Analyze full document text against the checks for its contract type."""
         sentences = split_sentences(full_text)
         text_lower = re.sub(r"\s+", " ", full_text).lower()
         results = []
 
-        for check in self.BASELINE_CHECKS:
+        for check in self.checks_for(contract_type):
             handler = getattr(self, "_check_" + check["id"].replace("-", "_"))
             outcome = handler(sentences, text_lower)
             if outcome is None:
@@ -365,3 +476,74 @@ class MissingClauseDetector:
         if cap:
             return "PRESENT", self._quote(cap)
         return "MISSING", "The contract charges fees but nothing limits how much they can rise."
+
+
+    # --- sale of goods checks ------------------------------------------------
+
+    def _check_goods_condition_warranty(self, sentences, text_lower):
+        as_is = self._find(
+            sentences,
+            r"\bas[\s-]is\b|disclaims?\b.{0,60}\bwarrant|without (?:any )?warrant|no warrant(?:y|ies)\b",
+        )
+        if as_is:
+            return "MISSING", self._quote(as_is)
+        warranty = self._find(sentences, r"\bseller\b.{0,60}\bwarrants?\b|\bwarrants? that\b")
+        if warranty:
+            return "PRESENT", self._quote(warranty)
+        return "MISSING", "No warranty about the condition of the goods found."
+
+    def _check_clear_title_warranty(self, sentences, text_lower):
+        clean = self._find(
+            sentences,
+            r"free (?:and clear )?(?:of|from) (?:all |any )?(?:liens?|encumbrances?|security interests?)|good (?:and marketable )?title",
+        )
+        if clean:
+            return "PRESENT", self._quote(clean)
+        conveys = self._find(sentences, r"\b(?:shall|will|agrees to)\b.{0,20}\b(?:convey|transfer)\w*\b.{0,30}\btitle\b")
+        if conveys:
+            return "MISSING", self._quote(conveys)
+        return "MISSING", "No promise that the goods are free of liens or other claims found."
+
+    def _check_inspection_rejection_right(self, sentences, text_lower):
+        both = self._find(sentences, r"\binspect\w*\b.{0,120}\b(?:reject|refuse|cancel|return)\w*|\b(?:reject|refuse)\w*\b.{0,120}\binspect")
+        if both:
+            return "PRESENT", self._quote(both)
+        inspect = self._find(sentences, r"\binspect\w*")
+        if inspect:
+            return "VAGUE", self._quote(inspect)
+        return "MISSING", "No right for the Buyer to inspect the goods or reject them found."
+
+    def _check_risk_of_loss(self, sentences, text_lower):
+        return self._present_if(
+            sentences,
+            r"risk of (?:loss|damage)",
+            "The contract does not say who bears the loss if the goods are damaged before delivery.",
+        )
+
+    def _check_deposit_refund(self, sentences, text_lower):
+        deposit = self._find(sentences, r"down[\s-]?payment|\bdeposit\b|\badvance (?:payment|amount)\b|earnest money")
+        if not deposit:
+            return None  # nothing is paid before delivery
+        refund = self._find(sentences, r"\b(?:refund|return(?:ed)? (?:of )?(?:the|all|any) (?:down[\s-]?payment|deposit|amounts?))")
+        if refund:
+            return "PRESENT", self._quote(refund)
+        return "MISSING", self._quote(deposit)
+
+    def _check_seller_default_remedy(self, sentences, text_lower):
+        remedy = self._find(
+            sentences,
+            r"\bseller\b.{0,60}\b(?:fails?|failure|unable)\b.{0,60}\bdeliver|specific performance"
+            r"|\bbuyer\b.{0,40}\bmay\b.{0,40}\b(?:cancel|terminate|rescind)",
+        )
+        if remedy:
+            return "PRESENT", self._quote(remedy)
+        return "MISSING", "No remedy for the Buyer if the Seller does not deliver found."
+
+    def _check_governing_law(self, sentences, text_lower):
+        law = self._find(sentences, r"governed by|laws? of the (?:state|country|republic)|governing law")
+        if not law:
+            return "MISSING", "No governing law or dispute forum found."
+        # A template can name the clause but leave the place blank
+        if re.search(r"_{3,}", law):
+            return "VAGUE", self._quote(law)
+        return "PRESENT", self._quote(law)

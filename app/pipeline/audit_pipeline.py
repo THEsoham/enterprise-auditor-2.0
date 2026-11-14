@@ -20,6 +20,7 @@ from app.chunking.semantic_chunker import chunk_pages
 from app.retrieval.retriever import Retriever
 from app.retrieval.bm25 import BM25Index
 from app.auditing.audit_planner import AuditPlanner, AuditProbe
+from app.auditing.contract_profile import profile_contract
 from app.auditing.missing_clauses import MissingClauseDetector
 from app.auditing.obligation_extractor import ObligationExtractor
 from app.debate.debate_graph import DebateEngine
@@ -124,7 +125,12 @@ class AuditPipeline:
 
         # 4. Document Planning & Baseline Checks
         print("[5/9] Formulating Audit Plan & Party Extraction...")
-        plan = self.audit_planner.create_plan(raw_chunks, document_title=document_name)
+        # What kind of document this is decides which checks and probes apply
+        profile = profile_contract(full_text)
+        print(f"  -> Detected: {profile.contract_type_label}" + (" (unfilled template)" if profile.is_template else ""))
+        plan = self.audit_planner.create_plan(
+            raw_chunks, document_title=document_name, contract_type=profile.contract_type
+        )
         parties = plan.parties
 
         # Needs the parties, to tell whose signature block is whose
@@ -135,7 +141,7 @@ class AuditPipeline:
         signature_data = signature_status.model_dump()
 
         print("[6/9] Running Missing-Protection Baseline Scanner...")
-        missing_clauses = self.missing_clause_detector.detect(full_text)
+        missing_clauses = self.missing_clause_detector.detect(full_text, contract_type=profile.contract_type)
 
         print("[7/9] Extracting Obligations & Constructing Timeline Map...")
         obligations_summary = self.obligation_extractor.extract(raw_chunks, parties=parties)
@@ -220,6 +226,7 @@ class AuditPipeline:
             findings=findings,
             risk_scores=risk_scores,
             missing_clauses=missing_clauses,
+            profile=profile.model_dump(),
         )
 
         nx_graph = self.graph_builder.build(
@@ -247,6 +254,7 @@ class AuditPipeline:
             pages=pages,
             sections=plan.detected_sections,
             source_format=source_format,
+            contract_profile=profile.model_dump(),
         )
 
         # Export report artifacts

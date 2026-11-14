@@ -39,7 +39,12 @@ FINDING_SCHEMA = """
 
 FINDING_RULES = """
 Perspective: you review the contract on behalf of the CUSTOMER (the party buying
-the services). "Risk" and "protection" are always judged from the Customer's side.
+the services or goods). "Risk" and "protection" are always judged from the Customer's side.
+Contracts use their own words for the sides: a Buyer, Client, Licensee or Tenant is the
+Customer side, and a Seller, Vendor, Licensor or Landlord is the Provider side.
+For a sale of goods, an "as is" sale that disclaims all warranties, money paid before
+delivery with no refund promise, and risk passing to the Buyer before it has the goods
+are risks to the Buyer.
 
 Severity rubric (from the Customer's point of view):
 - critical: could be fatal to the deal. Examples: the other party can exit at will

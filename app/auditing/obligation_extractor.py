@@ -71,6 +71,19 @@ MODAL_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+# "Buyer and Seller shall collectively be known as the Parties" names things; it creates no duty
+DEFINITION_PATTERN = re.compile(
+    r"\b(?:shall|will)\s+(?:(?:collectively|together|individually|hereinafter|herein|each)\s+)*be\s+"
+    r"(?:known|referred to|called|defined|designated)\b",
+    re.IGNORECASE,
+)
+# "Buyer acknowledges that ... Seller ... shall be canceled": the party who opens the sentence is its subject
+LEADING_PARTY = re.compile(
+    r"^(?:the\s+)?([A-Za-z]+(?:\s+[A-Za-z]+)?)\s+(?:hereby\s+)?"
+    r"(?:acknowledges|agrees|represents|warrants|covenants|understands|accepts|confirms|undertakes)\b",
+    re.IGNORECASE,
+)
+
 ABBREVIATION_END = re.compile(r"\b(?:Pvt|Ltd|Inc|Corp|Co|LLC|No|Sec|Mr|Mrs|Ms|Dr|vs|e\.g|i\.e|etc)\.$", re.IGNORECASE)
 
 CLAUSE_NUMBER = re.compile(r"^\d+(?:\.\d+)*\s+")
@@ -148,6 +161,8 @@ def split_sentences(text: str) -> list[str]:
     for sentence in merge_abbreviations(SENTENCE_SPLIT.split(text)):
         # Drop a leading section heading such as "15. FORCE MAJEURE Neither Party ..."
         sentence = re.sub(r"^\d{1,2}\.\s+[A-Z][A-Z &\-]{2,}(?=\s[A-Z][a-z])", "", sentence.strip())
+        # ... and a lettered one: "B. Consideration. 1. Purchase Price. The total ..."
+        sentence = re.sub(r"^[A-Z]\.\s+[A-Z][^.]{2,80}\.\s+(?=[A-Z0-9])", "", sentence.strip())
         sentence = CLAUSE_NUMBER.sub("", sentence.strip())
         if len(sentence) >= 20:
             sentences.append(sentence)
@@ -190,7 +205,7 @@ class ObligationExtractor:
 
             for sentence in split_sentences(chunk.get("text", "")):
                 key = sentence.lower()
-                if key in seen or " means " in key:
+                if key in seen or " means " in key or DEFINITION_PATTERN.search(sentence):
                     continue
                 seen.add(key)
 
@@ -201,7 +216,10 @@ class ObligationExtractor:
                 # Only the grammatical subject decides who owes a duty; a role
                 # mentioned elsewhere in the sentence is enough for the timeline.
                 subject = sentence[: modal.start()][-80:]
-                party = classify_party(subject, provider_roles, customer_roles)
+                leading = LEADING_PARTY.match(sentence)
+                party = (
+                    classify_party(leading.group(1), provider_roles, customer_roles) if leading else None
+                ) or classify_party(subject, provider_roles, customer_roles)
                 timeline_party = party or classify_party(sentence, provider_roles, customer_roles)
 
                 durations = find_durations(sentence)

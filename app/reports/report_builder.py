@@ -32,6 +32,7 @@ class ReportBuilder:
         sections: Optional[list[str]] = None,
         display_name: Optional[str] = None,
         source_format: Optional[str] = None,
+        contract_profile: Optional[dict] = None,
     ) -> dict:
         debate_histories = debate_histories or []
         missing_clauses = missing_clauses or []
@@ -91,6 +92,7 @@ class ReportBuilder:
             "health": health_score,
             "summary": {
                 "health_score": health_score.get("health_score", 100.0),
+                "warnings": health_score.get("warnings", []),
                 "rating": health_score.get("rating", "Strong"),
                 "headline": health_score.get("headline", ""),
                 "deal_breakers_count": health_score.get("deal_breakers_count", 0),
@@ -110,6 +112,8 @@ class ReportBuilder:
             # Files converted from DOCX/TXT/MD have no real pages, so citations should name the section instead
             "source_format": source_format,
             "page_numbers_reliable": not source_format,
+            # Contract type, unfilled-template and not-a-contract checks (contract_profile.py)
+            "contract_profile": contract_profile or {},
             "num_pages": len(pages) if pages else 0,
             "num_sections": len(sections) if sections else 0,
         }

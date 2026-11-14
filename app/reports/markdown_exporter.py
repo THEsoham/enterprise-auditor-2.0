@@ -62,7 +62,14 @@ class MarkdownExporter:
         # Header
         md.append(f"# 🛡️ Enterprise Contract Audit Memo")
         md.append(f"**Document:** `{doc}`  ")
-        md.append(f"**Customer:** {customer} | **Provider:** {provider}  ")
+        customer_role = parties.get("customer_role", "Customer")
+        provider_role = parties.get("provider_role", "Provider")
+        md.append(f"**{customer_role}:** {customer} | **{provider_role}:** {provider}  ")
+        profile = report.get("contract_profile") or {}
+        if profile.get("contract_type_label"):
+            md.append(f"**Contract type:** {profile['contract_type_label']}  ")
+        for warning in health.get("warnings", []):
+            md.append(f"> ⚠️ **{warning}**  ")
         md.append("")
         md.append("---")
         md.append("")
@@ -75,7 +82,8 @@ class MarkdownExporter:
         md.append(f"│  CONTRACT HEALTH SCORE                                       │")
         md.append(f"│                                                              │")
         md.append(f"│             ┌──────────────┐                                 │")
-        md.append(f"│             │    {score:4.1f}      │   Rating: {rating:<15}       │")
+        score_text = f"{score:4.1f}" if isinstance(score, (int, float)) else " n/a"
+        md.append(f"│             │    {score_text}      │   Rating: {rating:<15}       │")
         md.append(f"│             │   / 100      │                                 │")
         md.append(f"│             │   HEALTH     │                                 │")
         md.append(f"│             └──────────────┘                                 │")

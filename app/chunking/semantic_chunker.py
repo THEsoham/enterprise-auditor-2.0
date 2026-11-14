@@ -20,6 +20,32 @@ SECTION_PATTERN = re.compile(
     r"(?=\s|$)"
 )
 
+# Lettered headings at the start of a line, in title case, ending in a full stop or the line:
+# A. Description of Acquired Vehicle.
+# C. Delivery of Acquired Vehicle and Conveyance of Title
+# G. Indemnification of Attorneys Fees and out-of-pocket costs. Should any party ...
+#
+# It does NOT match a lettered sentence such as "A. The Seller shall deliver ...",
+# because a heading has no duty or permission verb.
+LETTERED_SECTION_PATTERN = re.compile(
+    r"(?m)^[ \t]*"
+    r"([A-Z])\.[ \t]+"
+    r"([A-Z][^\n.]{2,80}?)"
+    r"(?=\.(?:\s|$)|[ \t]*$)"
+)
+HEADING_VERB = re.compile(r"\b(?:shall|will|may|must|is|are|agrees?|hereby)\b", re.IGNORECASE)
+
+
+def find_section_headings(text: str) -> list[tuple[int, str, str]]:
+    """(position, number or letter, title) of each major section heading on a page."""
+    headings = [(m.start(), m.group(1), m.group(2).strip()) for m in SECTION_PATTERN.finditer(text)]
+    for m in LETTERED_SECTION_PATTERN.finditer(text):
+        title = m.group(2).strip()
+        if HEADING_VERB.search(title) or len(title.split()) > 10:
+            continue
+        headings.append((m.start(1), m.group(1), title))
+    return sorted(headings)
+
 # A page ending in one of these words has clearly not finished its sentence
 UNFINISHED_ENDING = re.compile(r"(?:,|\b(?:the|a|an|of|to|and|or|by|for|in|on|upon|with|at|from|that|its))$", re.IGNORECASE)
 SENTENCE_START = re.compile(r"[.;:!?]\s+")
@@ -40,7 +66,8 @@ def rejoin_split_sentences(pages: list[dict]) -> list[dict]:
             continue
 
         continues = following[0].islower() or UNFINISHED_ENDING.search(text)
-        if not continues or SECTION_PATTERN.match(following):
+        heading_first = SECTION_PATTERN.match(following) or LETTERED_SECTION_PATTERN.match(following)
+        if not continues or heading_first:
             continue
 
         # The unfinished part starts after the last sentence ending or line of its own clause
@@ -108,7 +135,7 @@ def split_sections(text: str) -> list[tuple[str | None, str]]:
     ("10. TERMINATION", "...")
     """
 
-    matches = list(SECTION_PATTERN.finditer(text))
+    matches = find_section_headings(text)
 
     if not matches:
         return [(None, text.strip())]
@@ -116,21 +143,17 @@ def split_sections(text: str) -> list[tuple[str | None, str]]:
     sections = []
 
     # Text before the first detected section
-    if matches[0].start() > 0:
-        prefix = text[:matches[0].start()].strip()
+    if matches[0][0] > 0:
+        prefix = text[:matches[0][0]].strip()
 
         if prefix:
             sections.append((None, prefix))
 
-    for index, match in enumerate(matches):
-        section_number = match.group(1)
-        section_title = match.group(2).strip()
-
+    for index, (start, section_number, section_title) in enumerate(matches):
         section_name = f"{section_number}. {section_title}"
 
-        start = match.start()
         end = (
-            matches[index + 1].start()
+            matches[index + 1][0]
             if index + 1 < len(matches)
             else len(text)
         )

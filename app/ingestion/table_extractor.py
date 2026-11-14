@@ -135,6 +135,20 @@ class TableExtractor:
 
         return risks
 
+    # A header cell longer than this is a paragraph, not a column name
+    MAX_HEADER_CHARS = 250
+
+    @classmethod
+    def _is_text_box(cls, rows: list[list[str]]) -> bool:
+        """
+        A box drawn around a code sample or a paragraph has ruling lines, so pdfplumber
+        reports it as a table. A real table has at least two columns with content and
+        short column headers.
+        """
+        columns = max(len(r) for r in rows)
+        filled = sum(1 for i in range(columns) if any(i < len(r) and r[i] for r in rows))
+        return filled < 2 or any(len(cell) > cls.MAX_HEADER_CHARS for cell in rows[0])
+
     # A table whose last row is this close to the bottom of the page may continue on the next page
     PAGE_BOTTOM_MARGIN = 0.2
 
@@ -174,14 +188,14 @@ class TableExtractor:
                     if not raw_table or len(raw_table) < 1:
                         continue
 
-                    # Filter out empty rows
+                    # Filter out empty rows; a line break inside a cell is just wrapping
                     cleaned_rows = [
-                        [cell.strip() if cell else "" for cell in row]
+                        [self._clean_cell(cell) for cell in row]
                         for row in raw_table
                         if any(cell and cell.strip() for cell in row)
                     ]
 
-                    if not cleaned_rows:
+                    if not cleaned_rows or self._is_text_box(cleaned_rows):
                         continue
 
                     # A table at the top of a page with the same columns as a table that ran off the

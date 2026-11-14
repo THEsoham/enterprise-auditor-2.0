@@ -4,6 +4,13 @@ from pydantic import BaseModel, Field
 from app.auditing.obligation_extractor import CUSTOMER_ROLES, PROVIDER_ROLES
 
 
+# A defined role: ("Customer"), (the "Client"), (hereinafter known as "Seller"), (hereinafter referred to as the "Buyer")
+DEFINED_ROLE = re.compile(
+    r"\(\s*(?:hereinafter|herein|henceforth)?\s*(?:(?:referred to|known|called|defined)\s+)?(?:as\s+)?(?:the\s+)?"
+    r"[\"\u201c\u201d']([A-Z][A-Za-z]+(?: [A-Z][A-Za-z]+)?)[\"\u201c\u201d']\s*\)"
+)
+
+
 class AuditProbe(BaseModel):
     probe_id: str
     category: str
@@ -56,6 +63,9 @@ class AuditPlanner:
         parties = {
             "customer": "Customer",
             "provider": "Provider",
+            # The words the contract itself uses for each side, e.g. "Buyer" / "Seller"
+            "customer_role": "Customer",
+            "provider_role": "Provider",
         }
 
         # Each party is introduced as: <Name>, a <description> ... ("<Role>")
@@ -77,7 +87,30 @@ class AuditPlanner:
             if match:
                 parties[key] = match.group(1).strip(" ,")
 
+        # Role names the contract defines, e.g. (hereinafter known as "Seller") or ("Client")
+        flat = re.sub(r"\s+", " ", combined_text)
+        for role_match in DEFINED_ROLE.finditer(flat):
+            role = role_match.group(1).strip()
+            word = role.lower().split()[-1]
+            key = "provider" if word in PROVIDER_ROLES else "customer" if word in CUSTOMER_ROLES else None
+            if not key or parties[f"{key}_role"] != key.capitalize():
+                continue
+            parties[f"{key}_role"] = role
+            # No real name (a blank template) -> call the side by its role, not "Customer"
+            if parties[key] == key.capitalize():
+                name = self._name_before(flat[: role_match.start()])
+                parties[key] = name or role
+
         return parties
+
+    @staticmethod
+    def _name_before(text: str) -> str | None:
+        """The party name just before its role definition, if one is filled in."""
+        after = re.split(r"\b(?:between|among|and)\b", text[-160:])[-1]
+        name = re.split(r",|\bof\b|\(", after)[0].strip(" ,")
+        if not name or "_" in name or not re.match(r"[A-Z]", name) or len(name) > 60:
+            return None
+        return name
 
     def detect_sections(self, chunks: list[dict]) -> list[str]:
         """Extract detected section titles from chunk metadata or text."""
@@ -241,17 +274,106 @@ class AuditPlanner:
         },
     ]
 
-    def _match_section_to_probe(self, section_name: str) -> str | None:
+    # Probes for a sale of goods (a vehicle, equipment, stock), judged from the Buyer's side
+    SALE_OF_GOODS_PROBE_TEMPLATES = [
+        {
+            "probe_id": "probe-goods-warranty",
+            "category": "warranties",
+            "target_area": "Warranties & 'As Is' Sale",
+            "keywords": ["warrant", "as is", "as-is", "merchantab", "condition"],
+            "query_template": (
+                "Does the seller give any warranty about the condition of the goods, or are they sold 'as is' "
+                "with warranties disclaimed? What can the buyer do if hidden defects appear after delivery?"
+            ),
+            "priority": "critical",
+            "expected_type": "deal_breaker",
+        },
+        {
+            "probe_id": "probe-goods-risk-of-loss",
+            "category": "delivery",
+            "target_area": "Delivery & Risk of Loss",
+            "keywords": ["deliver", "risk of loss", "possession"],
+            "query_template": (
+                "When does risk of loss pass to the buyer, and what happens if the goods are damaged, or the buyer "
+                "or seller misses the delivery date?"
+            ),
+            "priority": "high",
+            "expected_type": "watch_out",
+        },
+        {
+            "probe_id": "probe-goods-payment",
+            "category": "payment",
+            "target_area": "Payment, Deposit & Refunds",
+            "keywords": ["purchase price", "payment", "down-payment", "down payment", "deposit"],
+            "query_template": (
+                "How and when must the buyer pay, is any money due before delivery, and is it refundable if the "
+                "seller does not deliver?"
+            ),
+            "priority": "high",
+            "expected_type": "watch_out",
+        },
+        {
+            "probe_id": "probe-goods-title",
+            "category": "title",
+            "target_area": "Title & Liens",
+            "keywords": ["title", "lien", "encumbr", "registration"],
+            "query_template": (
+                "When does title pass to the buyer, and does the seller promise the goods are free of liens, "
+                "loans or other claims?"
+            ),
+            "priority": "high",
+            "expected_type": "watch_out",
+        },
+        {
+            "probe_id": "probe-goods-insurance",
+            "category": "insurance",
+            "target_area": "Insurance, Registration & Handover",
+            "keywords": ["insurance", "registration", "plates", "tags"],
+            "query_template": (
+                "What happens to insurance, registration, plates or tags at handover, and is the buyer left "
+                "uninsured at any point?"
+            ),
+            "priority": "medium",
+            "expected_type": "watch_out",
+        },
+    ]
+
+    PROBES_BY_TYPE = {
+        "services": ["GENERIC_PROBE_TEMPLATES"],
+        "sale_of_goods": ["SALE_OF_GOODS_PROBE_TEMPLATES", "probe-indemnification", "probe-confidentiality"],
+        "general": ["GENERIC_PROBE_TEMPLATES"],
+        "not_a_contract": [],
+    }
+
+    def templates_for(self, contract_type: str = "services") -> list[dict]:
+        templates: list[dict] = []
+        generic = {t["probe_id"]: t for t in self.GENERIC_PROBE_TEMPLATES}
+        for entry in self.PROBES_BY_TYPE.get(contract_type, ["GENERIC_PROBE_TEMPLATES"]):
+            templates.extend(getattr(self, entry) if entry.isupper() else [generic[entry]])
+        return templates
+
+    def _match_section_to_probe(self, section_name: str, templates: list[dict] | None = None) -> str | None:
         """Try to match a detected section to a probe template by keywords."""
         sec_lower = section_name.lower()
-        for template in self.GENERIC_PROBE_TEMPLATES:
+        for template in templates if templates is not None else self.GENERIC_PROBE_TEMPLATES:
             if any(kw in sec_lower for kw in template["keywords"]):
                 return template["probe_id"]
         return None
 
-    def _build_probe_query(self, template: dict, section_name: str | None = None) -> str:
-        """Build a probe query, optionally grounded to a specific section."""
+    def _build_probe_query(
+        self, template: dict, section_name: str | None = None, parties: dict | None = None
+    ) -> str:
+        """Build a probe query, optionally grounded to a specific section and named for the contract's roles."""
         base_query = template["query_template"]
+        parties = parties or {}
+        customer_role = parties.get("customer_role", "Customer")
+        provider_role = parties.get("provider_role", "Provider")
+        if (customer_role, provider_role) != ("Customer", "Provider"):
+            # Tell the auditor which side is which when the contract uses other words
+            base_query = (
+                f"Reviewing for the {customer_role} (the Customer side; the {provider_role} is the Provider side). "
+                f"{base_query}"
+            )
         if section_name:
             return f"Under '{section_name}': {base_query}"
         return base_query
@@ -259,7 +381,8 @@ class AuditPlanner:
     def create_plan(
         self,
         chunks: list[dict],
-        document_title: str = "Master Services Agreement"
+        document_title: str = "Master Services Agreement",
+        contract_type: str = "services",
     ) -> AuditPlan:
         """
         Creates an end-to-end audit plan for the provided document.
@@ -268,18 +391,19 @@ class AuditPlanner:
         """
         parties = self.extract_parties(chunks)
         detected_sections = self.detect_sections(chunks)
+        templates = self.templates_for(contract_type)
 
         # Map detected sections to probe templates
         section_probe_map: dict[str, str | None] = {}
         matched_probe_ids: set[str] = set()
         for sec in detected_sections:
-            probe_id = self._match_section_to_probe(sec)
+            probe_id = self._match_section_to_probe(sec, templates)
             if probe_id:
                 section_probe_map[sec] = probe_id
                 matched_probe_ids.add(probe_id)
 
         # Build a lookup of templates by probe_id
-        template_by_id = {t["probe_id"]: t for t in self.GENERIC_PROBE_TEMPLATES}
+        template_by_id = {t["probe_id"]: t for t in templates}
 
         probes = []
         used_probe_ids: set[str] = set()
@@ -292,7 +416,7 @@ class AuditPlanner:
                     probe_id=template["probe_id"],
                     category=template["category"],
                     target_area=template["target_area"],
-                    query=self._build_probe_query(template, section_name=sec),
+                    query=self._build_probe_query(template, section_name=sec, parties=parties),
                     priority=template["priority"],
                     expected_type=template["expected_type"],
                     target_sections=[sec],
@@ -300,7 +424,7 @@ class AuditPlanner:
                 used_probe_ids.add(probe_id)
 
         # Second: add generic probes for areas not covered by detected sections
-        for template in self.GENERIC_PROBE_TEMPLATES:
+        for template in templates:
             if template["probe_id"] not in used_probe_ids:
                 # Check if any chunk text mentions this topic at all
                 combined_text = " ".join(c.get("text", "") for c in chunks).lower()
@@ -309,7 +433,7 @@ class AuditPlanner:
                         probe_id=template["probe_id"],
                         category=template["category"],
                         target_area=template["target_area"],
-                        query=self._build_probe_query(template),
+                        query=self._build_probe_query(template, parties=parties),
                         priority=template["priority"],
                         expected_type=template["expected_type"],
                         target_sections=[],
@@ -317,13 +441,13 @@ class AuditPlanner:
                     used_probe_ids.add(template["probe_id"])
 
         # Fallback safeguard: if no probes matched, include core generic probes so any document is audited
-        if not probes:
-            for template in self.GENERIC_PROBE_TEMPLATES[:5]:
+        if not probes and contract_type != "not_a_contract":
+            for template in templates[:5]:
                 probes.append(AuditProbe(
                     probe_id=template["probe_id"],
                     category=template["category"],
                     target_area=template["target_area"],
-                    query=self._build_probe_query(template),
+                    query=self._build_probe_query(template, parties=parties),
                     priority=template["priority"],
                     expected_type=template["expected_type"],
                     target_sections=[],

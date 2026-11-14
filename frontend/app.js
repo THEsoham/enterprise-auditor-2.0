@@ -13,6 +13,18 @@ document.addEventListener("DOMContentLoaded", () => {
   let totalDocPages = 5;
 
   // Files converted from DOCX/TXT/MD have no real pages, so their citations name the section instead
+  // The words the contract uses for each side, e.g. "Buyer" / "Seller"
+  function roleLabel(side) {
+    const parties = auditData?.parties || {};
+    return side === "Customer" ? (parties.customer_role || "Customer") : (parties.provider_role || "Provider");
+  }
+  function relabelPartyFilters() {
+    document.querySelectorAll(".filter-pill-btn[data-party]").forEach((btn) => {
+      const side = btn.getAttribute("data-party");
+      if (side === "Customer" || side === "Provider") btn.textContent = roleLabel(side);
+    });
+  }
+
   function pagesAreReal() {
     return !auditData || auditData.page_numbers_reliable !== false;
   }
@@ -512,6 +524,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    // Which kind of contract was detected, which decides the clause checklist used
+    const bannerFormat = document.getElementById("banner-format");
+    if (bannerFormat && data.contract_profile?.contract_type_label) {
+      bannerFormat.textContent = data.contract_profile.contract_type_label + (data.contract_profile.is_template ? " (unfilled template)" : "");
+    }
+
     if (bannerPages) {
       const p = data.num_pages || (data.pages ? data.pages.length : 0);
       bannerPages.textContent = p > 0 ? `${p} ${p === 1 ? "page" : "pages"}` : "Document Processed";
@@ -544,7 +562,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // 2. Overview 4-KPI Metric Cards
   function renderOverviewKPIs(data) {
     const health = data.health || {};
-    const score = typeof health.health_score === "number" ? Math.round(health.health_score) : 100;
+    const score = typeof health.health_score === "number" ? Math.round(health.health_score) : null;
     const db = health.deal_breakers_count ?? (health.deal_breakers?.length || 0);
     const wo = health.watch_out_count ?? (health.watch_out?.length || 0);
     const pr = health.protections_count ?? (health.protections?.length || 0);
@@ -553,7 +571,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const total = db + wo + pr;
 
     // Score Circle & Assessment Text
-    if (kpiScoreNumber) kpiScoreNumber.textContent = score;
+    if (kpiScoreNumber) kpiScoreNumber.textContent = score ?? "—";
 
     let scoreColor = "#059669";
     let assessHtml = `<strong>Safe and balanced.</strong> Terms conform to standard enterprise baselines.`;
@@ -572,12 +590,24 @@ document.addEventListener("DOMContentLoaded", () => {
       assessHtml = `<strong>Strong.</strong> ${issues} a review before signing.`;
     }
 
+    // Unfilled templates and documents that are not contracts get their own warning
+    const warnings = health.warnings || [];
+    if (health.rating === "Not a Contract") {
+      scoreColor = "#64748B";
+      assessHtml = `<strong>Not a contract.</strong> ${escapeHtml(warnings[0] || "This document was not scored.")}`;
+    } else if (health.rating === "Incomplete Draft") {
+      scoreColor = "#D97706";
+      assessHtml = `<strong>Incomplete draft.</strong> ${escapeHtml(warnings[0] || "Key terms are left blank.")}`;
+    } else if (warnings.length) {
+      assessHtml += ` <br><span style="color:#B45309;">⚠️ ${escapeHtml(warnings[0])}</span>`;
+    }
+
     if (kpiScoreAssessment) kpiScoreAssessment.innerHTML = assessHtml;
 
     // SVG Gauge Dashoffset (circumference = 2 * PI * 40 ≈ 251.32)
     if (gaugeFillCircle) {
       const c = 251.32;
-      const offset = c - (Math.min(100, Math.max(0, score)) / 100) * c;
+      const offset = c - (Math.min(100, Math.max(0, score ?? 0)) / 100) * c;
       gaugeFillCircle.style.strokeDashoffset = offset;
       gaugeFillCircle.style.stroke = scoreColor;
     }
@@ -1490,6 +1520,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }));
 
     if (readerDeadlinesCount) readerDeadlinesCount.textContent = items.length;
+    relabelPartyFilters();
 
     if (!timelineFullTree) return;
     timelineFullTree.innerHTML = "";
@@ -1510,7 +1541,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const isCustomer = item.party === "Customer";
       const partyClass = isCustomer ? "party-customer" : "party-provider";
-      const tagText = isCustomer ? "Customer Duty" : "Provider Duty";
+      const tagText = `${roleLabel(isCustomer ? "Customer" : "Provider")} Duty`;
 
       node.innerHTML = `
         <div class="timeline-dot"></div>
@@ -2371,7 +2402,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const cust = data.parties?.customer || "First Party";
     const prov = data.parties?.provider || "Counterparty";
-    const score = typeof data.health?.health_score === "number" ? Math.round(data.health.health_score) : 100;
+    const score = typeof data.health?.health_score === "number" ? Math.round(data.health.health_score) : "—";
     const dbCount = (data.health?.deal_breakers || []).length;
     const woCount = (data.health?.watch_out || []).length;
     const baseline = data.missing_clauses || [];
@@ -2391,6 +2422,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <blockquote>
         <strong>Final Contract Safety Score: ${score}/100</strong> — ${escapeHtml(data.health?.rating || "Unrated")}. Detected ${dbCount} deal-breaker terms and ${woCount} watch-out warning items to resolve.
       </blockquote>
+      ${(data.health?.warnings || []).map((w) => `<p style="color:#B45309;"><strong>⚠️ ${escapeHtml(w)}</strong></p>`).join("")}
 
       <h2>2. Key Deal-Breakers Requiring Revision</h2>
       ${(data.health?.deal_breakers || []).map((db, i) => `
@@ -2405,7 +2437,7 @@ document.addEventListener("DOMContentLoaded", () => {
       `).join("")}
 
       <h2>3. Protective Baseline Gap Analysis</h2>
-      <p>The contract was scanned against ${baseline.length} standard enterprise protections: ${baseline.filter((m) => m.status === "PRESENT").length} present, ${vagueGaps.length} vague and ${missingGaps.length} missing.</p>
+      <p>The contract was scanned against ${baseline.length} standard protections for a ${escapeHtml((data.contract_profile?.contract_type_label || "commercial agreement").toLowerCase())}: ${baseline.filter((m) => m.status === "PRESENT").length} present, ${vagueGaps.length} vague and ${missingGaps.length} missing.</p>
       ${gapList.length ? `<ul>${gapList.map((m) => `<li><strong>${escapeHtml(m.status)}:</strong> ${escapeHtml(m.title)}</li>`).join("")}</ul>` : ""}
       ${oneSided.length ? `<p>One-sided terms were identified in: ${oneSided.map((c) => escapeHtml(c.title)).join("; ")}.</p>` : ""}
     `;
